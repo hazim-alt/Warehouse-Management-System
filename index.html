@@ -291,6 +291,140 @@ h2.ih svg{width:20px;height:20px;color:var(--accent);flex:none}
 .badge2.over{background:var(--s-full);color:#fff;box-shadow:0 0 10px -2px var(--s-full)}
 .loc .sechd .linkbtn{padding:0}
 .card{background:linear-gradient(180deg,#111d36,#0f1a31)}
+/* ---- v37: smart stock check ---- */
+#map .legend3 [hidden]{display:none!important}
+#map .legend3 i.goldring{background:transparent;border:2px solid #ffc83d;box-shadow:0 0 6px #ffc83d}
+#map .legend3 i.selring{background:transparent;border:2px solid var(--accent);box-shadow:0 0 6px var(--accent)}
+.kpis4{grid-template-columns:1fr 1fr;gap:10px}
+.kpi3{padding:12px;gap:8px}
+.kpi3 .hd{min-height:0}
+.kpi3 .ic{width:36px;height:36px}.kpi3 .ic svg{width:18px;height:18px}
+.kpi3 .num{font-size:28px}
+@media (min-width:1600px),(min-width:640px) and (max-width:1179px){.kpis4{grid-template-columns:repeat(4,1fr);gap:8px}
+  .kpi3 .hd{flex-direction:column;align-items:flex-start;gap:8px}.kpi3 .lab{font-size:13px}.kpi3 .ft{flex-direction:column;align-items:flex-start;gap:2px}.kpi3 .num{font-size:26px}}
+.stpill{display:inline-block;padding:3px 10px;border-radius:99px;font-size:12px;font-weight:700;white-space:nowrap;background:var(--chip);color:var(--muted)}
+.stpill.ok{background:color-mix(in srgb,var(--ok) 20%,transparent);color:var(--ok)}
+.stpill.bad{background:color-mix(in srgb,var(--bad) 22%,transparent);color:#ff8a8a}
+.stpill.pend{background:color-mix(in srgb,var(--accent) 14%,transparent);color:#7ef0f7}
+.curbin{border-color:rgba(34,211,224,.35);background:linear-gradient(160deg,rgba(34,211,224,.10),#0f1a31 55%)}
+.cbhd{display:flex;align-items:flex-end;gap:12px;justify-content:space-between;flex-wrap:wrap}
+.cbcode{font:700 34px/1 var(--display);letter-spacing:.01em;color:var(--fg);overflow-wrap:anywhere}
+.crumb{font-size:13px;color:var(--muted);margin-top:6px}
+.navbtn{display:inline-flex;align-items:center;gap:8px;border-color:rgba(34,211,224,.5)!important;color:#7ef0f7}
+.navbtn svg{width:17px;height:17px}
+.bdet{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;border-top:1px solid var(--line);padding-top:12px}
+.bdet div{display:grid;gap:2px;min-width:0}
+.bdet span{font-size:12px;color:var(--muted)}
+.bdet b{font-size:15px;font-variant-numeric:tabular-nums;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+@media (max-width:520px){.bdet{grid-template-columns:1fr 1fr}.kpis4{grid-template-columns:1fr 1fr}}
+.scanrow{display:flex;gap:8px}
+.scanrow .sbox{flex:1}
+.ptbl td{vertical-align:middle;padding:8px 6px}
+.ptbl th{padding:8px 6px}
+.ptbl input.cnt{width:76px;text-align:right;padding:8px;font-size:16px;font-weight:600}
+.ptbl .dif{font-weight:700;font-variant-numeric:tabular-nums}
+.ptbl .dif.ok{color:var(--ok)}.ptbl .dif.bad{color:#ff8a8a}
+.ptbl tr.diff td{background:color-mix(in srgb,var(--bad) 10%,transparent)}
+.ptbl tr.flash td{animation:flash .6s}
+@keyframes flash{0%{background:rgba(34,211,224,.35)}100%{background:transparent}}
+.addsku input{min-width:0}
+.cxact{display:grid;grid-template-columns:1fr 1.3fr 1fr;gap:8px}
+.cxact .btn{min-height:50px;font-size:14px;padding:0 8px;white-space:nowrap}
+.savedok{padding:10px 12px;border-radius:10px;background:color-mix(in srgb,var(--ok) 14%,transparent);color:var(--fg);display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.savedok .btn{margin-left:auto}
+.note-card{border-color:var(--warn)}
+.hidnote{color:var(--warn);margin-top:-2px;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.hidnote span{flex:1 1 220px}
+button.btn.sm{min-height:32px;padding:0 12px;font-size:13px}
+.binbtn.gone{border-style:dashed;opacity:.7}
+.seg.sm button{min-height:32px;padding:0 10px;font-size:13px}
+.binlist{display:flex;flex-wrap:wrap;gap:6px;max-height:240px;overflow:auto;padding:2px}
+.binbtn{display:inline-flex;align-items:center;gap:6px;padding:6px 9px;border-radius:8px;border:1px solid var(--line);background:var(--panel2);color:var(--fg);font:600 13px var(--mono);cursor:pointer}
+.binbtn i,.lg i.d{width:9px;height:9px;border-radius:50%;flex:none;display:inline-block}
+.binbtn.pend i,.lg .d.pend{background:var(--s-mark)}.binbtn.ok i,.lg .d.ok{background:var(--ok)}.binbtn.bad i,.lg .d.bad{background:var(--bad)}.binbtn.skip i,.lg .d.skip{background:var(--warn)}
+.binbtn.cur{border-color:var(--accent);box-shadow:0 0 0 2px rgba(34,211,224,.35);color:#7ef0f7}
+.binlist.bf-pend .binbtn:not(.pend):not(.skip):not(.cur),.binlist.bf-bad .binbtn:not(.bad):not(.cur){display:none}
+.lg{gap:14px}.lg span{display:inline-flex;align-items:center;gap:6px}
+/* ---- v41: transfer bin wizard ---- */
+.xhead{gap:12px}
+.stepper{display:flex;align-items:center;gap:6px}
+.stepper .stpl{flex:1;height:2px;background:var(--line);min-width:8px}
+.stp{display:flex;align-items:center;gap:8px;background:none;border:0;color:var(--muted);font:600 14px/1.15 var(--body);padding:4px 0;cursor:default;text-align:left;min-width:0}
+.stepper{min-width:0}.xhead .sechd{flex-wrap:wrap}
+.nw{white-space:nowrap}
+.stp:not(:disabled){cursor:pointer}.stp:not(:disabled):hover span{color:var(--fg)}
+.stp b{width:30px;height:30px;border-radius:50%;display:grid;place-items:center;border:2px solid var(--line);font-size:14px;flex:none}
+.stp.on{color:var(--fg)}.stp.on b{background:var(--accent);border-color:var(--accent);color:var(--accent-ink);box-shadow:0 0 0 4px rgba(34,211,224,.18)}
+.stp.done b{border-color:var(--accent);color:var(--accent)}
+@media (max-width:1399px) and (min-width:1180px){.stp span{font-size:12.5px}.stp b{width:26px;height:26px}}
+@media (max-width:480px){.stp span{display:none}.stp.on span{display:inline}}
+.xsaved{flex-wrap:nowrap}.xsaved select{min-width:0;width:0;flex:1 1 auto;text-overflow:ellipsis}
+.xmsg{overflow-wrap:anywhere}.xhead{min-width:0;overflow:hidden}
+.xmsg{padding:8px 12px;border-radius:10px;background:var(--panel2);border:1px solid var(--line)}
+.xlocs{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.xloc{border-radius:14px;padding:12px;display:grid;gap:6px;min-width:0;border:1px solid}
+.xloc.src{border-color:rgba(34,211,224,.55);background:linear-gradient(150deg,rgba(34,211,224,.14),var(--panel2) 70%)}
+.xloc.dst{border-color:rgba(255,200,61,.55);background:linear-gradient(150deg,rgba(255,200,61,.14),var(--panel2) 70%)}
+.xlh{display:flex;justify-content:space-between;align-items:center;gap:6px;font:700 12px var(--body);letter-spacing:.06em;text-transform:uppercase}
+.xloc.src .xlh{color:#7ef0f7}.xloc.dst .xlh{color:#ffd66b}
+.xlh em{font-style:normal;text-transform:none;letter-spacing:0;font-size:11px;padding:2px 8px;border-radius:99px;background:rgba(52,195,143,.2);color:var(--ok)}
+.xlh em.bad{background:rgba(239,68,68,.2);color:#ff8a8a}
+.xlm{display:flex;align-items:center;gap:8px;min-width:0}
+.xlm svg{width:26px;height:26px;flex:none}.xloc.src .xlm svg{color:var(--accent)}.xloc.dst .xlm svg{color:#ffc83d}
+.xlm b{font:700 24px/1.05 var(--display);overflow-wrap:anywhere}
+.xls{font-size:12.5px;color:var(--muted)}
+.xlf{display:flex;flex-wrap:wrap;gap:4px 12px;font-size:12.5px;border-top:1px solid var(--line);padding-top:6px;color:var(--fg)}
+@media (max-width:420px){.xlocs{grid-template-columns:1fr}}
+.xitems{max-height:340px;overflow:auto}
+.xitems tr.off td{opacity:.45}
+.xitems input[type=checkbox],.xitems th input{width:18px;height:18px}
+.xtot{display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;font-size:14px;padding-top:4px;border-top:1px solid var(--line)}
+.xtot b{color:#7ef0f7}
+.xbar{display:flex;gap:8px;align-items:center;flex-wrap:wrap;position:sticky;bottom:0;z-index:2;padding:10px;margin:0 -2px;border-radius:14px;background:rgba(12,22,42,.95);border:1px solid var(--line);backdrop-filter:blur(6px)}
+.xbar .sp{flex:1}
+.xbar .btn{min-height:46px}
+.xbar .btn.pri{padding:0 22px;font-size:15px}
+.xbar2 .btn{min-height:42px}
+.xbar2{gap:8px}
+.xact{border-color:rgba(34,211,224,.35);gap:8px}
+.xactm{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.xroute{display:grid;grid-template-columns:1fr auto 1fr;gap:10px;align-items:start}
+.xroute .arrow{font-size:22px;color:var(--muted);padding-top:14px}
+.xroute a{font:600 14px var(--mono);color:var(--fg);text-decoration:none;display:inline-block;margin:2px 4px 2px 0}
+.xroute .lbl{display:block;font:700 11px var(--body);text-transform:uppercase;letter-spacing:.06em;margin-bottom:2px}
+.xroute .lbl.s{color:#7ef0f7}.xroute .lbl.d{color:#ffd66b}
+.xroute div:last-child a{color:#ffd66b}
+.xplan{max-height:360px;overflow:auto}
+.xplan tbody tr{cursor:pointer}
+.xplan tbody tr:hover td{background:var(--panel2)}
+.xplan tr.on td{background:rgba(34,211,224,.12)}
+.xplan td.to{color:#ffd66b}
+.xrn{display:grid;grid-template-columns:1fr 1.3fr;gap:10px}
+.xrn select,.xrn textarea{width:100%;margin-top:4px}
+.xrn textarea{resize:vertical;font:inherit}
+.xro{margin-top:6px;font-size:14px}
+.xlist{display:grid;gap:8px}
+.xver.ok{border-color:rgba(52,195,143,.55)}
+.xvk{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.xvk div{display:grid;gap:2px;background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:8px 10px;min-width:0}
+.xvk b{font:700 22px/1 var(--display);font-variant-numeric:tabular-nums}
+.xvk span{font-size:12px;color:var(--muted)}
+.stpill.warn{background:color-mix(in srgb,var(--warn) 20%,transparent);color:var(--warn)}
+.xplan tr.vdone td{opacity:.6}
+.xplan .lefttag{font:700 11px var(--body);color:var(--warn);background:color-mix(in srgb,var(--warn) 16%,transparent);padding:1px 6px;border-radius:99px}
+@media (max-width:520px){.xvk{grid-template-columns:1fr 1fr}}
+.xli{display:grid;gap:4px;text-align:left;width:100%;padding:12px 14px;border-radius:12px;border:1px solid var(--line);background:var(--panel2);color:var(--fg);font:inherit;cursor:pointer}
+.xli:hover{border-color:var(--accent)}
+.xli.done{opacity:.85}
+.xlt{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.xli .captr{height:6px}
+.stpill.bad{white-space:nowrap}
+.xlt .code{font-size:15px;color:#7ef0f7;background:transparent;padding:0}
+.xln{font-weight:600;overflow-wrap:anywhere}
+.xsv{display:grid;gap:6px;padding:10px 12px;border-radius:12px;background:var(--panel2);border:1px solid var(--line)}
+.xnm b{font-size:15px;overflow-wrap:anywhere}
+.xnm input{min-width:0}
+@media (max-width:520px){.xrn{grid-template-columns:1fr}}
 </style>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
@@ -402,7 +536,7 @@ document.addEventListener('click',e=>{if(e.target.id==='installapp'&&__ip){__ip.
         <div class="grp"><button id="zin" class="tbtn" aria-label="Zoom in">＋</button><button id="zout" class="tbtn" aria-label="Zoom out">－</button></div></div>
     </div>
   <div class="legend3" id="legedit" hidden><span>Click a rack on the map to select it. Selected racks turn <b style="color:#ffd43b">yellow</b>. Other colours follow the row.</span></div>
-    <div class="legend3" id="legfill"><span id="legnote"></span><span><i style="background:var(--s-empty)"></i>Empty</span><span><i style="background:var(--s-low)"></i>Under 50%</span><span><i style="background:var(--s-mid)"></i>50–89%</span><span><i style="background:var(--s-full)"></i>Full</span><span><i style="background:var(--s-mark)"></i>Marked</span></div>
+    <div class="legend3" id="legfill"><span id="legnote"></span><span><i style="background:var(--s-empty)"></i>Empty</span><span><i style="background:var(--s-low)"></i>Under 50%</span><span><i style="background:var(--s-mid)"></i>50–89%</span><span><i style="background:var(--s-full)"></i>Full</span><span id="legmk"><i style="background:var(--s-mark)"></i><span id="legmark">Marked</span></span><span id="legsel"><i class="selring"></i>Selected</span><span id="legsrc" hidden><i class="selring"></i>Source bins</span><span id="legdst" hidden><i class="goldring"></i>Destination bins</span></div>
     </div>
     <div id="mhint" class="mhint"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 8 12 3 3 8v8l9 5 9-5z"/><path d="m3 8 9 5 9-5M12 13v8"/></svg><span>Click on a bin<br>to view details</span></div>
     <div id="gmsg" class="mmsg" role="status"></div>
@@ -493,7 +627,7 @@ async function saveBins(changes){ // changes: {binCode: [[sku,qty],...]}
 }
 function addTo(changes,code,s,q){const arr=(changes[code]||binItems(code).map(x=>x.slice())).slice();const i=arr.findIndex(x=>x[0]===s);if(i>=0)arr[i]=[s,arr[i][1]+q];else arr.push([s,q]);changes[code]=arr.filter(x=>x[1]>0);return changes}
 async function guarded(fn,okMsg){if(!db){setStatus('Cannot save: storage not connected.',true);return false}
-  try{setStatus('Saving…');await fn();setStatus('✓ '+(okMsg||'Disimpan'));return true}
+  try{setStatus('Saving…');await fn();setStatus('✓ '+(okMsg||'Saved'));return true}
   catch(e){setStatus(e&&e.code==='invalid_argument'?'Cannot save: the data is too large, or you only have view access.':e&&e.code==='quota_exceeded'?'Cannot save: data storage is full. Delete old records.':'Save failed ('+(e&&e.code||'?')+'). Try again.',true);return false}}
 // ---------- putaway suggestion ----------
 function suggestBins(s,qty,exclude){const cap=capOf(s),g=groupOf(s),ps=planSize(s),out=[];let left=qty;const used=new Set(exclude||[]);
@@ -547,12 +681,12 @@ function mat(token,op){const m=new THREE.MeshLambertMaterial({color:css(token)||
 function box(x1,y1,x2,y2,h,y0,m){const g=new THREE.BoxGeometry(Math.abs(x2-x1)*PX,h,Math.abs(y2-y1)*PX);const o=new THREE.Mesh(g,m);o.position.set(X((x1+x2)/2),y0+h/2,Z((y1+y2)/2));scene.add(o);return o}
 
 // text sprite sized to its text; h = world height
-function makeSign(t,sub,bg,h){
+function makeSign(t,sub,bg,h,sc){
   const c=document.createElement('canvas'),x=c.getContext('2d');
   const F1='700 84px "Barlow Condensed", "Arial Narrow", sans-serif',F2='600 48px "Barlow Condensed", "Arial Narrow", sans-serif';
   x.font=F1;let w=x.measureText(t).width;if(sub){x.font=F2;w=Math.max(w,x.measureText(sub).width)}
   const W=Math.ceil(w+64),H=sub?168:112;c.width=W;c.height=H;
-  x.fillStyle=bg;x.beginPath();const r=bg[0]==='r'?H/2-4:14,o=bg[0]==='r'?4:0;x.moveTo(o+r,o);x.arcTo(W-o,o,W-o,H-o,r);x.arcTo(W-o,H-o,o,H-o,r);x.arcTo(o,H-o,o,o,r);x.arcTo(o,o,W-o,o,r);x.closePath();x.fill();if(o){x.strokeStyle='rgba(34,211,224,.8)';x.lineWidth=5;x.stroke()}
+  x.fillStyle=bg;x.beginPath();const r=bg[0]==='r'?H/2-4:14,o=bg[0]==='r'?4:0;x.moveTo(o+r,o);x.arcTo(W-o,o,W-o,H-o,r);x.arcTo(W-o,H-o,o,H-o,r);x.arcTo(o,H-o,o,o,r);x.arcTo(o,o,W-o,o,r);x.closePath();x.fill();if(o){x.strokeStyle=sc||'rgba(34,211,224,.8)';x.lineWidth=5;x.stroke()}
   x.fillStyle='#fff';x.textAlign='center';x.textBaseline='middle';
   x.font=F1;x.fillText(t,W/2,sub?60:58);if(sub){x.font=F2;x.fillText(sub,W/2,128)}
   const tex=new THREE.CanvasTexture(c);tex.anisotropy=4;
@@ -561,7 +695,7 @@ function makeSign(t,sub,bg,h){
 }
 let labelsHidden=false;try{labelsHidden=localStorage.getItem('wh3d-hide')==='1'}catch(e){}
 const fixedSprites=[];
-function fixedLabel(t,bg,px,pz,y,h){const s=makeSign(t,null,bg,h);s.position.set(X(px),y,Z(pz));s.visible=!labelsHidden;scene.add(s);fixedSprites.push(s);return s}
+function fixedLabel(t,bg,px,pz,y,h){const s=makeSign(t,null,bg,h);s.userData.s0=s.scale.clone();s.position.set(X(px),y,Z(pz));s.visible=!labelsHidden;scene.add(s);fixedSprites.push(s);return s}
 
 // floor + walls
 box(173,152,973,688,0.05,-0.05,mat('--floor',1));
@@ -707,12 +841,25 @@ const pinTex=(()=>{const c=document.createElement('canvas');c.width=64;c.height=
 function setPins(){pins.forEach(p=>scene.remove(p));pins.length=0;return;cellsT.forEach((a,t)=>a.forEach(c=>{if(c.code&&hl.has(c.code)){
   const sp=new THREE.Sprite(new THREE.SpriteMaterial({map:pinTex,depthTest:false,transparent:true}));sp.renderOrder=999;sp.scale.set(0.35,0.52,1);sp.center.set(0.5,0);
   sp.position.set(c.p[0],c.p[1]+c.s[1]/2,c.p[2]);sp.userData.tier=t;scene.add(sp);pins.push(sp)}}));visAll()}
-const COL={empty:new THREE.Color(STATUS.empty),low:new THREE.Color(STATUS.low),mid:new THREE.Color(STATUS.mid),full:new THREE.Color(STATUS.full),hl:new THREE.Color(STATUS.mark),pick:new THREE.Color('#ffffff')};
+const COL={empty:new THREE.Color(STATUS.empty),low:new THREE.Color(STATUS.low),mid:new THREE.Color(STATUS.mid),full:new THREE.Color(STATUS.full),hl:new THREE.Color(STATUS.mark),pick:new THREE.Color('#22d3e0'),src:new THREE.Color('#22d3e0'),dst:new THREE.Color('#ffc83d')};
+let xS=null,xD=null;const xObjs=[];
+function cellPos(code){for(const arr of cellsT)for(const c of arr)if(c.code===code)return new THREE.Vector3(c.p[0],c.p[1]+c.s[1]/2,c.p[2]);return null}
+function setXfer(src,dst,pair){xS=src&&src.length?new Set(src):null;xD=dst&&dst.length?new Set(dst):null;
+  xObjs.forEach(o=>{scene.remove(o);if(o.geometry)o.geometry.dispose();if(o.material){if(o.material.map)o.material.map.dispose();o.material.dispose()}});xObjs.length=0;
+  if(pair){const a=cellPos(pair[0]),b=cellPos(pair[1]);
+    if(a&&b){const mid=a.clone().add(b).multiplyScalar(0.5);mid.y+=Math.max(1.6,a.distanceTo(b)*0.3);
+      const cv=new THREE.QuadraticBezierCurve3(a,mid,b);
+      const l=new THREE.Mesh(new THREE.TubeGeometry(cv,64,0.06,8,false),new THREE.MeshBasicMaterial({color:'#22d3e0',depthTest:false,transparent:true,opacity:0.9}));l.renderOrder=998;scene.add(l);xObjs.push(l);
+      const tg=cv.getTangent(0.97),hd=new THREE.Mesh(new THREE.ConeGeometry(0.2,0.5,14),new THREE.MeshBasicMaterial({color:'#ffc83d',depthTest:false,transparent:true}));
+      hd.position.copy(cv.getPoint(0.97));hd.quaternion.setFromUnitVectors(new THREE.Vector3(0,1,0),tg.normalize());hd.renderOrder=999;scene.add(hd);xObjs.push(hd)}
+    [[a,pair[0],'rgba(6,40,52,.95)','rgba(34,211,224,.95)'],[b,pair[1],'rgba(58,40,0,.95)','rgba(255,200,61,.95)']].forEach(([p,txt,bg,sc])=>{if(!p)return;const s=makeSign(txt,null,bg,0.42,sc);s.position.set(p.x,p.y+0.55,p.z);s.renderOrder=999;scene.add(s);xObjs.push(s)})}
+  paint()}
 function paint(){cellsT.forEach((arr,t)=>{arr.forEach((c,i)=>{let col;
   if(mode==='edit'){const r=RBYID.get(c.rid);cellMs[t].setColorAt(i,sel.has(c.rid)?SELC:r?rc(r.r):COL.empty);return}
-  if(c.code&&c.code===picked)col=COL.pick;else if(c.code&&hl.has(c.code))col=COL.hl;
+  const inX=xD&&xD.has(c.code)?'d':xS&&xS.has(c.code)?'s':'';
+  if(c.code&&c.code===picked)col=COL.pick;else if(inX==='d')col=COL.dst;else if(inX==='s')col=COL.src;else if(c.code&&hl.has(c.code))col=COL.hl;
   else{const f=c.code?fillLevel(c.code):'empty';col=COL[f]}
-  if(hl.size&&!hl.has(c.code)&&c.code!==picked)col=col.clone().lerp(new THREE.Color('#1a2946'),0.65);
+  if((hl.size||xS||xD)&&!hl.has(c.code)&&!inX&&c.code!==picked)col=col.clone().lerp(new THREE.Color('#1a2946'),0.65);
   cellMs[t].setColorAt(i,col)});cellMs[t].instanceColor.needsUpdate=true})}
 const ray=new THREE.Raycaster(),mouse=new THREE.Vector2();let down=null;
 renderer.domElement.addEventListener('pointerdown',e=>down=[e.clientX,e.clientY]);
@@ -782,7 +929,7 @@ const kd=e=>{if(!W.on||host.closest('[hidden]')||/INPUT|TEXTAREA|SELECT/.test(do
 window.addEventListener('keydown',kd);window.addEventListener('keyup',kd);
 
 let lastAz=99;
-(function loop(ts){if(dead)return;const dt=Math.min(0.1,((ts||0)-W.last)/1000);W.last=ts||0;if(!host.closest('[hidden]')){if(W.on)walkStep(dt);else controls.update();renderer.render(scene,camera);const ne=document.getElementById('mneedle');if(ne){const a=W.on?W.yaw:controls.getAzimuthalAngle();if(Math.abs(a-lastAz)>0.002){lastAz=a;ne.style.transform='rotate('+a+'rad)'}}}requestAnimationFrame(loop)})();
+(function loop(ts){if(dead)return;const dt=Math.min(0.1,((ts||0)-W.last)/1000);W.last=ts||0;if(!host.closest('[hidden]')){if(W.on)walkStep(dt);else controls.update();if(!W.on)fixedSprites.forEach(sp=>{const k=Math.max(0.3,Math.min(1,camera.position.distanceTo(sp.position)/28));sp.scale.set(sp.userData.s0.x*k,sp.userData.s0.y*k,1)});renderer.render(scene,camera);const ne=document.getElementById('mneedle');if(ne){const a=W.on?W.yaw:controls.getAzimuthalAngle();if(Math.abs(a-lastAz)>0.002){lastAz=a;ne.style.transform='rotate('+a+'rad)'}}}requestAnimationFrame(loop)})();
 paint();
 const getView=()=>({p:camera.position.toArray(),t:controls.target.toArray()});
 function walkAtWorld(x,z,fl){if(!W.on)walkStart();W.floor=fl;const [nx,nz]=nearestFree(x,z,fl);camera.position.set(nx,0,nz);
@@ -791,16 +938,17 @@ function walkAtWorld(x,z,fl){if(!W.on)walkStart();W.floor=fl;const [nx,nz]=neare
 function walkAtScreen(cx,cy,fl){const b=renderer.domElement.getBoundingClientRect();if(cx<b.left||cx>b.right||cy<b.top||cy>b.bottom)return false;
   mouse.set((cx-b.left)/b.width*2-1,-(cy-b.top)/b.height*2+1);ray.setFromCamera(mouse,camera);
   const v=new THREE.Vector3();if(!ray.ray.intersectPlane(new THREE.Plane(new THREE.Vector3(0,1,0),-(fl===1?DECK:0)),v))return false;walkAtWorld(v.x,v.z,fl);return true}
-return {zoom(f){if(W.on)return;const tg=controls.target;camera.position.sub(tg).multiplyScalar(f).add(tg);controls.update()},walk:{atScreen:walkAtScreen,atWorld:walkAtWorld,start:walkStart,stop:walkStop,to:walkTo,floor:walkFloor,on:()=>W.on,getFloor:()=>W.floor,pad:W.pad},dbg:()=>({p:camera.position.toArray(),r:camera.rotation.toArray(),fov:camera.fov,W:{floor:W.floor,yaw:W.yaw,pitch:W.pitch}}),getView,dispose(){if(W.on)walkStop();window.LASTVIEW=getView();dead=true;ro.disconnect();controls.dispose();renderer.dispose();renderer.domElement.remove()},paint,setTier,view,setMode(m){if(mode===m)return;mode=m;visAll();paint()},setSel(keys){sel=new Set(keys);paint()},setCodes(on){codesOn=on;visAll()},highlight(codes){hl=new Set(codes||[]);paint();setPins()},pick(code){picked=code;paint()},
+return {setXfer,zoom(f){if(W.on)return;const tg=controls.target;camera.position.sub(tg).multiplyScalar(f).add(tg);controls.update()},walk:{atScreen:walkAtScreen,atWorld:walkAtWorld,start:walkStart,stop:walkStop,to:walkTo,floor:walkFloor,on:()=>W.on,getFloor:()=>W.floor,pad:W.pad},dbg:()=>({p:camera.position.toArray(),r:camera.rotation.toArray(),fov:camera.fov,W:{floor:W.floor,yaw:W.yaw,pitch:W.pitch}}),getView,dispose(){if(W.on)walkStop();window.LASTVIEW=getView();dead=true;ro.disconnect();controls.dispose();renderer.dispose();renderer.domElement.remove()},paint,setTier,view,setMode(m){if(mode===m)return;mode=m;visAll();paint()},setSel(keys){sel=new Set(keys);paint()},setCodes(on){codesOn=on;visAll()},highlight(codes){hl=new Set(codes||[]);paint();setPins()},pick(code){picked=code;paint()},
   focus(code){if(W.on){const b=BINS.get(code);const r=b&&RACKS.find(x=>x.c===b.rack);if(r&&r.id)walkTo(r.id);return}let t=-1,i=-1;cellsT.forEach((a,tt)=>{const k=a.findIndex(x=>x.code===code);if(k>=0){t=tt;i=k}});if(t<0)return;const c=cellsT[t][i];
     const b=BINS.get(code);if(b){const m=b.floor===2?'up':'lo';setTier(m);document.querySelectorAll('.mtools [data-t]').forEach(x=>x.setAttribute('aria-pressed',x.dataset.t===m))}
     const T=new THREE.Vector3(...c.p);controls.target.copy(T);
-    const best=[-2.5,5,6];camera.position.copy(T.clone().add(new THREE.Vector3(...best)));controls.update()}};
+    const best=[-2.5,5,6];camera.position.copy(T.clone().add(new THREE.Vector3(...best)));controls.update()},
+  frame(a,b){if(W.on)return;const A=cellPos(a),B=cellPos(b);if(!A||!B)return;const T=A.clone().add(B).multiplyScalar(0.5);controls.target.copy(T);const d=Math.max(9,A.distanceTo(B)*1.45);camera.position.copy(T.clone().add(new THREE.Vector3(-2.5,5,6).normalize().multiplyScalar(d)));controls.update()}};
 }
 
 // ---------- 2D floor plan (flat, no rotating) ----------
 const PLAN_DATA={"racks":[{"id":"0.0.0","t":0,"f":[590,153,628.1,165],"o":"h","flip":false},{"id":"0.1.0","t":0,"f":[628.1,153,666.3,165],"o":"h","flip":false},{"id":"0.2.0","t":0,"f":[666.3,153,704.4,165],"o":"h","flip":false},{"id":"0.3.0","t":0,"f":[704.4,153,742.6,165],"o":"h","flip":false},{"id":"0.4.0","t":0,"f":[742.6,153,768,165],"o":"h","flip":false},{"id":"1.0.0","t":0,"f":[800,153,839.3,165],"o":"h","flip":false},{"id":"1.1.0","t":0,"f":[839.3,153,878.5,165],"o":"h","flip":false},{"id":"1.2.0","t":0,"f":[878.5,153,917.8,165],"o":"h","flip":false},{"id":"1.3.0","t":0,"f":[917.8,153,957,165],"o":"h","flip":false},{"id":"2.0.0","t":0,"f":[590,215,642,228],"o":"h","flip":true},{"id":"2.0.1","t":1,"f":[590,215,642,228],"o":"h","flip":true},{"id":"2.1.0","t":0,"f":[642,215,694,228],"o":"h","flip":true},{"id":"2.1.1","t":1,"f":[642,215,694,228],"o":"h","flip":true},{"id":"3.0.0","t":0,"f":[694,215,735,228],"o":"h","flip":true},{"id":"4.0.1","t":1,"f":[735,215,761,228],"o":"h","flip":true},{"id":"5.0.0","t":0,"f":[785,215,842.5,228],"o":"h","flip":true},{"id":"5.0.1","t":1,"f":[785,215,842.5,228],"o":"h","flip":true},{"id":"5.1.0","t":0,"f":[842.5,215,900,228],"o":"h","flip":true},{"id":"5.1.1","t":1,"f":[842.5,215,900,228],"o":"h","flip":false},{"id":"6.0.0","t":0,"f":[590,228,642,241],"o":"h","flip":false},{"id":"6.0.1","t":1,"f":[590,228,642,241],"o":"h","flip":false},{"id":"6.1.0","t":0,"f":[642,228,694,241],"o":"h","flip":false},{"id":"6.1.1","t":1,"f":[642,228,694,241],"o":"h","flip":false},{"id":"7.0.0","t":0,"f":[694,228,735,241],"o":"h","flip":false},{"id":"8.0.1","t":1,"f":[735,228,761,241],"o":"h","flip":false},{"id":"9.0.0","t":0,"f":[785,228,842.5,241],"o":"h","flip":false},{"id":"9.0.1","t":1,"f":[785,228,842.5,241],"o":"h","flip":false},{"id":"9.1.0","t":0,"f":[842.5,228,900,241],"o":"h","flip":false},{"id":"9.1.1","t":1,"f":[842.5,228,900,241],"o":"h","flip":false},{"id":"10.0.0","t":0,"f":[540,267,591.3,279.5],"o":"h","flip":true},{"id":"10.0.1","t":1,"f":[540,267,591.3,279.5],"o":"h","flip":true},{"id":"10.1.0","t":0,"f":[591.3,267,642.7,279.5],"o":"h","flip":true},{"id":"10.1.1","t":1,"f":[591.3,267,642.7,279.5],"o":"h","flip":true},{"id":"10.2.0","t":0,"f":[642.7,267,694,279.5],"o":"h","flip":true},{"id":"10.2.1","t":1,"f":[642.7,267,694,279.5],"o":"h","flip":true},{"id":"11.0.0","t":0,"f":[694,267,735,279.5],"o":"h","flip":true},{"id":"12.0.0","t":0,"f":[735,267,790,279.5],"o":"h","flip":true},{"id":"12.0.1","t":1,"f":[735,267,790,279.5],"o":"h","flip":true},{"id":"12.1.0","t":0,"f":[790,267,845,279.5],"o":"h","flip":true},{"id":"12.1.1","t":1,"f":[790,267,845,279.5],"o":"h","flip":true},{"id":"12.2.0","t":0,"f":[845,267,900,279.5],"o":"h","flip":true},{"id":"12.2.1","t":1,"f":[845,267,900,279.5],"o":"h","flip":true},{"id":"13.0.0","t":0,"f":[540,279.5,591.3,292],"o":"h","flip":false},{"id":"13.0.1","t":1,"f":[540,279.5,591.3,292],"o":"h","flip":false},{"id":"13.1.0","t":0,"f":[591.3,279.5,642.7,292],"o":"h","flip":false},{"id":"13.1.1","t":1,"f":[591.3,279.5,642.7,292],"o":"h","flip":false},{"id":"13.2.0","t":0,"f":[642.7,279.5,694,292],"o":"h","flip":false},{"id":"13.2.1","t":1,"f":[642.7,279.5,694,292],"o":"h","flip":false},{"id":"14.0.0","t":0,"f":[694,279.5,735,292],"o":"h","flip":false},{"id":"15.0.0","t":0,"f":[735,279.5,790,292],"o":"h","flip":false},{"id":"15.0.1","t":1,"f":[735,279.5,790,292],"o":"h","flip":false},{"id":"15.1.0","t":0,"f":[790,279.5,845,292],"o":"h","flip":false},{"id":"15.1.1","t":1,"f":[790,279.5,845,292],"o":"h","flip":false},{"id":"15.2.0","t":0,"f":[845,279.5,900,292],"o":"h","flip":false},{"id":"15.2.1","t":1,"f":[845,279.5,900,292],"o":"h","flip":false},{"id":"16.0.0","t":0,"f":[540,318,591.3,331],"o":"h","flip":true},{"id":"16.0.1","t":1,"f":[540,318,591.3,331],"o":"h","flip":true},{"id":"16.1.0","t":0,"f":[591.3,318,642.7,331],"o":"h","flip":true},{"id":"16.1.1","t":1,"f":[591.3,318,642.7,331],"o":"h","flip":true},{"id":"16.2.0","t":0,"f":[642.7,318,694,331],"o":"h","flip":true},{"id":"16.2.1","t":1,"f":[642.7,318,694,331],"o":"h","flip":true},{"id":"17.0.0","t":0,"f":[694,318,735,331],"o":"h","flip":true},{"id":"18.0.0","t":0,"f":[735,318,790,331],"o":"h","flip":true},{"id":"18.0.1","t":1,"f":[735,318,790,331],"o":"h","flip":true},{"id":"18.1.0","t":0,"f":[790,318,845,331],"o":"h","flip":true},{"id":"18.1.1","t":1,"f":[790,318,845,331],"o":"h","flip":true},{"id":"18.2.0","t":0,"f":[845,318,900,331],"o":"h","flip":true},{"id":"18.2.1","t":1,"f":[845,318,900,331],"o":"h","flip":true},{"id":"19.0.0","t":0,"f":[540,331,591.3,344],"o":"h","flip":false},{"id":"19.0.1","t":1,"f":[540,331,591.3,344],"o":"h","flip":false},{"id":"19.1.0","t":0,"f":[591.3,331,642.7,344],"o":"h","flip":false},{"id":"19.1.1","t":1,"f":[591.3,331,642.7,344],"o":"h","flip":false},{"id":"19.2.0","t":0,"f":[642.7,331,694,344],"o":"h","flip":false},{"id":"19.2.1","t":1,"f":[642.7,331,694,344],"o":"h","flip":false},{"id":"20.0.0","t":0,"f":[694,331,735,344],"o":"h","flip":false},{"id":"21.0.0","t":0,"f":[735,331,790,344],"o":"h","flip":false},{"id":"21.0.1","t":1,"f":[735,331,790,344],"o":"h","flip":false},{"id":"21.1.0","t":0,"f":[790,331,845,344],"o":"h","flip":false},{"id":"21.1.1","t":1,"f":[790,331,845,344],"o":"h","flip":false},{"id":"21.2.0","t":0,"f":[845,331,900,344],"o":"h","flip":false},{"id":"21.2.1","t":1,"f":[845,331,900,344],"o":"h","flip":false},{"id":"22.0.0","t":0,"f":[540,366,591.3,378.5],"o":"h","flip":true},{"id":"22.0.1","t":1,"f":[540,366,591.3,378.5],"o":"h","flip":true},{"id":"22.1.0","t":0,"f":[591.3,366,642.7,378.5],"o":"h","flip":true},{"id":"22.1.1","t":1,"f":[591.3,366,642.7,378.5],"o":"h","flip":true},{"id":"22.2.0","t":0,"f":[642.7,366,694,378.5],"o":"h","flip":true},{"id":"22.2.1","t":1,"f":[642.7,366,694,378.5],"o":"h","flip":true},{"id":"23.0.0","t":0,"f":[694,366,735,378.5],"o":"h","flip":true},{"id":"24.0.0","t":0,"f":[735,366,790,378.5],"o":"h","flip":true},{"id":"24.0.1","t":1,"f":[735,366,790,378.5],"o":"h","flip":true},{"id":"24.1.0","t":0,"f":[790,366,845,378.5],"o":"h","flip":true},{"id":"24.1.1","t":1,"f":[790,366,845,378.5],"o":"h","flip":true},{"id":"24.2.0","t":0,"f":[845,366,900,378.5],"o":"h","flip":true},{"id":"24.2.1","t":1,"f":[845,366,900,378.5],"o":"h","flip":true},{"id":"25.0.0","t":0,"f":[540,378.5,591.3,391],"o":"h","flip":false},{"id":"25.0.1","t":1,"f":[540,378.5,591.3,391],"o":"h","flip":false},{"id":"25.1.0","t":0,"f":[591.3,378.5,642.7,391],"o":"h","flip":false},{"id":"25.1.1","t":1,"f":[591.3,378.5,642.7,391],"o":"h","flip":false},{"id":"25.2.0","t":0,"f":[642.7,378.5,694,391],"o":"h","flip":false},{"id":"25.2.1","t":1,"f":[642.7,378.5,694,391],"o":"h","flip":false},{"id":"26.0.0","t":0,"f":[694,378.5,735,391],"o":"h","flip":false},{"id":"27.0.0","t":0,"f":[735,378.5,790,391],"o":"h","flip":false},{"id":"27.0.1","t":1,"f":[735,378.5,790,391],"o":"h","flip":false},{"id":"27.1.0","t":0,"f":[790,378.5,845,391],"o":"h","flip":false},{"id":"27.1.1","t":1,"f":[790,378.5,845,391],"o":"h","flip":false},{"id":"27.2.0","t":0,"f":[845,378.5,900,391],"o":"h","flip":false},{"id":"27.2.1","t":1,"f":[845,378.5,900,391],"o":"h","flip":false},{"id":"28.0.0","t":0,"f":[590,416,640,429],"o":"h","flip":true},{"id":"29.0.0","t":0,"f":[640,416,694,429],"o":"h","flip":true},{"id":"29.0.1","t":1,"f":[640,416,694,429],"o":"h","flip":true},{"id":"29.1.0","t":0,"f":[694,416,735,429],"o":"h","flip":true},{"id":"29.1.1","t":1,"f":[694,416,735,429],"o":"h","flip":true},{"id":"29.2.0","t":0,"f":[735,416,790,429],"o":"h","flip":true},{"id":"29.2.1","t":1,"f":[735,416,790,429],"o":"h","flip":true},{"id":"29.3.0","t":0,"f":[790,416,845,429],"o":"h","flip":true},{"id":"29.3.1","t":1,"f":[790,416,845,429],"o":"h","flip":true},{"id":"29.4.0","t":0,"f":[845,416,900,429],"o":"h","flip":true},{"id":"29.4.1","t":1,"f":[845,416,900,429],"o":"h","flip":true},{"id":"30.0.0","t":0,"f":[590,429,640,442],"o":"h","flip":false},{"id":"31.0.0","t":0,"f":[640,429,694,442],"o":"h","flip":false},{"id":"31.0.1","t":1,"f":[640,429,694,442],"o":"h","flip":false},{"id":"31.1.0","t":0,"f":[694,429,735,442],"o":"h","flip":false},{"id":"31.1.1","t":1,"f":[694,429,735,442],"o":"h","flip":false},{"id":"31.2.0","t":0,"f":[735,429,790,442],"o":"h","flip":false},{"id":"31.2.1","t":1,"f":[735,429,790,442],"o":"h","flip":false},{"id":"31.3.0","t":0,"f":[790,429,845,442],"o":"h","flip":false},{"id":"31.3.1","t":1,"f":[790,429,845,442],"o":"h","flip":false},{"id":"31.4.0","t":0,"f":[845,429,900,442],"o":"h","flip":false},{"id":"31.4.1","t":1,"f":[845,429,900,442],"o":"h","flip":false},{"id":"32.0.0","t":0,"f":[885,469,921.5,482],"o":"h","flip":true},{"id":"32.1.0","t":0,"f":[921.5,469,958,482],"o":"h","flip":true},{"id":"33.0.0","t":0,"f":[958,178,971,213],"o":"v","flip":false},{"id":"34.0.0","t":0,"f":[958,241,971,279.2],"o":"v","flip":false},{"id":"34.1.0","t":0,"f":[958,279.2,971,317.3],"o":"v","flip":false},{"id":"34.2.0","t":0,"f":[958,317.3,971,355.5],"o":"v","flip":false},{"id":"34.3.0","t":0,"f":[958,355.5,971,393.7],"o":"v","flip":false},{"id":"34.4.0","t":0,"f":[958,393.7,971,431.8],"o":"v","flip":false},{"id":"34.5.0","t":0,"f":[958,431.8,971,470],"o":"v","flip":false},{"id":"35.0.0","t":0,"f":[612,495,627,530],"o":"v","flip":true},{"id":"35.1.0","t":0,"f":[612,530,627,565],"o":"v","flip":true},{"id":"35.2.0","t":0,"f":[612,565,627,600],"o":"v","flip":true},{"id":"36.0.0","t":0,"f":[653,488,667,527],"o":"v","flip":false},{"id":"36.1.0","t":0,"f":[653,527,667,566],"o":"v","flip":false},{"id":"36.2.0","t":0,"f":[653,566,667,605],"o":"v","flip":false},{"id":"37.0.0","t":0,"f":[667,488,682,527],"o":"v","flip":true},{"id":"37.1.0","t":0,"f":[667,527,682,566],"o":"v","flip":true},{"id":"37.2.0","t":0,"f":[667,566,682,605],"o":"v","flip":true},{"id":"38.0.0","t":0,"f":[705,488,719,527],"o":"v","flip":false},{"id":"38.1.0","t":0,"f":[705,527,719,566],"o":"v","flip":false},{"id":"38.2.0","t":0,"f":[705,566,719,605],"o":"v","flip":false},{"id":"39.0.0","t":0,"f":[719,488,733,527],"o":"v","flip":true},{"id":"39.1.0","t":0,"f":[719,527,733,566],"o":"v","flip":true},{"id":"39.2.0","t":0,"f":[719,566,733,605],"o":"v","flip":true},{"id":"40.0.0","t":0,"f":[755,505,770,543.3],"o":"v","flip":false},{"id":"40.1.0","t":0,"f":[755,543.3,770,581.7],"o":"v","flip":false},{"id":"40.2.0","t":0,"f":[755,581.7,770,620],"o":"v","flip":false},{"id":"41.0.0","t":0,"f":[770,505,785,543.3],"o":"v","flip":true},{"id":"41.1.0","t":0,"f":[770,543.3,785,581.7],"o":"v","flip":true},{"id":"41.2.0","t":0,"f":[770,581.7,785,620],"o":"v","flip":true},{"id":"42.0.0","t":0,"f":[612,623,651.3,637],"o":"h","flip":true},{"id":"42.1.0","t":0,"f":[651.3,623,690.7,637],"o":"h","flip":true},{"id":"42.2.0","t":0,"f":[690.7,623,730,637],"o":"h","flip":true},{"id":"43.0.0","t":0,"f":[310,397,325,435.3],"o":"v","flip":false},{"id":"43.1.0","t":0,"f":[310,435.3,325,473.7],"o":"v","flip":false},{"id":"43.2.0","t":0,"f":[310,473.7,325,512],"o":"v","flip":false},{"id":"44.0.0","t":0,"f":[267,397,279.5,435.3],"o":"v","flip":false},{"id":"44.1.0","t":0,"f":[267,435.3,279.5,473.7],"o":"v","flip":false},{"id":"44.2.0","t":0,"f":[267,473.7,279.5,512],"o":"v","flip":false},{"id":"45.0.0","t":0,"f":[279.5,397,292,435.3],"o":"v","flip":true},{"id":"45.1.0","t":0,"f":[279.5,435.3,292,473.7],"o":"v","flip":true},{"id":"45.2.0","t":0,"f":[279.5,473.7,292,512],"o":"v","flip":true},{"id":"46.0.0","t":0,"f":[215,397,227.5,435.3],"o":"v","flip":false},{"id":"46.1.0","t":0,"f":[215,435.3,227.5,473.7],"o":"v","flip":false},{"id":"46.2.0","t":0,"f":[215,473.7,227.5,512],"o":"v","flip":false},{"id":"47.0.0","t":0,"f":[227.5,397,240,435.3],"o":"v","flip":true},{"id":"47.1.0","t":0,"f":[227.5,435.3,240,473.7],"o":"v","flip":true},{"id":"47.2.0","t":0,"f":[227.5,473.7,240,512],"o":"v","flip":true},{"id":"48.0.0","t":0,"f":[351,505,388,518],"o":"h","flip":false},{"id":"49.0.0","t":0,"f":[175,405,188,443.5],"o":"v","flip":true},{"id":"49.1.0","t":0,"f":[175,443.5,188,482],"o":"v","flip":true},{"id":"50.0.0","t":0,"f":[175,506,188,545.8],"o":"v","flip":true},{"id":"50.1.0","t":0,"f":[175,545.8,188,585.5],"o":"v","flip":true},{"id":"50.2.0","t":0,"f":[175,585.5,188,625.3],"o":"v","flip":true},{"id":"50.3.0","t":0,"f":[175,625.3,188,665],"o":"v","flip":true},{"id":"51.0.0","t":0,"f":[190,675,228.8,688],"o":"h","flip":true},{"id":"51.1.0","t":0,"f":[228.8,675,267.5,688],"o":"h","flip":true},{"id":"51.2.0","t":0,"f":[267.5,675,306.3,688],"o":"h","flip":true},{"id":"51.3.0","t":0,"f":[306.3,675,345,688],"o":"h","flip":true}],"rooms":[[173,280,388,397,"Inventory office"],[325,397,388,505,"Operation"],[237,183,303,227,"Lift"],[303,152,495,227,"Emergency staircase"],[527,483,612,590,"Cargo lift"],[527,590,612,698,"Cargo lift"],[885,482,973,553,"Toilet"],[885,553,973,615,"Toilet"],[822,625,973,688,"Emergency staircase"],[612,640,730,688,"Pantry"]],"pillars":[[173,227],[373,227],[573,152],[784,164],[573,227],[773,227],[973,227],[173,494],[373,494],[573,494],[773,494],[173,688],[373,688],[573,688],[773,688],[973,688]],"deck":[[590,195,871,215],[540,241,901,267],[540,292,901,318],[540,344,901,366],[540,391,901,416],[590,442,901,464],[694,195,735,416],[590,416,640,442]],"stairs":[[556,418,590,440],[871,197,900,213]],"bounds":[173,150,973,690]};
-const ICON={"grid": "<svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><rect x=\"3\" y=\"3\" width=\"7\" height=\"7\" rx=\"1.5\"/><rect x=\"14\" y=\"3\" width=\"7\" height=\"7\" rx=\"1.5\"/><rect x=\"3\" y=\"14\" width=\"7\" height=\"7\" rx=\"1.5\"/><rect x=\"14\" y=\"14\" width=\"7\" height=\"7\" rx=\"1.5\"/></svg>", "chart": "<svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M4 20V10M10 20V4M16 20v-7M22 20H2\"/></svg>", "pin": "<svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M12 21s-7-6.2-7-11a7 7 0 0 1 14 0c0 4.8-7 11-7 11z\"/><circle cx=\"12\" cy=\"10\" r=\"2.5\"/></svg>", "used": "<svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"m12 2 9 5-9 5-9-5 9-5z\"/><path d=\"m3 12 9 5 9-5\"/><path d=\"m3 17 9 5 9-5\"/></svg>", "pcs": "<svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M20.4 14.6 13.4 21.6a2 2 0 0 1-2.8 0L2 13V2h11l7.4 7.4a2 2 0 0 1 0 2.8z\"/><circle cx=\"7.5\" cy=\"7.5\" r=\"1.5\"/></svg>", "box": "<svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M21 8 12 3 3 8v8l9 5 9-5z\"/><path d=\"M3 8l9 5 9-5M12 13v8\"/></svg>", "ok": "<svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><circle cx=\"12\" cy=\"12\" r=\"9\"/><path d=\"m8 12 3 3 5-6\"/></svg>", "warn": "<svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M12 3 2 20h20z\"/><path d=\"M12 10v4M12 17h.01\"/></svg>", "alert": "<svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><circle cx=\"12\" cy=\"12\" r=\"9\"/><path d=\"M12 7v6M12 16h.01\"/></svg>", "search": "<svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><circle cx=\"11\" cy=\"11\" r=\"7\"/><path d=\"m20 20-3.5-3.5\"/></svg>"};
+const ICON={"swap": "<svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M4 7h13l-3-3M20 17H7l3 3\"/></svg>", "grid": "<svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><rect x=\"3\" y=\"3\" width=\"7\" height=\"7\" rx=\"1.5\"/><rect x=\"14\" y=\"3\" width=\"7\" height=\"7\" rx=\"1.5\"/><rect x=\"3\" y=\"14\" width=\"7\" height=\"7\" rx=\"1.5\"/><rect x=\"14\" y=\"14\" width=\"7\" height=\"7\" rx=\"1.5\"/></svg>", "chart": "<svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M4 20V10M10 20V4M16 20v-7M22 20H2\"/></svg>", "pin": "<svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M12 21s-7-6.2-7-11a7 7 0 0 1 14 0c0 4.8-7 11-7 11z\"/><circle cx=\"12\" cy=\"10\" r=\"2.5\"/></svg>", "used": "<svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"m12 2 9 5-9 5-9-5 9-5z\"/><path d=\"m3 12 9 5 9-5\"/><path d=\"m3 17 9 5 9-5\"/></svg>", "pcs": "<svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M20.4 14.6 13.4 21.6a2 2 0 0 1-2.8 0L2 13V2h11l7.4 7.4a2 2 0 0 1 0 2.8z\"/><circle cx=\"7.5\" cy=\"7.5\" r=\"1.5\"/></svg>", "box": "<svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M21 8 12 3 3 8v8l9 5 9-5z\"/><path d=\"M3 8l9 5 9-5M12 13v8\"/></svg>", "ok": "<svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><circle cx=\"12\" cy=\"12\" r=\"9\"/><path d=\"m8 12 3 3 5-6\"/></svg>", "warn": "<svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M12 3 2 20h20z\"/><path d=\"M12 10v4M12 17h.01\"/></svg>", "alert": "<svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><circle cx=\"12\" cy=\"12\" r=\"9\"/><path d=\"M12 7v6M12 16h.01\"/></svg>", "search": "<svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><circle cx=\"11\" cy=\"11\" r=\"7\"/><path d=\"m20 20-3.5-3.5\"/></svg>"};
 const STATUS={empty:'#34c38f',low:'#3b82f6',mid:'#f5b301',full:'#ef4444',mark:'#a855f7'};
 let VIEW='3d';try{VIEW=localStorage.getItem('pg-view')||'3d'}catch(e){}
 let PLAN=null,mapRack=null;
@@ -1002,8 +1150,8 @@ const skuOptions=()=>`<datalist id="skus">${Object.keys(st.master).slice(0,4000)
 function sugHTML(s,qty,sg){return `<div class="list">${sg.out.map(o=>`<div class="sug"><span class="code">${esc(o.code)}</span> · <b>${fmt(o.qty)}</b> pcs<div class="small muted">${esc(o.why)} · ${binItems(o.code).length?`has ${fmt(binQty(o.code))}/${binCap(o.code)}`:'empty'}</div></div>`).join('')}${sg.left>0?`<div class="pill bad">Tiada bin untuk ${fmt(sg.left)} pcs lagi</div>`:''}</div>`}
 function skuLine(s){return `<div class="t">${esc(s.sku)}</div><div class="small muted">${esc(s.desc)}</div><div class="row small"><span class="pill">${esc(s.cat)}</span><span class="pill">${esc(s.size)}</span><span class="pill">${esc(s.brand)}</span>${s.kol?`<span class="pill">Koleksi ${esc(s.kol)}</span>`:''}${isCekak(s)?'<span class="pill">Cekak Musang · maks 30</span>':''}</div>`}
 
-let _hlKey='',locQuiet=false;
-function tabHL(){if(tab==='check'&&chkSel&&st.checks[chkSel])return st.checks[chkSel].bins;if(tab==='xfer'&&xPlan)return xPlan.used;return mapHL}
+let _hlKey='',_xKey='',locQuiet=false;
+function tabHL(){if(tab==='check'&&chkOpen&&chkSel&&st.checks[chkSel]&&!chkNew){const c=st.checks[chkSel],R=c.results||{};return chkActive(c).filter(b=>!R[b])}if(tab==='xfer'&&xPlan)return xPlan.used;return mapHL}
 function curTier(){return (document.querySelector('.mtools [aria-pressed="true"][data-t]')||{}).dataset?.t||'lo'}
 function setTierBtn(t){document.querySelectorAll('.mtools [data-t]').forEach(x=>x.setAttribute('aria-pressed',x.dataset.t===t))}
 function mapClickRack(rid){locQuiet=false;if(tab==='rak'){rakToggle(rid);return}const r=RACKS.find(x=>x.id===rid);if(!r)return;mapRack=r.c;mapPicked=null;render()}
@@ -1027,7 +1175,7 @@ function ensureMap(edit){
   document.querySelectorAll('.mtools [data-v]').forEach(b=>b.setAttribute('aria-pressed',b.dataset.v===v));
   document.querySelectorAll('.mtools button,.mtools .grp').forEach(b=>{const d=b.dataset;b.hidden=(d['3d']!==undefined&&v!=='3d')||(d['2d']!==undefined&&v!=='2d')||(d.edit!==undefined&&!edit)||(d.fill!==undefined&&edit)||(d.hl!==undefined&&(!mapHL.length||tab==='check'||tab==='xfer'))});
   if(v==='2d'&&curTier()==='all')setTierBtn('lo');
-  $('#legedit').hidden=!edit;$('#legfill').hidden=edit;$('#msearch').hidden=edit;
+  $('#legedit').hidden=!edit;$('#legfill').hidden=edit;{const lm=$('#legmark');if(lm)lm.textContent=tab==='check'&&chkOpen?'Not counted (list)':'Marked';const xo=tab==='xfer'&&!!(xPlan||(xPrev&&(xPrev.src.length||xPrev.dst.length)))&&v==='3d';['legsrc','legdst'].forEach(i=>$('#'+i).hidden=!xo);$('#legmk').hidden=xo;$('#legsel').hidden=xo}$('#msearch').hidden=edit;
   {const gl=$('#gl');if(gl&&+gl.dataset.n!==RACKS.length){gl.dataset.n=RACKS.length;gl.innerHTML=[...new Set(RACKS.map(r=>r.r))].map(r=>`<option value="${esc(r)}">`).join('')+RACKS.map(r=>`<option value="${esc(r.c)}">`).join('')}}
   if(v==='2d'){const ne=$('#mneedle');if(ne)ne.style.transform=''}
   $('#legnote').textContent=v==='2d'?'Rack colour by bins used:':'';
@@ -1072,8 +1220,8 @@ function ensureMap(edit){
   if(!MAP&&window.THREE){MAP=init3D($('#map'),(code,rid)=>{if(tab==='rak'){if(rid)rakToggle(rid)}else{locQuiet=false;mapPicked=code;const r=rackOfCode(code);mapRack=r?r.c:null;render()}});
     const cur=curTier();if(cur!=='all')MAP.setTier(cur);
     MAP.setCodes($('#mcodes').getAttribute('aria-pressed')==='true');
-    _hlKey='';if(HL.length&&tab!=='check'){MAP.focus(HL[0])}}
-  if(MAP){const k=HL.join(',');if(k!==_hlKey){_hlKey=k;MAP.highlight(HL)}MAP.setMode(edit?'edit':'fill');if(edit)MAP.setSel(selIds);else MAP.paint()}
+    _hlKey='';_xKey='-';if(HL.length&&tab!=='check'){MAP.focus(HL[0])}}
+  if(MAP){const H3=tab==='xfer'?[]:HL;const k=H3.join(',');if(k!==_hlKey){_hlKey=k;MAP.highlight(H3)}{const X=tab==='xfer'?xferMapSets():null;const k2=X?X.src.length+'|'+X.dst.length+'|'+X.pair+'|'+X.src[0]+'|'+X.dst[0]:'';if(k2!==_xKey){_xKey=k2;MAP.setXfer(X&&X.src,X&&X.dst,X&&X.pair)}}MAP.setMode(edit?'edit':'fill');if(edit)MAP.setSel(selIds);else MAP.paint()}
   walkUI()}
 const nm=x=>!x?'-':/^tanpa nama$/i.test(x)?'Unnamed':x;
 function findLocation(){const v=$('#gq').value.trim().toUpperCase();const msg=$('#gmsg');msg.textContent='';if(!v)return;
@@ -1168,6 +1316,7 @@ function renderPindah(){main.className='';const rs=relocations();$('#bp').hidden
   if(rs.length>80)rl.insertAdjacentHTML('beforeend',`<p class="small muted">Menunjuk 80 daripada ${rs.length}. Selesaikan yang di atas dulu.</p>`)}
 
 // ---------- stock check: lists built from filters ----------
+let chkCurBy={},chkSkip=new Set(),chkBF='all',chkOpen=false;
 let chkSel=null,chkNew=false,chkF={sku:'',size:[],brand:[],kol:[],grp:[],cat:[],row:'',col:'',mode:'all',n:20,only:true};
 try{chkSel=localStorage.getItem('pg-chk')}catch(e){}
 const SZ_ORDER=['XS','S','M','L','XL','2XL','3XL','4XL','5XL','6XL'];
@@ -1195,17 +1344,57 @@ function chkName(f){const p=[];if(f.sku)p.push('SKU "'+f.sku+'"');const J=v=>fAr
   return (p.join(' · ')||'All bins')+(f.mode==='rand'?` (random ${f.n})`:'')}
 const kols=brand=>[...new Set(Object.keys(st.master).map(sku).filter(s=>fHas(brand,s.brand)).map(s=>s.kol).filter(Boolean))].sort(kolSort);
 const chkList=()=>Object.entries(st.checks||{}).map(([id,c])=>({id,...c})).sort((a,b)=>(b.created||0)-(a.created||0));
+async function chkReport(c,msgEl){
+  const dl=window.claude?await window.claude.use('downloads'):null;
+  if(!dl||!window.XLSX){msgEl.textContent='Download not available.';return}
+  const R=c.results||{},rows=[],diffRows=[];let binsCounted=0,binsDiff=0,pcsSys=0,pcsCnt=0;
+  c.bins.forEach(code=>{const r=R[code];if(!r)return;binsCounted++;if(r.diff)binsDiff++;
+    const sys=r.s||Object.fromEntries(chkRows(c,code));const keys=[...new Set([...Object.keys(sys),...Object.keys(r.c||{})])];
+    keys.forEach(k=>{const s=sku(k)||{};const q=+(sys[k]||0),n=+((r.c||{})[k]||0),d=n-q;pcsSys+=q;pcsCnt+=n;
+      const row=[code,k,s.desc||'',s.col||'',s.size||'',q,n,d,d===0?'OK':!(k in sys)?'Not in system':d>0?'Over':'Short',nm(r.by),new Date(r.at||0).toLocaleString('en-GB')];
+      rows.push(row);if(d!==0)diffRows.push(row)})});
+  const now=new Date();const left=chkLive(c).filter(b=>!R[b]).length;
+  const head=['No','Bin','SKU','Description','Colour','Size','System qty','Counted qty','Difference','Status','Counted by','Counted at'];
+  const num=a=>a.map((r,i)=>[i+1,...r]);
+  const info=[['Stock check – discrepancy report'],['List',c.name||''],['Created',new Date(c.created||0).toLocaleString('en-GB')+' by '+nm(c.by)],['Printed',now.toLocaleString('en-GB')],[],
+    ['Bins counted',binsCounted],['Bins not counted yet',left],['Bins with differences',binsDiff],['SKU lines with differences',diffRows.length],['Total system qty (counted bins)',pcsSys],['Total counted qty',pcsCnt],['Net difference',pcsCnt-pcsSys],[],
+    ['Note','For information only. Stock locations in the system are not changed by this report.']];
+  const wb=XLSX.utils.book_new();const mk=(aoa,cols)=>{const ws=XLSX.utils.aoa_to_sheet(aoa);ws['!cols']=cols.map(w=>({wch:w}));return ws};
+  const W=[5,14,18,34,14,8,10,11,10,13,14,18];
+  XLSX.utils.book_append_sheet(wb,mk(info,[30,50]),'Summary');
+  XLSX.utils.book_append_sheet(wb,mk([head,...num(diffRows)],W),'Discrepancies');
+  XLSX.utils.book_append_sheet(wb,mk([head,...num(rows)],W),'All counts');
+  const p=n=>String(n).padStart(2,'0');const safe=String(c.name||'list').replace(/[^A-Za-z0-9]+/g,'_').slice(0,40);
+  const fn=`Stock_Check_${safe}_${now.getFullYear()}${p(now.getMonth()+1)}${p(now.getDate())}_${p(now.getHours())}${p(now.getMinutes())}.xlsx`;
+  try{await dl.save({filename:fn,data:XLSX.write(wb,{type:'array',bookType:'xlsx'})});msgEl.textContent='✓ '+fn+' downloaded.'}
+  catch(e){msgEl.textContent=e&&e.code==='declined'?'Download cancelled.':e&&e.code==='rate_limited'?'Wait a moment and try again.':'Download is not possible in this view.'}}
+function chkLive(c){const R=c.results||{};return c.bins.filter(b=>R[b]||chkRows(c,b).length)}
+let chkShowHid=false;
+function chkActive(c){return chkShowHid?c.bins:chkLive(c)}
 function chkRows(c,code){const it=binItems(code);return c.only&&c.filter&&skuFilterOn(c.filter)?it.filter(([k])=>chkMatchSku(sku(k),c.filter)):it}
 function renderCheck(){main.className='';
-  const lists=chkList();if(chkSel&&!st.checks[chkSel])chkSel=null;if(!chkSel&&lists.length&&!chkNew)chkSel=lists[0].id;
-  const c=chkSel?st.checks[chkSel]:null;const building=chkNew||!lists.length;
+  const lists=chkList();if(chkSel&&!st.checks[chkSel]){chkSel=null;chkOpen=false}
+  if(!chkNew&&!(chkOpen&&chkSel)){chkOpen=false;
+    const stats=l=>{const R=l.results||{},A=chkLive(l),d=A.filter(b=>R[b]).length,x=A.filter(b=>R[b]&&R[b].diff).length,last=Object.values(R).reduce((a,r)=>Math.max(a,r.at||0),0);return {n:A.length,d,x,last,full:A.length>0&&d===A.length}};
+    const fmtD=ts=>new Date(ts||0).toLocaleString('en-GB',{day:'numeric',month:'short',year:'numeric'});
+    const card=l=>{const s=stats(l),pc=s.n?s.d/s.n*100:0;return `<button type="button" class="xli${s.full?' done':''}" data-copen="${esc(l.id)}"><div class="xlt"><b class="xln">${esc(l.name||('Random week '+(l.week||'')))}</b><span class="stpill ${s.full?(s.x?'bad':'ok'):'pend'}">${s.full?(s.x?s.x+' discrepanc'+(s.x>1?'ies':'y'):'Complete'):Math.round(pc)+'%'}</span></div>
+      <div class="captr"><span style="width:${pc.toFixed(1)}%"></span></div>
+      <div class="small muted">${fmt(s.d)} / ${fmt(s.n)} bins counted${s.x?` · <span style="color:#ff8a8a">${s.x} with differences</span>`:''} · created ${fmtD(l.created)} by ${esc(nm(l.by))}${s.last?' · last count '+fmtD(s.last):''}</div></button>`};
+    const open=lists.filter(l=>!stats(l).full),done=lists.filter(l=>stats(l).full);
+    main.className='';main.innerHTML=`<section class="card xhead"><div class="sechd"><h2 class="ih">${ICON.chart}Stock Check</h2><button class="btn pri" id="cxnew">+ New list</button></div>
+      <p class="small muted" style="margin:0">Create a counting list, then staff count each bin and save. Open a list below to continue counting.</p></section>
+      <section class="card"><div class="sechd"><h2 class="ih">${ICON.used}In progress</h2><span class="small muted">${open.length}</span></div>${open.length?`<div class="xlist">${open.map(card).join('')}</div>`:'<p class="empty">No lists in progress. Press <b>+ New list</b> to create one.</p>'}</section>
+      <section class="card"><div class="sechd"><h2 class="ih">${ICON.ok}Completed</h2><span class="small muted">${done.length}</span></div>${done.length?`<div class="xlist">${done.map(card).join('')}</div>`:'<p class="empty">No completed lists yet.</p>'}</section>`;
+    $('#cxnew').onclick=()=>{chkNew=true;render();window.scrollTo(0,0)};
+    main.querySelectorAll('[data-copen]').forEach(b=>b.onclick=()=>{chkSel=b.dataset.copen;chkOpen=true;chkNew=false;mapPicked=null;try{localStorage.setItem('pg-chk',chkSel)}catch(e){}render();window.scrollTo(0,0)});
+    return}
+  const c=chkSel?st.checks[chkSel]:null;const building=chkNew;
   const opt=(arr,v,ph)=>`<option value="">${ph}</option>`+arr.map(x=>`<option${x===v?' selected':''}>${esc(x)}</option>`).join('');
   const M=Object.keys(st.master).map(sku);
   const sizes=[...new Set(M.map(s=>s.size).filter(Boolean))].sort(szSort),brands=[...new Set(M.map(s=>s.brand).filter(Boolean))].sort(),
     grps=[...new Set(M.map(s=>s.grp).filter(Boolean))].sort(),rows=[...new Set(RACKS.map(r=>r.r))].sort(natSort);
   const f=chkF;const m=building?chkMatches(f):null;
-  let h=`<section class="card"><div class="row"><h2 style="margin-right:auto">Stock check</h2>${building&&lists.length?'<button class="btn" id="cxback">Back to lists</button>':'<button class="btn pri" id="cxnew">+ New list</button>'}</div>
-    ${lists.length?`<div class="row" style="margin-top:6px"><label for="cxsel" class="small">List</label><select id="cxsel" class="grow">${lists.map(l=>{const d=Object.keys(l.results||{}).length;return `<option value="${esc(l.id)}"${l.id===chkSel&&!building?' selected':''}>${esc(l.name||('Random week '+(l.week||'')))} · ${d}/${l.bins.length} counted · ${new Date(l.created||0).toLocaleDateString('en-GB')}</option>`}).join('')}</select></div>`:''}</section>`;
+  let h=`<section class="card xhead"><div class="sechd"><h2 class="ih">${ICON.chart}${building?'New stock check list':'Stock Check'}</h2><button class="btn sm" id="cxback">← All lists</button></div></section>`;
   if(building){
     h+=`<section class="card"><h2>New list</h2><p class="small muted">Choose what to count. Leave a box empty for "all".</p>
       <div class="fgrid">
@@ -1224,18 +1413,56 @@ function renderCheck(){main.className='';
       <div class="stats" style="margin-top:10px"><div class="stat"><b>${fmt(m.bins.length)}</b><span>Matching bins</span></div><div class="stat"><b>${fmt(m.skus)}</b><span>SKU</span></div><div class="stat"><b>${fmt(m.qty)}</b><span>Pcs</span></div></div>
       <div class="row" style="margin-top:10px"><button class="btn pri" id="fgo"${m.bins.length?'':' disabled'}>Create list (${fmt(f.mode==='rand'?Math.min(f.n,m.bins.length):m.bins.length)} bin)</button><button class="btn" id="fclr">Clear selection</button></div>
       ${m.bins.length>200&&f.mode==='all'?'<p class="small" style="color:var(--warn)">This list is long. Consider "Random" or narrow the filter.</p>':''}</section>`;
+  }else if(c&&!chkActive(c).length){
+    h+=`<section class="card"><div class="sechd"><h2>${esc(c.name||'Stock check')}</h2><button class="linkbtn" id="cxdel" style="color:var(--muted)">Delete list</button></div><p class="empty">None of the ${fmt(c.bins.length)} bins in this list still hold the selected SKUs (stock has moved since the list was created). Create a new list to count the current locations.</p><div class="row"><button class="btn sm" id="cxhid">Show hidden bins</button></div><div id="cxmsg" class="small"></div></section>`;
   }else if(c){
-    const done=Object.keys(c.results||{}).length,diffBins=Object.values(c.results||{}).filter(r=>r.diff).length;
-    h+=`<section class="card"><div class="row"><h2 style="margin-right:auto">${esc(c.name||('Random week '+(c.week||'')))}</h2><button class="btn" id="cxdel">Delete list</button></div>
-      <p class="small muted" style="margin:2px 0 8px">Created by ${esc(nm(c.by))} · ${new Date(c.created||0).toLocaleString('en-GB')}${c.only&&c.filter&&skuFilterOn(c.filter)?' · selected SKUs only':''}</p>
-      <div class="stats"><div class="stat"><b>${done}/${c.bins.length}</b><span>Bins counted</span></div><div class="stat"><b>${diffBins}</b><span>Bins with differences</span></div>
-      <div class="stat"><b>${done?Math.round((done-diffBins)/done*100):0}%</b><span>Accuracy</span></div></div>
-      <div id="cxmsg" class="small"></div>
-      <p class="small muted">Count each bin, enter the actual quantity, then press Save count.</p><div class="list" id="cl"></div></section>`}
+    const AB=chkActive(c),LV=new Set(chkLive(c)),hid=c.bins.length-LV.size;
+    const R=c.results||{},done=AB.filter(b=>R[b]).length,diffBins=AB.filter(b=>R[b]&&R[b].diff).length,total=AB.length,left=total-done,pct=total?done/total*100:0;
+    if(mapPicked&&AB.includes(mapPicked))chkCurBy[chkSel]=mapPicked;
+    let cur=chkCurBy[chkSel];if(!cur||!AB.includes(cur))cur=chkCurBy[chkSel]=AB.find(b=>!R[b])||AB[0];
+    const foreign=mapPicked&&!AB.includes(mapPicked)?mapPicked:null;
+    const r=R[cur],exp=chkRows(c,cur),b=BINS.get(cur)||{},pm=String(cur).match(/^(.*)-L(\d+)-(\d+)$/),rk=rackOfCode(cur);
+    const extra=r&&r.c?Object.keys(r.c).filter(k=>!exp.some(x=>x[0]===k)).map(k=>[k,0]):[];
+    const cap=binCap(cur),used=binQty(cur);
+    const st2=!r?['pend','Not counted']:r.diff?['bad','Discrepancy']:['ok','Counted · OK'];
+    const last=Object.values(R).sort((x,y)=>(y.at||0)-(x.at||0))[0];
+    const kp=(ic,col,lab,n,sub)=>`<div class="kpi kpi2 kpi3" style="--c:${col}"><div class="hd"><span class="ic">${ICON[ic]}</span><span class="lab">${lab}</span></div><div class="ft"><span class="num">${fmt(n)}<small class="unit">bins</small></span>${sub?`<span class="pct" style="color:${col}">${sub}</span>`:''}</div></div>`;
+    const prow=([k,q])=>{const got=r&&r.c&&k in r.c?r.c[k]:'';const s=sku(k);return `<tr data-row="${esc(k)}"><td><span class="code">${esc(k)}</span><div class="small muted">${esc(s?[s.col,s.size].filter(Boolean).join(' · '):'Not in system for this bin')}</div></td><td class="n">${fmt(q)}</td><td class="n"><input class="cnt" type="number" inputmode="numeric" min="0" data-k="${esc(k)}" data-sys="${q}" value="${got}" aria-label="Counted ${esc(k)}"></td><td class="n dif"></td><td class="stc"></td></tr>`};
+    const listBtns=AB.map(x=>{const rr=R[x];const s=!rr?(chkSkip.has(x)?'skip':'pend'):rr.diff?'bad':'ok';return `<button type="button" class="binbtn ${s}${x===cur?' cur':''}${LV.has(x)?'':' gone'}" data-go="${esc(x)}" data-st="${s}" title="${esc(x)}"><i></i>${esc(x)}</button>`}).join('');
+    h+=`<section class="card"><div class="sechd"><h2 class="ih">${ICON.chart}Stock Check Progress</h2><button class="linkbtn" id="cxdel" style="color:var(--muted)">Delete list</button></div>
+      <div class="small muted" style="margin-top:-6px">${esc(c.name||('Random week '+(c.week||'')))} · created by ${esc(nm(c.by))}, ${new Date(c.created||0).toLocaleDateString('en-GB')}${c.only&&c.filter&&skuFilterOn(c.filter)?' · selected SKUs only':''}</div>${hid?`<div class="small hidnote"><span>${chkShowHid?`Showing ${fmt(hid)} bin${hid>1?'s':''} where the system no longer has the selected SKUs (dashed in the list).`:`${fmt(hid)} bin${hid>1?'s':''} hidden: the selected SKUs are no longer in ${hid>1?'them':'it'} (stock moved since the list was created).`}</span><button class="btn sm" id="cxhid">${chkShowHid?'Hide empty bins':'Show hidden bins'}</button></div>`:''}
+      <div class="kpis kpis4">${kp('box','var(--accent)','Total Bins',total,'')}${kp('ok','#34c38f','Counted',done,pct.toFixed(1)+'%')}${kp('used','#3b82f6','Remaining',left,total?(left/total*100).toFixed(1)+'%':'')}${kp('alert','#ef4444','Discrepancies',diffBins,done?(diffBins/done*100).toFixed(1)+'%':'')}</div>
+      <div class="captr" role="img" aria-label="${pct.toFixed(1)}% counted"><span style="width:${pct.toFixed(2)}%"></span></div>
+      <div class="row small" style="justify-content:space-between"><span class="muted">${last?`Last saved ${new Date(last.at).toLocaleString('en-GB',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'})} by ${esc(nm(last.by))}`:'No counts saved yet'}</span><b>${fmt(done)} / ${fmt(total)}</b></div>
+      <div class="row"><button class="btn" id="cxrep"${done?'':' disabled'}>⤓ Discrepancy report (Excel)</button><span class="small muted">${diffBins?fmt(diffBins)+' bin'+(diffBins>1?'s':'')+' with differences':done?'No differences so far':'Available after counts are saved'}</span></div>
+      <div id="cxmsg" class="small"></div></section>
+    ${foreign?`<section class="card note-card"><div class="row"><span><span class="code">${esc(foreign)}</span> is not in this stock check list.</span><button class="btn" id="cxback2" style="margin-left:auto">Back to ${esc(cur)}</button></div></section>`:''}
+    <section class="card curbin" id="curbin">
+      <div class="sechd"><span class="small muted">Current Bin · ${AB.indexOf(cur)+1} of ${total}</span><span class="stpill ${st2[0]}">${st2[1]}</span></div>
+      <div class="cbhd"><div style="min-width:0"><div class="cbcode">${esc(cur)}</div>
+        <div class="crumb">${b.floor===2?'Level M':'Ground Floor'} › Row ${esc(b.row||'-')} › Rack ${esc(rk?rk.c:(pm?pm[1]:'-'))}${pm?` › Level ${pm[2]} › Bin ${pm[3]}`:''}</div></div>
+        <button class="btn navbtn" id="cxnav">${ICON.pin}Navigate on Map</button></div>
+      <div class="bdet"><div><span>Capacity</span><b>${fmt(cap)} pcs</b></div><div><span>System qty</span><b>${fmt(used)} pcs</b></div><div><span>Available</span><b>${fmt(Math.max(0,cap-used))} pcs</b></div><div><span>Counted by</span><b>${r?esc(nm(r.by)):'–'}</b></div></div>
+    </section>
+    <section class="card" id="cxprod">
+      <div class="sechd"><h2 class="ih">${ICON.box}Products in Bin</h2><span class="small muted">${exp.length} SKU${c.only?' (selected only)':''}</span></div>
+      <div class="scanrow"><label class="sbox">${ICON.search}<input id="cxscan" placeholder="Scan or type SKU, then Enter" autocomplete="off" list="skus" aria-label="Scan or type SKU"></label><button class="btn" id="cxman" title="Go to the first empty count box">Manual input</button></div>
+      <div id="cxscanmsg" class="small"></div>
+      <div class="tbl"><table class="ptbl"><thead><tr><th>SKU</th><th class="n">System</th><th class="n">Counted</th><th class="n">Diff</th><th>Status</th></tr></thead><tbody id="cxrows">${[...exp,...extra].map(prow).join('')||'<tr><td colspan="5" class="empty">No selected SKUs in the system for this bin now.</td></tr>'}</tbody></table></div>
+      <div class="row addsku"><input class="grow" id="cxxs" list="skus" placeholder="${c.only?'Selected SKU found here':'Other SKU found in this bin'}"><input type="number" min="1" id="cxxq" placeholder="Qty" style="width:80px"><button class="btn" id="cxxadd">Add</button></div>
+      ${!exp.length?`<p class="small muted" style="margin:0">The system says this bin no longer has the selected SKUs. If the shelf is really empty, press <b>Save Count</b> to confirm. If you find stock, add the SKU and quantity above, then save. It will be recorded as a discrepancy in the report.</p>`:''}
+      <details id="cxall"><summary class="small">View bin details (all SKUs the system has in this bin)</summary><div class="tbl" style="margin-top:6px"><table><thead><tr><th>SKU</th><th>Description</th><th class="n">Qty</th></tr></thead><tbody>${binItems(cur).map(([k,q])=>`<tr><td><span class="code">${esc(k)}</span></td><td class="small">${esc(sku(k)?.desc||'')}</td><td class="n">${fmt(q)}</td></tr>`).join('')||'<tr><td colspan="3" class="empty">Empty in system</td></tr>'}</tbody></table></div></details>
+      <div class="cxact"><button class="btn" id="cxprev">‹ Previous Bin</button><button class="btn pri" id="cxsave">Save Count</button><button class="btn" id="cxnext">Next Bin ›</button></div>
+      <div class="row" style="justify-content:space-between"><button class="linkbtn" id="cxskip" style="color:var(--muted)">Skip this bin for now</button></div>
+      <div id="cxsmsg" class="small"></div>
+    </section>
+    <section class="card"><div class="sechd"><h2 class="ih">${ICON.grid}Bins in List</h2><span class="seg sm" role="group" aria-label="Filter bins">${[['all','All'],['pend','Remaining'],['bad','Discrepancy']].map(([k,l])=>`<button data-bf="${k}" aria-pressed="${chkBF===k}">${l}</button>`).join('')}</span></div>
+      <div class="binlist bf-${chkBF}" id="cxbins">${listBtns}</div>
+      <div class="row small muted lg"><span><i class="d pend"></i>Not counted</span><span><i class="d ok"></i>OK</span><span><i class="d bad"></i>Discrepancy</span><span><i class="d skip"></i>Skipped (not saved)</span></div></section>`}
   main.innerHTML=h+skuOptions();
   // events
-  const nb=$('#cxnew');if(nb)nb.onclick=()=>{chkNew=true;renderCheck()};
-  const bb=$('#cxback');if(bb)bb.onclick=()=>{chkNew=false;renderCheck()};
+  {const rp=$('#cxrep');if(rp&&c)rp.onclick=()=>chkReport(c,$('#cxmsg'))}
+  const bb=$('#cxback');if(bb)bb.onclick=()=>{chkNew=false;chkOpen=false;mapPicked=null;render();window.scrollTo(0,0)};
   const sel=$('#cxsel');if(sel)sel.onchange=()=>{chkSel=sel.value;chkNew=false;try{localStorage.setItem('pg-chk',chkSel)}catch(e){}renderCheck()};
   if(building){
     const upd=(k,v)=>{chkF[k]=v;renderCheck()};
@@ -1247,30 +1474,59 @@ function renderCheck(){main.className='';
     $('#fclr').onclick=()=>{chkF={sku:'',size:[],brand:[],kol:[],grp:[],cat:[],row:'',col:'',mode:'all',n:20,only:true};renderCheck()};
     $('#fgo').onclick=async()=>{let bins=[...m.bins];if(f.mode==='rand'){for(let i=bins.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[bins[i],bins[j]]=[bins[j],bins[i]]}bins=bins.slice(0,f.n).sort((a,b)=>BINS.get(a).ord-BINS.get(b).ord)}
       const id='c'+Date.now().toString(36);const body={name:chkName(f),filter:{...f},only:skuFilterOn(f)&&f.only,bins,results:{},created:Date.now(),by:me()};
-      if(await guarded(()=>db.doc('checks/'+id).set(body),'List created')){st.checks[id]=body;chkSel=id;chkNew=false;try{localStorage.setItem('pg-chk',id)}catch(e){}renderCheck()}};
+      if(await guarded(()=>db.doc('checks/'+id).set(body),'List created')){st.checks[id]=body;chkSel=id;chkNew=false;chkOpen=true;mapPicked=null;try{localStorage.setItem('pg-chk',id)}catch(e){}renderCheck()}};
     return}
   if(!c)return;
-  $('#cxdel').onclick=()=>askInline($('#cxmsg'),'Delete this list? Counts saved in it will also be lost.',async()=>{if(await guarded(()=>db.doc('checks/'+chkSel).delete(),'List deleted')){delete st.checks[chkSel];chkSel=null;renderCheck()}});
-  const cl=$('#cl');c.bins.forEach(code=>{const r=(c.results||{})[code];const exp=chkRows(c,code);const d=document.createElement('div');d.className='item';
-    const rowsH=exp.map(([k,q])=>{const got=r&&r.c&&k in r.c?r.c[k]:'';return `<tr class="${r&&got!==''&&+got!==q?'diff':''}"><td><span class="code">${esc(k)}</span><div class="small muted">${esc(sku(k)?.col||'')} ${esc(sku(k)?.size||'')}</div></td><td class="n">${q}</td><td class="n"><input type="number" min="0" data-k="${esc(k)}" value="${got}" aria-label="Count ${esc(k)}"></td></tr>`}).join('');
-    d.innerHTML=`<div class="row"><span class="code">${esc(code)}</span>${r?(r.diff?'<span class="pill bad">Difference</span>':'<span class="pill ok">Correct</span>'):'<span class="pill">Not counted</span>'}${r?`<span class="small muted">by ${esc(nm(r.by))}</span>`:''}</div>
-      <div class="tbl"><table><thead><tr><th>SKU</th><th class="n">System</th><th class="n">Count</th></tr></thead><tbody>${rowsH||'<tr><td colspan="3" class="empty">No selected SKUs in this bin now</td></tr>'}</tbody></table></div>
-      ${c.only?'':`<details><summary class="small">Other SKU found in this bin</summary><div class="row" style="margin-top:6px"><input class="grow" data-xs list="skus" placeholder="SKU"><input type="number" min="1" data-xq placeholder="Qty"></div></details>`}
-      <div class="row"><button class="btn pri" data-save>Save count</button>${r&&r.diff?'<button class="btn" data-apply>Update location from count</button>':''}</div>`;
-    d.querySelector('[data-save]').onclick=async()=>{const cnt={};let miss=false;d.querySelectorAll('input[data-k]').forEach(i=>{if(i.value==='')miss=true;cnt[i.dataset.k]=Math.max(0,+i.value||0)});
-      const xsI=d.querySelector('[data-xs]');if(xsI){const xs=xsI.value.trim(),xq=+d.querySelector('[data-xq]').value||0;if(xs&&xq>0)cnt[xs]=(cnt[xs]||0)+xq}
-      if(miss){setStatus('Enter a count for every SKU in the bin (enter 0 if none).',true);return}
-      const diff=exp.some(([k,q])=>cnt[k]!==q)||Object.keys(cnt).some(k=>!exp.find(x=>x[0]===k));
-      const res={c:cnt,diff,by:me(),at:Date.now()};const id=chkSel;
-      if(await guarded(async()=>{const ref=db.doc('checks/'+id);const snap=await ref.get();const cur=snap.exists?snap.data():c;await ref.set({...cur,results:{...(cur.results||{}),[code]:res}})},`${code} saved`)){st.checks[id]={...st.checks[id],results:{...(st.checks[id].results||{}),[code]:res}};renderCheck()}};
-    const ap=d.querySelector('[data-apply]');if(ap)ap.onclick=async()=>{
-      // replace only the counted SKUs; keep other SKUs in the bin as they are
-      const counted=new Set(Object.keys(r.c));const keep=binItems(code).filter(([k])=>!counted.has(k));
-      const arr=[...keep,...Object.entries(r.c).filter(([,q])=>q>0)];
-      if(await guarded(()=>saveBins({[code]:arr}),'Location updated from count'))renderCheck()};
-    d.querySelector('.row .code').style.cursor='pointer';d.querySelector('.row .code').title='Show on map';d.querySelector('.row .code').onclick=()=>{locQuiet=true;openOnMap(code)};
-    cl.appendChild(d)});
+  if(!chkActive(c).length){$('#cxhid').onclick=()=>{chkShowHid=true;mapPicked=null;renderCheck()};$('#cxdel').onclick=()=>askInline($('#cxmsg'),'Delete this list?',async()=>{if(await guarded(()=>db.doc('checks/'+chkSel).delete(),'List deleted')){delete st.checks[chkSel];chkSel=null;chkOpen=false;render()}});return}
+  const R=c.results||{},cur=chkCurBy[chkSel],r=R[cur],exp=chkRows(c,cur);
+  if(!mapPicked){locQuiet=true;openOnMap(cur,true);_hlKey='';ensureMap(false)}
+  $('#cxdel').onclick=()=>askInline($('#cxmsg'),'Delete this list? Counts saved in it will also be lost.',async()=>{if(await guarded(()=>db.doc('checks/'+chkSel).delete(),'List deleted')){delete st.checks[chkSel];chkSel=null;chkOpen=false;render()}});
+  {const hb=$('#cxhid');if(hb)hb.onclick=()=>{chkShowHid=!chkShowHid;if(!chkShowHid&&!chkLive(c).includes(chkCurBy[chkSel]))chkCurBy[chkSel]=null;mapPicked=null;renderCheck()}}
+  const rowsEl=$('#cxrows');
+  const upd=tr=>{const i=tr.querySelector('input.cnt');if(!i)return;const sys=+i.dataset.sys,v=i.value;const d=tr.querySelector('.dif'),s=tr.querySelector('.stc');
+    if(v===''){d.textContent='–';d.className='n dif';s.innerHTML='<span class="stpill pend">Pending</span>';tr.classList.remove('diff');return}
+    const df=Math.max(0,+v||0)-sys;d.textContent=(df>0?'+':'')+fmt(df);d.className='n dif '+(df===0?'ok':'bad');
+    s.innerHTML=df===0?'<span class="stpill ok">OK</span>':df>0?'<span class="stpill bad">Over</span>':'<span class="stpill bad">Short</span>';tr.classList.toggle('diff',df!==0)};
+  const allRows=()=>[...rowsEl.querySelectorAll('tr[data-row]')];allRows().forEach(upd);
+  let dirty=false;rowsEl.addEventListener('input',e=>{if(e.target.matches('input.cnt')){dirty=true;upd(e.target.closest('tr'))}});
+  rowsEl.addEventListener('keydown',e=>{if(e.key==='Enter'&&e.target.matches('input.cnt')){e.preventDefault();const ins=[...rowsEl.querySelectorAll('input.cnt')];const n=ins[ins.indexOf(e.target)+1];if(n)n.focus();else $('#cxsave').focus()}});
+  const addRow=(k,q)=>{const s=sku(k);const tr=document.createElement('tr');tr.dataset.row=k;tr.innerHTML=`<td><span class="code">${esc(k)}</span><div class="small muted">${esc(s?[s.col,s.size].filter(Boolean).join(' · '):'')} · not expected here</div></td><td class="n">0</td><td class="n"><input class="cnt" type="number" inputmode="numeric" min="0" data-k="${esc(k)}" data-sys="0" value="${q}" aria-label="Counted ${esc(k)}"></td><td class="n dif"></td><td class="stc"></td>`;const em=rowsEl.querySelector('.empty');if(em)em.closest('tr').remove();rowsEl.appendChild(tr);upd(tr);dirty=true;return tr};
+  const flash=tr=>{tr.classList.remove('flash');void tr.offsetWidth;tr.classList.add('flash')};
+  const sm=$('#cxscanmsg');
+  $('#cxscan').onkeydown=e=>{if(e.key!=='Enter')return;e.preventDefault();const raw=e.target.value.trim();e.target.value='';sm.textContent='';sm.style.color='';if(!raw)return;
+    const k=Object.keys(st.master).find(x=>x.toLowerCase()===raw.toLowerCase())||raw;
+    let tr=allRows().find(t=>t.dataset.row.toLowerCase()===k.toLowerCase());
+    if(!tr){const okSel=!c.only||chkMatchSku(sku(k),c.filter);if(!okSel||!st.master[k]){sm.style.color='var(--warn)';sm.textContent=!st.master[k]?`"${raw}" is not a known SKU code. Scanning works when the barcode contains the SKU code.`:`${k} is not part of this list (selected SKUs only).`;return}tr=addRow(k,0)}
+    const i=tr.querySelector('input.cnt');i.value=String((+i.value||0)+1);upd(tr);dirty=true;flash(tr);sm.style.color='var(--ok)';sm.textContent=`+1 ${k} → ${i.value}`;};
+  $('#cxman').onclick=()=>{const i=[...rowsEl.querySelectorAll('input.cnt')].find(x=>x.value==='')||rowsEl.querySelector('input.cnt');if(i){i.focus();i.select()}};
+  const xa=$('#cxxadd');if(xa)xa.onclick=()=>{const k=$('#cxxs').value.trim(),q=Math.max(1,+$('#cxxq').value||0);if(!k)return;if(!st.master[k]){sm.style.color='var(--warn)';sm.textContent=`"${k}" is not a known SKU code.`;return}
+    if(c.only&&!chkMatchSku(sku(k),c.filter)){sm.style.color='var(--warn)';sm.textContent=`${k} is not part of this list (selected SKUs only).`;return}
+    const tr=allRows().find(t=>t.dataset.row===k);if(tr){const i=tr.querySelector('input.cnt');i.value=String((+i.value||0)+q);upd(tr);flash(tr);dirty=true}else flash(addRow(k,q));$('#cxxs').value='';$('#cxxq').value=''};
+  const go=(code,force)=>{if(!code)return;if(dirty&&!force){askInline($('#cxsmsg'),'You have counts that are not saved yet. Leave this bin without saving?',()=>go(code,true));return}
+    chkCurBy[chkSel]=code;locQuiet=true;openOnMap(code,true);renderCheck();const cb=$('#curbin');if(cb&&cb.getBoundingClientRect().top<0)cb.scrollIntoView({block:'start'})};
+  const order=chkActive(c),ix=order.indexOf(cur);
+  const nextOpen=()=>{for(let s=1;s<=order.length;s++){const x=order[(ix+s)%order.length];if(!(st.checks[chkSel].results||{})[x]&&!chkSkip.has(x))return x}return null};
+  $('#cxprev').disabled=ix<=0;$('#cxprev').onclick=()=>go(order[ix-1]);
+  $('#cxnext').onclick=()=>go(nextOpen()||order[ix+1]||null);if(!nextOpen()&&ix>=order.length-1)$('#cxnext').disabled=true;
+  $('#cxskip').onclick=()=>{chkSkip.add(cur);go(nextOpen()||order[(ix+1)%order.length],false)};
+  $('#cxnav').onclick=()=>{locQuiet=true;openOnMap(cur,true);ensureMap(false);if(window.innerWidth<1180)$('#mapwrap').scrollIntoView({behavior:'smooth',block:'start'})};
+  const bk=$('#cxback2');if(bk)bk.onclick=()=>{mapPicked=null;go(cur,true)};
+  main.querySelectorAll('[data-go]').forEach(x=>x.onclick=()=>go(x.dataset.go));
+  main.querySelectorAll('[data-bf]').forEach(x=>x.onclick=()=>{chkBF=x.dataset.bf;main.querySelectorAll('[data-bf]').forEach(y=>y.setAttribute('aria-pressed',y===x));$('#cxbins').className='binlist bf-'+chkBF});
+  {const cb=main.querySelector('.binbtn.cur');if(cb){const L=$('#cxbins');L.scrollTop=cb.offsetTop-L.offsetTop-L.clientHeight/2}}
+  $('#cxsave').onclick=async()=>{const cnt={};let miss=false;rowsEl.querySelectorAll('input.cnt').forEach(i=>{if(i.value==='')miss=true;cnt[i.dataset.k]=Math.max(0,+i.value||0)});
+    const smsg=$('#cxsmsg');smsg.style.color='';
+    if(miss){smsg.style.color='var(--warn)';smsg.textContent='Enter a count for every SKU in the bin (enter 0 if none).';setStatus('Enter a count for every SKU in the bin (enter 0 if none).',true);const i=[...rowsEl.querySelectorAll('input.cnt')].find(x=>x.value==='');if(i)i.focus();return}
+    const diff=exp.some(([k,q])=>cnt[k]!==q)||Object.keys(cnt).some(k=>!exp.find(x=>x[0]===k));
+    const sys={};exp.forEach(([k,q])=>sys[k]=q);const res={c:cnt,s:sys,diff,by:me(),at:Date.now()};const id=chkSel,code=cur;
+    $('#cxsave').disabled=true;$('#cxsave').textContent='Saving…';
+    if(await guarded(async()=>{const ref=db.doc('checks/'+id);const snap=await ref.get();const curd=snap.exists?snap.data():c;await ref.set({...curd,results:{...(curd.results||{}),[code]:res}})},`${code} saved`)){
+      st.checks[id]={...st.checks[id],results:{...(st.checks[id].results||{}),[code]:res}};chkSkip.delete(code);dirty=false;renderCheck();
+      const m2=$('#cxsmsg');if(m2){const nx=(()=>{const o=chkActive(st.checks[id]),j=o.indexOf(code);for(let s=1;s<=o.length;s++){const x=o[(j+s)%o.length];if(!(st.checks[id].results||{})[x])return x}return null})();
+        m2.innerHTML=`<div class="savedok">✓ ${esc(code)} saved${diff?' · discrepancy recorded':''}.${nx?` <button class="btn pri" id="cxgonext">Next uncounted: ${esc(nx)} ›</button>`:' All bins in this list are counted.'}</div>`;const gn=$('#cxgonext');if(gn){gn.onclick=()=>go(nx,true);gn.focus()}}}
+    else{const sv=$('#cxsave');if(sv){sv.disabled=false;sv.textContent='Save Count'}}};
 }
+
 
 // ---------- bin capacity: one number per item group ----------
 let capDraft=null,capMsg='',capFilter='';
@@ -1307,12 +1563,12 @@ function renderCap(){main.className='';
 
 // ---------- transfer bin suggestion ----------
 let xSel='';
-let xf={sku:'',size:[],brand:[],kol:[],sepKol:true,grp:[],cat:[],col:'',from:'',rows:[],levels:[],racks:'',order:'size',newRack:true,mix:false,auto:true},xPlan=null,xMsg='';
+let xf={sku:'',size:[],brand:[],kol:[],sepKol:true,grp:[],cat:[],col:'',from:'',rows:[],levels:[],racks:'',order:'size',newRack:true,mix:false,auto:true,excl:[]},xPlan=null,xMsg='';
 function xferPlan(f){
   // 1. stock to move: selected SKUs and where they sit now
   const want={};
   for(const row in st.loc)for(const code in st.loc[row]){const b=BINS.get(code);if(!b)continue;if(f.from&&b.row!==f.from)continue;
-    for(const [k,q] of st.loc[row][code]){const s=sku(k);if(!s||!chkMatchSku(s,f))continue;const w=want[k]=want[k]||{sku:k,s,qty:0,from:[]};w.qty+=q;w.from.push([code,q])}}
+    for(const [k,q] of st.loc[row][code]){const s=sku(k);if(!s||!chkMatchSku(s,f))continue;if(f.excl&&f.excl.includes(k))continue;const w=want[k]=want[k]||{sku:k,s,qty:0,from:[]};w.qty+=q;w.from.push([code,q])}}
   const items=Object.values(want).filter(w=>w.qty>0);
   const kk=s=>f.sepKol?[-(parseInt((s.kol||'X0').slice(1))||0)]:[];
   const key=w=>{const s=w.s;const z=szKey(s.size);return [...kk(s),...(f.order==='size'?[z[0],z[1],s.size,s.ser||'',s.col||'',s.sku]:[s.ser||'',s.col||'',z[0],z[1],s.size,s.sku])]};
@@ -1370,7 +1626,21 @@ function xferFromDoc(id,d,items){const plan=(items||d.plan||[]).map(x=>({sku:x.k
 async function xferLoad(id){const d=st.xfers[id];if(!d)return null;if(d.plan)return xferFromDoc(id,d);const items=[];
   for(let i=0;i<(d.parts||0);i++){const sn=await db.doc('xferparts/'+id+'_'+i).get();if(sn.exists)items.push(...(sn.data().plan||[]))}
   return xferFromDoc(id,d,items)}
-function xferName(f,P){const rows=[...f.rows,...(P.added||[])].join(', ')||f.racks;return chkName({...f,mode:'all'})+' → '+rows}
+// "2-A, 2-B, 2-C" -> "2-A to 2-C" when the rows follow each other
+function rowRange(rows){const s=[...new Set(rows)].sort(natSort);const out=[];let run=[];
+  const nxt=(a,b)=>{const x=a.match(/^(\d+-)([A-Z])$/),y=b.match(/^(\d+-)([A-Z])$/);return x&&y&&x[1]===y[1]&&y[2].charCodeAt(0)===x[2].charCodeAt(0)+1};
+  s.forEach(r=>{if(run.length&&nxt(run[run.length-1],r))run.push(r);else{if(run.length)out.push(run);run=[r]}});if(run.length)out.push(run);
+  return out.map(g=>g.length>2?g[0]+' to '+g[g.length-1]:g.join(', ')).join(', ')}
+function xferName(f,P){const rows=[...f.rows,...(P.added||[])];const fl=floorsOf(P.used||[]);const what=chkName({...f,mode:'all',row:''})+(f.from?' from '+f.from:'');
+  const where=rows.length?(fl&&fl!=='-'?fl+' ':'')+'Row '+rowRange(rows):'Racks '+f.racks;return what+' → '+where+(fArr(f.levels).length?' (L'+fArr(f.levels).join(', L')+')':'')}
+// reference: TRF-DDMMYY-<pcs>-<brand>, e.g. TRF-291026-680-KHTM
+function xferBrand(f,plan){const b=fArr(f&&f.brand);if(b.length)return b.length>2?'MIXED':b.join('/');
+  const src=plan&&plan.length?plan.map(p=>(p.s&&p.s.brand)||(sku(p.sku||p.k)||{}).brand):f?Object.keys(st.master).map(sku).filter(s=>chkMatchSku(s,f)).map(s=>s.brand):[];const s=[...new Set(src.filter(Boolean))];return !s.length?'ALL':s.length>2?'MIXED':s.join('/')}
+function xferRef(ts,qty,brand,skip){const d=new Date(ts||Date.now()),p=n=>String(n).padStart(2,'0');
+  const base=`TRF-${p(d.getDate())}${p(d.getMonth()+1)}${String(d.getFullYear()).slice(2)}-${qty||0}-${String(brand||'ALL').toUpperCase().replace(/\s+/g,'')}`;
+  const taken=new Set(Object.entries(st.xfers||{}).filter(([id])=>id!==skip).map(([,x])=>x.ref).filter(Boolean));let r=base,n=2;while(taken.has(r))r=base+'-'+(n++);return r}
+const xRefOf=(d,id)=>d.ref||xferRef(d.created,d.qty,xferBrand(d.filter),id);
+const xLabel=(d,id)=>`${xRefOf(d,id)} · ${d.name}`;
 // when the chosen rows are not enough, carry on into the next rows on the same floor
 function xferPlanAuto(f){let p=xferPlan(f);p.added=[];if(!p.short||!f.auto||!f.rows.length||f.racks.trim())return p;
   const floorOf=r=>(RACKS.find(x=>x.r===r)||{}).f;const fl=new Set(f.rows.map(floorOf));
@@ -1380,18 +1650,83 @@ function xferPlanAuto(f){let p=xferPlan(f);p.added=[];if(!p.short||!f.auto||!f.r
   let rows=[...f.rows];
   for(const r of cand){rows.push(r);p=xferPlan({...f,rows});p.added=rows.slice(f.rows.length);if(!p.short)break}
   return p}
+let xStep=1,xAct=0,xReason='Reorganise stock',xNotes='',xName='',xCreating=false,xShowAll=false;
+const X_REASONS=['Reorganise stock','Easy-pick layout','Make space','New collection','Consolidate bins','Other'];
+// stock that matches the "stock to move" filter, before any destination is chosen
+function xferItems(f){const want={};
+  for(const row in st.loc)for(const code in st.loc[row]){const b=BINS.get(code);if(!b)continue;if(f.from&&b.row!==f.from)continue;
+    for(const [k,q] of st.loc[row][code]){const s=sku(k);if(!s||!chkMatchSku(s,f))continue;const w=want[k]=want[k]||{sku:k,s,qty:0,from:[]};w.qty+=q;w.from.push([code,q])}}
+  return Object.values(want).filter(w=>w.qty>0).sort((a,b)=>{const x=szKey(a.s.size),y=szKey(b.s.size);return (a.s.kol||'').localeCompare(b.s.kol||'')||x[0]-y[0]||x[1]-y[1]||a.sku.localeCompare(b.sku)})}
+let xPrev=null,xVF='all';
+// check a plan against the stock data now in the system (e.g. after staff uploaded a new report)
+const qtyIn=(c,k)=>{const e=binItems(c).find(x=>x[0]===k);return e?e[1]:0};
+function xferVerify(P){const items=P.plan.filter(p=>p.placed>0).map(p=>{const dests=[...new Set(p.to.map(t=>t[0]))];
+    const base=p.from.filter(([c])=>dests.includes(c)).reduce((a,x)=>a+x[1],0);const have=dests.reduce((a,c)=>a+qtyIn(c,p.sku),0);
+    const state=have>=p.placed?'done':have>base?'part':'todo';
+    const still=p.from.filter(([c])=>!dests.includes(c)).map(([c])=>[c,qtyIn(c,p.sku)]).filter(x=>x[1]>0);
+    return {p,state,have,base,still}});
+  const by=s=>items.filter(x=>x.state===s);const pcsAll=items.reduce((a,x)=>a+x.p.placed,0);
+  const pcsDone=items.reduce((a,x)=>a+Math.max(0,Math.min(x.have,x.p.placed)-x.base),0),pcsNeed=items.reduce((a,x)=>a+x.p.placed-x.base,0);
+  return {items,map:new Map(items.map(x=>[x.p.sku,x])),done:by('done').length,part:by('part').length,todo:by('todo').length,pcsAll,pcsDone,pcsNeed}}
+function xFirstLeft(P){const ok=i=>P.plan[i].from[0]&&P.plan[i].to[0];if(P.saved&&P.saved.status!=='done'){const V=xferVerify(P);const i=P.plan.findIndex((q,j)=>ok(j)&&(V.map.get(q.sku)||{}).state!=='done');if(i>=0)return i}return Math.max(0,P.plan.findIndex((q,j)=>ok(j)))}
+function xShow(p){if(!p||!p.from[0])return;locQuiet=true;openOnMap(p.from[0][0],true);if(MAP&&MAP.frame&&p.to[0]&&VIEW==='3d')MAP.frame(p.from[0][0],p.to[0][0])}
+function xferMapSets(){const P=xPlan;if(!P)return xPrev&&(xPrev.src.length||xPrev.dst.length)?{src:xPrev.src,dst:xPrev.dst,pair:null}:null;
+  if(P._ver&&P._ver.done){const left=P._ver.items.filter(x=>x.state!=='done');const a=P.plan[Math.min(xAct,P.plan.length-1)];return {src:[...new Set(left.flatMap(x=>x.still.map(s=>s[0])))],dst:[...new Set(left.flatMap(x=>x.p.to.map(t=>t[0])))],pair:a&&a.from[0]&&a.to[0]?[a.from[0][0],a.to[0][0]]:null}}
+  const src=[...new Set(P.plan.filter(p=>p.placed).flatMap(p=>p.from.map(x=>x[0])))];
+  const a=P.plan[Math.min(xAct,P.plan.length-1)];const pair=a&&a.from[0]&&a.to[0]?[a.from[0][0],a.to[0][0]]:null;return {src,dst:P.used,pair}}
+const rowsOf=codes=>{const r=[...new Set(codes.map(c=>(BINS.get(c)||{}).row).filter(Boolean))].sort(natSort);return r.length>4?r.slice(0,4).join(', ')+' +'+(r.length-4):r.join(', ')};
+const floorsOf=codes=>{const f=new Set(codes.map(c=>(BINS.get(c)||{}).floor));return [...f].map(x=>x===2?'Level M':'Ground Floor').join(' & ')||'-'};
+function binPath(code){const b=BINS.get(code)||{};const m=String(code).match(/^(.*)-L(\d+)-(\d+)$/);return `${b.floor===2?'Level M':'Ground Floor'} · Row ${b.row||'-'}${m?` · Rack ${m[1]} · L${m[2]}`:''}`}
 function renderXfer(){main.className='';
   const M=Object.keys(st.master).map(sku);const opt=(arr,v,ph)=>`<option value="">${ph}</option>`+arr.map(x=>`<option${x===v?' selected':''}>${esc(x)}</option>`).join('');
   const sizes=[...new Set(M.map(s=>s.size).filter(Boolean))].sort(szSort),brands=[...new Set(M.map(s=>s.brand).filter(Boolean))].sort(),grps=[...new Set(M.map(s=>s.grp).filter(Boolean))].sort();
   const rows=[...new Set(RACKS.map(r=>r.r))].sort(natSort);const maxL=Math.max(...RACKS.filter(r=>!xf.rows.length||xf.rows.includes(r.r)).map(r=>r.l),1);
+  if(!Array.isArray(xf.excl))xf.excl=[];
   const f=xf;const P=xPlan;
   const saved=Object.entries(st.xfers||{}).sort((a,b)=>(b[1].created||0)-(a[1].created||0));
-  const viewing=P&&P.saved;
-  let h=saved.length?`<section class="card"><div class="row"><h2 style="margin-right:auto">Saved suggestions</h2>${viewing?'<button class="btn pri" id="xnew">+ New suggestion</button>':''}</div>
-    <select id="xsel"><option value="">${viewing?'— select —':'Select to look back ('+saved.length+')'}</option>${saved.map(([id,d])=>`<option value="${esc(id)}"${viewing&&viewing.id===id?' selected':''}>${d.status==='done'?'✓ ':'• '}${esc(d.name)} · ${new Date(d.created||0).toLocaleDateString('en-GB')}</option>`).join('')}</select>
-    <p class="small muted" style="margin:0">✓ = moved · • = not moved yet</p></section>`:'';
-  if(!viewing)h+=`<section class="card"><h2>Transfer Bin Suggestion</h2><p class="small muted">Choose the stock to rearrange, then pick the destination rows and levels. The system suggests an easy-to-pick layout.</p>
-    <h3 style="margin:6px 0 0">1. Stock to move</h3>
+  const viewing=P&&P.saved;if(P)xStep=3;else if(xStep===3)xStep=2;
+  if(!P&&!xCreating){
+    const fmtD=ts=>new Date(ts||0).toLocaleString('en-GB',{day:'numeric',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'});
+    const card=([id,d])=>`<button type="button" class="xli${d.status==='done'?' done':''}" data-open="${esc(id)}"><div class="xlt"><span class="code">${esc(xRefOf(d,id))}</span><span class="stpill ${d.status==='done'?'ok':'pend'}">${d.status==='done'?'Moved':'Draft'}</span></div>
+      <div class="xln">${esc(d.name||'')}</div><div class="small muted">${fmt(d.skuN||0)} SKU · ${fmt(d.qty||0)} pcs · ${fmt(d.binN||0)} bins · ${d.status==='done'?'moved '+fmtD(d.doneAt)+' by '+esc(nm(d.doneBy)):'saved '+fmtD(d.created)+' by '+esc(nm(d.by))}</div></button>`;
+    const drafts=saved.filter(([,d])=>d.status!=='done'),done=saved.filter(([,d])=>d.status==='done');
+    main.innerHTML=`<section class="card xhead"><div class="sechd"><h2 class="ih">${ICON.swap}Transfer Bin</h2><button class="btn pri" id="xnew">+ New Transfer</button></div>
+      <p class="small muted" style="margin:0">Plan a stock transfer, print the move list, then confirm it when the stock has been moved.</p>${xMsg?`<div class="small xmsg">${esc(xMsg)}</div>`:''}</section>
+      <section class="card"><div class="sechd"><h2 class="ih">${ICON.used}Drafts – not moved yet</h2><span class="small muted">${drafts.length}</span></div>
+        ${drafts.length?`<div class="xlist">${drafts.map(card).join('')}</div>`:'<p class="empty">No drafts. Press <b>+ New Transfer</b> to plan one.</p>'}</section>
+      <section class="card"><div class="sechd"><h2 class="ih">${ICON.ok}Completed</h2><span class="small muted">${done.length}</span></div>
+        ${done.length?`<div class="xlist">${done.slice(0,xShowAll?done.length:10).map(card).join('')}</div>${done.length>10?`<button class="linkbtn" id="xmore">${xShowAll?'Show less':'Show all '+done.length}</button>`:''}`:'<p class="empty">No completed transfers yet.</p>'}</section>`;
+    if(xPrev){xPrev=null;ensureMap(false)}
+    $('#xnew').onclick=()=>{xCreating=true;xPlan=null;xStep=1;xAct=0;xName='';xMsg='';render();window.scrollTo(0,0)};
+    const mo=$('#xmore');if(mo)mo.onclick=()=>{xShowAll=!xShowAll;renderXfer()};
+    main.querySelectorAll('[data-open]').forEach(b=>b.onclick=async()=>{const id=b.dataset.open;setStatus('Loading transfer…');let p=null;try{p=await xferLoad(id)}catch(e){}if(!p){setStatus('The transfer could not be opened.',true);return}setStatus('✓ Transfer opened');xPlan=p;xMsg='';xVF='all';xAct=xFirstLeft(p);xShow(p.plan[xAct]);render();window.scrollTo(0,0)});
+    return}
+  const hasStock=skuFilterOn(f)||!!f.from;
+  const items=hasStock?xferItems(f):[];const selItems=items.filter(w=>!f.excl.includes(w.sku));
+  const selQty=selItems.reduce((a,w)=>a+w.qty,0);
+  const est=xStep===2&&hasStock&&(f.rows.length||f.racks.trim())&&selItems.length?xferPlanAuto(f):null;
+  const stepH=[[1,'Select Items'],[2,'Choose Destination'],[3,'Review & Confirm']].map(([n,l])=>`<button type="button" class="stp${xStep===n?' on':''}${xStep>n?' done':''}" data-step="${n}"${n<xStep&&!viewing?'':' disabled'}><b>${xStep>n?'✓':n}</b><span>${l}</span></button>`).join('<i class="stpl"></i>');
+  let h=`<section class="card xhead"><div class="sechd"><h2 class="ih">${ICON.swap}${viewing?esc(xRefOf(viewing,viewing.id)):'New Transfer'}</h2><button class="btn sm" id="xback">← All transfers</button></div>
+    <div class="stepper">${stepH}</div>
+    
+    ${xMsg?`<div class="small xmsg">${esc(xMsg)}</div>`:''}</section>`;
+  // source / destination cards
+  const srcBins=P?[...new Set(P.plan.filter(p=>p.placed).flatMap(p=>p.from.map(x=>x[0])))]:[...new Set(selItems.flatMap(w=>w.from.map(x=>x[0])))];
+  const skuN=P?P.plan.length:selItems.length,units=P?P.qty:selQty;
+  const D=P||est;const dstBins=D?D.used:[];
+  const capFree=D&&D.dest&&Array.isArray(D.dest)?D.dest.reduce((a,c)=>a+Math.max(0,binCap(c)-binQty(c)),0):null;
+  const destRows=[...f.rows,...((D&&D.added)||[])];
+  const sv=P&&P.saved;const svF=sv?sv.filter||{}:f;
+  const locCards=`<div class="xlocs"><div class="xloc src"><div class="xlh"><span>Source location</span>${srcBins.length?'<em>Selected</em>':''}</div>
+      <div class="xlm">${ICON.box}<b>${srcBins.length===1?esc(srcBins[0]):srcBins.length?fmt(srcBins.length)+' bins':'–'}</b></div>
+      <div class="xls">${srcBins.length===1?esc(binPath(srcBins[0])):srcBins.length?`${esc(floorsOf(srcBins))} · Row ${esc(rowsOf(srcBins))}`:'Choose the stock to move'}</div>
+      <div class="xlf"><span>${fmt(skuN)} SKU${skuN===1?'':'s'}</span><span>${fmt(units)} pcs</span></div></div>
+    <div class="xloc dst"><div class="xlh"><span>Destination location</span>${D?(D.short?'<em class="bad">Short</em>':'<em>Available</em>'):''}</div>
+      <div class="xlm">${ICON.box}<b>${dstBins.length===1?esc(dstBins[0]):dstBins.length?fmt(dstBins.length)+' bins':(destRows.length||svF.racks?'Row '+esc((destRows.length?destRows:[svF.racks]).join(', ')):'–')}</b></div>
+      <div class="xls">${dstBins.length?`${esc(floorsOf(dstBins))} · Row ${esc(rowsOf(dstBins))}${fArr(svF.levels).length?' · L'+fArr(svF.levels).join(', L'):''}`:'Choose destination rows'}</div>
+      <div class="xlf">${D?`<span>${fmt(D.used.length)} needed / ${fmt(D.dest.length)} free bins</span>${capFree!==null?`<span>${fmt(capFree)} pcs space</span>`:''}`:'<span>Capacity follows Bin Capacity</span>'}</div></div></div>`;
+  if(xStep===1){
+    h+=`<section class="card"><h2 class="ih">${ICON.search}Stock to move</h2>
     <div class="fgrid">
       <label for="xs">SKU / name</label><input id="xs" list="skus" value="${esc(f.sku)}" placeholder="e.g. PTX2TBD or Teluk Belanga" autocomplete="off">
       <span>Brand</span>${multiPick('brand',brands,f.brand,'All brands')}
@@ -1401,74 +1736,125 @@ function renderXfer(){main.className='';
       <span>Size</span>${multiChips('size',sizes,f.size)}
       <label for="xw">Colour</label><input id="xw" value="${esc(f.col)}" placeholder="e.g. Brick Red" autocomplete="off">
       <label for="xfr">Currently in row</label><select id="xfr">${opt(rows,f.from,'All rows')}</select>
-    </div>
-    <h3 style="margin:10px 0 0">2. Destination</h3>
-    <div class="small muted">Rows (you can pick more than one)</div>
-    <div class="chips2">${rows.map(r=>`<button class="chip2" data-xrow="${esc(r)}" aria-pressed="${f.rows.includes(r)}">${esc(r)}</button>`).join('')}</div>
-    <div class="small muted" style="margin-top:6px">Levels (leave empty for all)</div>
-    <div class="chips2">${Array.from({length:maxL},(_,i)=>i+1).map(l=>`<button class="chip2" data-xlv="${l}" aria-pressed="${f.levels.includes(l)}">L${l}</button>`).join('')}</div>
-    <div class="fgrid"><label for="xr">Specific racks</label><input id="xr" value="${esc(f.racks)}" placeholder="optional, e.g. 1-G1, 1-G2" autocomplete="off"></div>
-    <h3 style="margin:10px 0 0">3. Arrangement</h3>
-    <div class="fgrid"><label for="xo">Sort by</label><select id="xo"><option value="size"${f.order==='size'?' selected':''}>Size first, then series and colour</option><option value="ser"${f.order==='ser'?' selected':''}>Series and colour first, then size</option></select></div>
-    <label class="row small"><input type="checkbox" id="xk2"${f.sepKol?' checked':''}> Separate by collection (newest first, e.g. X4 → X3 → X2)</label>
-    <label class="row small"><input type="checkbox" id="xn"${f.newRack?' checked':''}> Start ${f.order==='size'? 'each size':'each series/colour'} on a new rack</label>
-    <label class="row small"><input type="checkbox" id="xa"${f.auto?' checked':''}> If bins run out, continue into the next row automatically</label>
-    <label class="row small"><input type="checkbox" id="xm"${f.mix?' checked':''}> Let SKUs of the ${f.order==='size'?'same size':'same series/colour'} share a bin that is not yet full</label>
-    <div class="row"><button class="btn pri" id="xgo">Suggest layout</button>${P?'<button class="btn" id="xclr">Clear</button>':''}</div>
-    <div id="xmsg" class="small">${esc(xMsg)}</div></section>`;
-  else if(xMsg)h+=`<section class="card"><div class="small">${esc(xMsg)}</div></section>`;
-  if(P){const placedAll=P.plan.every(p=>p.placed===p.qty);
-    const sv=P.saved;
-    h+=`<section class="card"><div class="pickhd"><h2>${sv?esc(sv.name):'Suggestion'}</h2>${sv?(sv.status==='done'?'<span class="badge2" style="background:color-mix(in srgb,var(--ok) 22%,transparent);color:var(--ok)">Moved</span>':'<span class="badge2" style="background:color-mix(in srgb,var(--warn) 22%,transparent);color:var(--warn)">Not moved yet</span>'):''}</div>
-      ${sv?`<p class="small muted" style="margin:0">Saved by ${esc(nm(sv.by))} · ${new Date(sv.created||0).toLocaleString('en-GB')}${sv.status==='done'?` · moved by ${esc(sv.doneBy||'-')} · ${new Date(sv.doneAt||0).toLocaleString('en-GB')}`:''}</p>`:''}
-      <div class="stats"><div class="stat"><b>${fmt(P.plan.length)}</b><span>SKU</span></div><div class="stat"><b>${fmt(P.qty)}</b><span>Pcs</span></div><div class="stat"><b>${fmt(P.used.length)}</b><span>Bins needed</span></div><div class="stat"><b>${fmt(P.dest.length)}</b><span>Destination bins available</span></div></div>
-      ${P.added&&P.added.length?`<p class="small" style="color:var(--warn)">The chosen rows were not enough, so the system continued into: <b>${P.added.map(esc).join(', ')}</b>.</p>`:''}
-      ${P.short?`<p class="small" style="color:var(--bad)">Not enough bins: ${fmt(P.short)} pcs could not be placed. Add destination rows or levels.</p>`:''}
-      <p class="small muted">Destination bins are marked purple on the map. Click a bin code to see it on the map.</p>
-      <div class="tbl"><table><thead><tr><th>SKU</th><th>From</th><th>To</th></tr></thead><tbody>
-      ${P.plan.map(p=>`<tr><td><span class="code">${esc(p.sku)}</span><div class="small muted">${p.s.kol?esc(p.s.kol)+' · ':''}${esc(p.s.size)} · ${esc(p.s.col||'')} · ${fmt(p.qty)} pcs</div></td>
-        <td class="small">${p.from.map(([c,q])=>`<a href="#" data-xbin="${esc(c)}" style="color:var(--fg)">${esc(c)}</a> (${q})`).join('<br>')}</td>
-        <td class="small">${p.to.map(([c,q])=>`<a href="#" data-xbin="${esc(c)}" style="color:var(--accent)">${esc(c)}</a> (${q})`).join('<br>')||'<span style="color:var(--bad)">no bin</span>'}</td></tr>`).join('')}
+    </div></section>
+    <section class="card"><div class="sechd"><h2 class="ih">${ICON.used}Items to Transfer</h2><span class="small muted">${hasStock?`${fmt(items.length)} SKU found`:''}</span></div>
+    ${!hasStock?'<p class="empty">Choose at least one filter above (SKU, brand, item group, category, size, colour or current row) to list the stock.</p>':!items.length?'<p class="empty">No stock in rack bins matches the selection.</p>':`
+      <div class="tbl xitems"><table><thead><tr><th><input type="checkbox" id="xall"${f.excl.length?'':' checked'} aria-label="Select all"></th><th>No.</th><th>SKU</th><th>Size / Colour</th><th class="n">Available</th><th class="n">Bins</th></tr></thead><tbody>
+      ${items.slice(0,300).map((w,i)=>`<tr class="${f.excl.includes(w.sku)?'off':''}"><td><input type="checkbox" data-xi="${esc(w.sku)}"${f.excl.includes(w.sku)?'':' checked'} aria-label="Include ${esc(w.sku)}"></td><td class="muted">${i+1}</td><td><span class="code">${esc(w.sku)}</span>${w.s.kol?`<span class="pill" style="margin-left:4px">${esc(w.s.kol)}</span>`:''}</td><td class="small">${esc(w.s.size||'-')} / ${esc(w.s.col||'-')}</td><td class="n">${fmt(w.qty)}</td><td class="n">${w.from.length}</td></tr>`).join('')}
+      </tbody></table></div>${items.length>300?`<p class="small muted">Showing the first 300 of ${fmt(items.length)} SKUs. All selected SKUs are included in the plan.</p>`:''}
+      <div class="xtot"><span>Total selected: <b>${fmt(selItems.length)} SKU</b></span><span>Transfer qty: <b>${fmt(selQty)} pcs</b></span></div>
+      <p class="small muted" style="margin:0">The full quantity of each SKU is moved from all its bins. Untick an SKU to leave it where it is.</p>`}
+    </section>
+    <div class="xbar"><button class="btn" id="xclr">Clear Selection</button><span class="sp"></span><button class="btn pri" id="xnext"${selItems.length?'':' disabled'}>Choose Destination →</button></div>`;
+  }else if(xStep===2){
+    h+=`<section class="card">${locCards}
+      ${est?`${est.added&&est.added.length?`<p class="small" style="color:var(--warn);margin:0">The chosen rows are not enough. The plan continues into <b>${est.added.map(esc).join(', ')}</b>.</p>`:''}${est.short?`<p class="small" style="color:#ff8a8a;margin:0">Not enough bins: ${fmt(est.short)} pcs cannot be placed. Add rows or levels.</p>`:'<p class="small" style="color:var(--ok);margin:0">✓ Enough suitable bins for all selected stock.</p>'}`:''}
+      <p class="small muted" style="margin:0">Suitable bins are empty, or hold only stock that is moving anyway. Bin capacity follows the Bin Capacity tab.</p></section>
+    <section class="card"><h2 class="ih">${ICON.pin}Choose Destination</h2>
+      <div class="small muted">Rows (you can pick more than one)</div>
+      <div class="chips2">${rows.map(r=>`<button class="chip2" data-xrow="${esc(r)}" aria-pressed="${f.rows.includes(r)}">${esc(r)}</button>`).join('')}</div>
+      <div class="small muted" style="margin-top:6px">Levels (leave empty for all)</div>
+      <div class="chips2">${Array.from({length:maxL},(_,i)=>i+1).map(l=>`<button class="chip2" data-xlv="${l}" aria-pressed="${f.levels.includes(l)}">L${l}</button>`).join('')}</div>
+      <div class="fgrid"><label for="xr">Specific racks</label><input id="xr" value="${esc(f.racks)}" placeholder="optional, e.g. 1-G1, 1-G2" autocomplete="off"></div>
+      <h3 style="margin:8px 0 0">Arrangement</h3>
+      <div class="fgrid"><label for="xo">Sort by</label><select id="xo"><option value="size"${f.order==='size'?' selected':''}>Size first, then series and colour</option><option value="ser"${f.order==='ser'?' selected':''}>Series and colour first, then size</option></select></div>
+      <label class="row small"><input type="checkbox" id="xk2"${f.sepKol?' checked':''}> Separate by collection (newest first, e.g. X4 → X3 → X2)</label>
+      <label class="row small"><input type="checkbox" id="xn"${f.newRack?' checked':''}> Start ${f.order==='size'? 'each size':'each series/colour'} on a new rack</label>
+      <label class="row small"><input type="checkbox" id="xa"${f.auto?' checked':''}> If bins run out, continue into the next row automatically</label>
+      <label class="row small"><input type="checkbox" id="xm"${f.mix?' checked':''}> Let SKUs of the ${f.order==='size'?'same size':'same series/colour'} share a bin that is not yet full</label>
+    </section>
+    <div class="xbar"><button class="btn" id="xprev">← Previous</button><button class="linkbtn" id="xclr" style="color:var(--muted);padding:0 6px">Clear</button><span class="sp"></span><button class="btn pri" id="xgo">Review Transfer →</button></div>`;
+  }else{
+    const a=P.plan[Math.min(xAct,P.plan.length-1)]||P.plan[0];
+    const V=sv&&sv.status!=='done'?xferVerify(P):null;P._ver=V;const allDone=V&&V.items.length&&V.done===V.items.length;
+    const vpct=V&&V.pcsNeed?Math.min(100,V.pcsDone/V.pcsNeed*100):0;const synced=($('#synct')||{}).textContent||'';
+    const vst=p=>{const x=V&&V.map.get(p.sku);return x?x.state:null};
+    const VL={done:['ok','Done'],part:['warn','Partly moved'],todo:['bad','Not moved']};
+    const stale=P.plan.filter(p=>p.placed===p.qty).reduce((n,p)=>n+p.from.filter(([c,q])=>{const e=binItems(c).find(x=>x[0]===p.sku);return !e||e[1]<q}).length,0);
+    h+=`<section class="card">${locCards}
+      ${sv?`<div class="xsv"><div class="row" style="gap:8px"><span class="stpill ${sv.status==='done'?'ok':'pend'}">${sv.status==='done'?'Moved':'Draft – not moved yet'}</span><span class="code">${esc(xRefOf(sv,sv.id))}</span></div>
+        <div class="row xnm" id="xnmrow"><b class="grow">${esc(sv.name)}</b><button class="linkbtn" id="xren">Rename</button></div>
+        <div class="small muted">Saved by ${esc(nm(sv.by))}, ${new Date(sv.created||0).toLocaleString('en-GB')}${sv.status==='done'?` · moved by ${esc(nm(sv.doneBy))}, ${new Date(sv.doneAt||0).toLocaleString('en-GB')}`:''}</div></div>`:''}
+      ${P.added&&P.added.length?`<p class="small" style="color:var(--warn);margin:0">The chosen rows were not enough, so the plan continues into <b>${P.added.map(esc).join(', ')}</b>.</p>`:''}
+      ${P.short?`<p class="small" style="color:#ff8a8a;margin:0">Not enough bins: ${fmt(P.short)} pcs could not be placed. SKUs without a destination will not be changed.</p>`:''}
+      ${stale&&!V?`<p class="small" style="color:var(--warn);margin:0">${stale} source bins no longer match current stock (it changed after this plan was made).</p>`:''}</section>
+    ${V?`<section class="card xver ${allDone?'ok':''}"><div class="sechd"><h2 class="ih">${ICON.ok}Transfer Progress</h2><span class="small muted">checked against stock data${synced?' synced '+esc(synced):''}</span></div>
+      <div class="xvk"><div><b style="color:var(--ok)">${fmt(V.done)}</b><span>Done</span></div><div><b style="color:var(--warn)">${fmt(V.part)}</b><span>Partly moved</span></div><div><b style="color:#ff8a8a">${fmt(V.todo)}</b><span>Not moved</span></div><div><b>${vpct.toFixed(0)}%</b><span>${fmt(V.pcsDone)} / ${fmt(V.pcsNeed)} pcs</span></div></div>
+      <div class="captr"><span style="width:${vpct.toFixed(2)}%;background:linear-gradient(90deg,var(--ok),var(--accent))"></span></div>
+      ${allDone?'<p class="small" style="margin:0;color:var(--ok)">✓ Every SKU is now in its destination bin according to the latest upload. You can mark this transfer as completed.</p>':`<p class="small muted" style="margin:0">After staff move the stock, upload the new Inventory report in <b>Upload Stock</b>. This list then updates by itself. Use the <b>Not done</b> filter below to see which bins are left. The map shows only the remaining bins.</p>`}</section>`:''}
+    ${a?`<section class="card xact"><div class="small muted">Selected item · shown on the map</div><div class="xactm"><span class="code">${esc(a.sku)}</span><span class="small">${esc(a.s.size||'')} · ${esc(a.s.col||'')} · ${fmt(a.qty)} pcs</span></div>
+      <div class="xroute"><div><span class="lbl s">From</span>${a.from.map(([c,q])=>`<span class="nw"><a href="#" data-xbin="${esc(c)}">${esc(c)}</a> <small>(${q})</small></span>`).join(' ')}</div><div class="arrow">→</div><div><span class="lbl d">To</span>${a.to.map(([c,q])=>`<span class="nw"><a href="#" data-xbin="${esc(c)}">${esc(c)}</a> <small>(${q})</small></span>`).join(' ')||'<span style="color:#ff8a8a">no bin</span>'}</div></div></section>`:''}
+    <section class="card"><div class="sechd"><h2 class="ih">${ICON.used}Items to Transfer</h2>${V?`<span class="seg sm" role="group" aria-label="Filter">${[['all','All'],['left','Not done ('+(V.part+V.todo)+')'],['done','Done']].map(([k,l])=>`<button data-xvf="${k}" aria-pressed="${xVF===k}">${l}</button>`).join('')}</span>`:'<span class="small muted">click a row to show it on the map</span>'}</div>
+      <div class="tbl xplan"><table><thead><tr><th>SKU</th><th>From</th><th>To</th></tr></thead><tbody>
+      ${P.plan.map((p,i)=>{const s=vst(p);if(V&&xVF!=='all'&&s&&((xVF==='done')!==(s==='done')))return '';const vx=V&&V.map.get(p.sku);return `<tr data-xa="${i}" class="${i===xAct?'on':''}${s?' v'+s:''}"><td><span class="code">${esc(p.sku)}</span>${s?` <span class="stpill ${VL[s][0]}">${VL[s][1]}</span>`:''}<div class="small muted">${i+1}. ${p.s.kol?esc(p.s.kol)+' · ':''}${esc(p.s.size||'')} · ${esc(p.s.col||'')} · <b style="color:var(--fg)">${fmt(p.qty)} pcs</b></div></td>
+        <td class="small">${p.from.map(([c,q])=>{const left=vx&&vx.still.find(x=>x[0]===c);return `<span class="nw${left?' left':''}">${esc(c)} <span class="muted">(${q})</span>${left?` <span class="lefttag" title="Still in this bin">still ${left[1]}</span>`:''}</span>`}).join('<br>')}</td>
+        <td class="small to">${p.to.map(([c,q])=>{const ok=vx&&qtyIn(c,p.sku)>=q;return `<span class="nw">${vx?(ok?'✓ ':'○ '):''}${esc(c)} <span class="muted">(${q})</span></span>`}).join('<br>')||'<span style="color:#ff8a8a">no bin</span>'}</td></tr>`}).join('')}
       </tbody></table></div>
-      <div class="row">${sv?'':'<button class="btn pri" id="xsave">Save suggestion</button>'}<button class="btn${sv?' pri':''}" id="xxls">Download Excel to print</button></div><div id="xxmsg" class="small"></div>
-      <div class="row">${sv&&sv.status==='done'?'':`<button class="btn ok" id="xapply"${P.plan.some(p=>p.placed)?'':' disabled'}>All moved – update locations</button>`}${sv?'<button class="btn" id="xdel">Delete suggestion</button>':''}</div><div id="xamsg" class="small"></div>
-      ${placedAll?'':'<p class="small muted">SKUs without a destination bin will not be changed.</p>'}</section>`}
-  main.innerHTML=h+skuOptions();
-  const xs=$('#xsel');if(xs)xs.onchange=async()=>{const id=xs.value;if(!id){xPlan=null;render();return}setStatus('Loading suggestion…');let p=null;try{p=await xferLoad(id)}catch(e){}if(!p){setStatus('The suggestion could not be opened.',true);return}setStatus('✓ Suggestion opened');xPlan=p;xMsg='';locQuiet=true;const first=xPlan.used[0];if(first)openOnMap(first,true);render()};
-  const xn=$('#xnew');if(xn)xn.onclick=()=>{xPlan=null;xMsg='';render()};
-  if(!viewing){
-  const upd=(k,v)=>{xf[k]=v;xPlan=null;xMsg='';renderXfer()};
-  bindMulti(main,xf,()=>{xPlan=null;xMsg='';renderXfer()});
-  [['xfr','from'],['xo','order']].forEach(([id,k])=>$('#'+id).onchange=e=>upd(k,e.target.value));
-  [['xs','sku'],['xw','col'],['xr','racks']].forEach(([id,k])=>$('#'+id).onchange=e=>upd(k,e.target.value.trim()));
-  $('#xn').onchange=e=>upd('newRack',e.target.checked);$('#xa').onchange=e=>upd('auto',e.target.checked);$('#xk2').onchange=e=>upd('sepKol',e.target.checked);$('#xm').onchange=e=>upd('mix',e.target.checked);
-  main.querySelectorAll('[data-xrow]').forEach(b=>b.onclick=()=>{const r=b.dataset.xrow;upd('rows',f.rows.includes(r)?f.rows.filter(x=>x!==r):[...f.rows,r])});
-  main.querySelectorAll('[data-xlv]').forEach(b=>b.onclick=()=>{const l=+b.dataset.xlv;upd('levels',f.levels.includes(l)?f.levels.filter(x=>x!==l):[...f.levels,l].sort((a,b)=>a-b))});
-  $('#xgo').onclick=()=>{if(!skuFilterOn(f)&&!f.from){xMsg='Choose at least one: SKU, brand, item group, category, size, colour or source row.';renderXfer();return}
-    if(!f.rows.length&&!f.racks){xMsg='Choose destination rows or specific racks.';renderXfer();return}
-    const p=xferPlanAuto(f);if(!p.plan.length){xMsg='No stock in bins matches the selection.';xPlan=null;renderXfer();return}
-    xPlan=p;xMsg='';mapHL=[];locQuiet=true;const first=p.used[0];if(first)openOnMap(first,true);render()};
-  const xc=$('#xclr');if(xc)xc.onclick=()=>{xPlan=null;xMsg='';render()};
+      <div class="xtot"><span>Total: <b>${fmt(P.plan.length)} SKU</b> · <b>${fmt(P.used.length)} destination bins</b></span><span>Transfer qty: <b>${fmt(P.qty)} pcs</b></span></div></section>
+    ${sv?'':`<section class="card"><label for="xname" class="small muted">Transfer name</label><input id="xname" value="${esc(xName||xferName(f,P))}" maxlength="120" style="width:100%"><div class="small muted">Reference <span class="code">${esc(xferRef(Date.now(),P.qty,xferBrand(f,P.plan)))}</span> is added automatically when you save.</div></section>`}
+    <section class="card"><div class="xrn"><div><label for="xrs" class="small muted">Transfer reason</label>${sv?`<div class="xro">${esc(sv.reason||'-')}</div>`:`<select id="xrs">${X_REASONS.map(r=>`<option${r===xReason?' selected':''}>${esc(r)}</option>`).join('')}</select>`}</div>
+      <div><label for="xnt" class="small muted">Notes (optional)</label>${sv?`<div class="xro">${esc(sv.notes||'-')}</div>`:`<textarea id="xnt" rows="2" placeholder="Add any additional notes…">${esc(xNotes)}</textarea>`}</div></div></section>
+    <div class="row xbar2"><button class="btn" id="xclr">Clear Selection</button>${sv?'':'<button class="btn" id="xsave">Save Draft</button>'}<button class="btn" id="xxls">Download Excel</button>${V&&!allDone&&V.done?'<button class="btn" id="xxlsl">Excel – remaining only</button>':''}${sv?'<button class="btn" id="xdel">Delete</button>':''}</div>
+    <div class="xbar">${sv?'':'<button class="btn" id="xprev">← Previous</button>'}<span class="sp"></span>${allDone?'<button class="btn pri" id="xmark">Mark as Completed ✓</button>':sv&&sv.status==='done'?'<span class="small muted">This transfer is already confirmed.</span>':`<button class="btn pri" id="xapply"${P.plan.some(p=>p.placed)?'':' disabled'}>Confirm Transfer ✓</button>`}</div>
+    <div id="xxmsg" class="small"></div><div id="xamsg" class="small"></div>`;
   }
-  main.querySelectorAll('[data-xbin]').forEach(a=>a.onclick=e=>{e.preventDefault();locQuiet=true;openOnMap(a.dataset.xbin)});
-  const xx=$('#xxls');if(xx)xx.onclick=()=>xferExcel(P,P.saved?P.saved.filter:f,$('#xxmsg'));
-  const saveDoc=async(status)=>{const {meta,parts}=xferToDoc(P,f,xferName(f,P),status);if(status==='done'){meta.doneAt=Date.now();meta.doneBy=me()}
-    const id='x'+Date.now().toString(36);
-    const ok=await guarded(async()=>{for(let i=0;i<parts.length;i++)await db.doc('xferparts/'+id+'_'+i).set({plan:parts[i]});await db.doc('xfers/'+id).set(meta)},status==='done'?'Suggestion saved as a record':'Saved suggestions');
-    return ok?[id,meta,parts.flat()]:null};
-  const xsv=$('#xsave');if(xsv)xsv.onclick=async()=>{const r=await saveDoc('draft');if(r){st.xfers[r[0]]=r[1];xPlan=xferFromDoc(r[0],r[1],r[2]);render()}};
-  const xd=$('#xdel');if(xd)xd.onclick=()=>askInline($('#xamsg'),'Delete this suggestion? Stock locations will not change.',async()=>{const id=P.saved.id;const n=P.saved.parts||0;if(await guarded(async()=>{await db.doc('xfers/'+id).delete();for(let i=0;i<n;i++)await db.doc('xferparts/'+id+'_'+i).delete()},'Suggestion deleted')){delete st.xfers[id];xPlan=null;render()}});
-  const stale=!P?0:P.plan.filter(p=>p.placed===p.qty).reduce((n,p)=>n+p.from.filter(([c,q])=>{const e=binItems(c).find(x=>x[0]===p.sku);return !e||e[1]<q}).length,0);
-  const ap=$('#xapply');if(ap)ap.onclick=()=>askInline($('#xamsg'),`Update locations for ${P.plan.filter(p=>p.placed===p.qty).length} SKUs? Make sure the stock has actually been moved.${stale?`\n\n Note: ${stale} source bins no longer match current stock (it may have changed since the suggestion was made).`:''}`,async()=>{
-    const changes={};const cur=c=>changes[c]||(changes[c]=binItems(c).map(x=>[...x]));
-    const done=P.plan.filter(p=>p.placed===p.qty);
-    done.forEach(p=>p.from.forEach(([c])=>{changes[c]=cur(c).filter(([k])=>k!==p.sku)}));
-    done.forEach(p=>p.to.forEach(([c,q])=>{const arr=cur(c);const e=arr.find(x=>x[0]===p.sku);if(e)e[1]+=q;else arr.push([p.sku,q])}));
-    QUIET++;let okA=false;try{okA=await guarded(()=>saveBins(changes),'Locations updated')}finally{QUIET--}
-    if(okA){
-      if(P.saved){const id=P.saved.id;const upd2={...st.xfers[id],status:'done',doneAt:Date.now(),doneBy:me()};delete upd2.id;await guarded(()=>db.doc('xfers/'+id).set(upd2),'Record updated');st.xfers[id]=upd2}
-      else{const r=await saveDoc('done');if(r)st.xfers[r[0]]=r[1]}
-      xPlan=null;xMsg=`✓ ${done.length} SKUs moved and locations updated. A record is kept in "Saved suggestions".`;render()}});
+  main.innerHTML=h+skuOptions();
+  if(xStep===3)ensureMap(false);
+  {const np=xStep<3?{src:srcBins,dst:est?est.used:[]}:null;const k=np?np.src.length+'|'+np.dst.length+'|'+np.src[0]+'|'+np.dst[0]:'';if(k!==(xPrev?xPrev.k:'')){xPrev=np?{...np,k}:null;ensureMap(false)}}
+  // ---- events ----
+  const goStep=n=>{xStep=n;xMsg='';render();window.scrollTo(0,0)};
+  main.querySelectorAll('[data-step]').forEach(b=>b.onclick=()=>{const n=+b.dataset.step;if(n<xStep){if(xStep===3&&!viewing){xPlan=null}goStep(n)}});
+  $('#xback').onclick=()=>{xPlan=null;xCreating=false;xMsg='';xStep=1;xAct=0;xName='';render();window.scrollTo(0,0)};
+  // saved transfers open from the list view
+  const clr=$('#xclr');if(clr)clr.onclick=()=>{xf={sku:'',size:[],brand:[],kol:[],sepKol:true,grp:[],cat:[],col:'',from:'',rows:[],levels:[],racks:'',order:'size',newRack:true,mix:false,auto:true,excl:[]};xPlan=null;xMsg='';xStep=1;xAct=0;xNotes='';render()};
+  const upd=(k,v)=>{xf[k]=v;xPlan=null;xMsg='';renderXfer()};
+  if(xStep===1){
+    bindMulti(main,xf,()=>{xPlan=null;xMsg='';renderXfer()});
+    $('#xfr').onchange=e=>upd('from',e.target.value);
+    [['xs','sku'],['xw','col']].forEach(([id,k])=>$('#'+id).onchange=e=>upd(k,e.target.value.trim()));
+    const all=$('#xall');if(all)all.onchange=()=>upd('excl',all.checked?[]:items.map(w=>w.sku));
+    main.querySelectorAll('[data-xi]').forEach(c=>c.onchange=()=>{const k=c.dataset.xi;upd('excl',c.checked?f.excl.filter(x=>x!==k):[...f.excl,k])});
+    $('#xnext').onclick=()=>{if(!selItems.length){xMsg='Select at least one SKU to transfer.';renderXfer();return}goStep(2)};
+  }else if(xStep===2){
+    $('#xo').onchange=e=>upd('order',e.target.value);$('#xr').onchange=e=>upd('racks',e.target.value.trim());
+    $('#xn').onchange=e=>upd('newRack',e.target.checked);$('#xa').onchange=e=>upd('auto',e.target.checked);$('#xk2').onchange=e=>upd('sepKol',e.target.checked);$('#xm').onchange=e=>upd('mix',e.target.checked);
+    main.querySelectorAll('[data-xrow]').forEach(b=>b.onclick=()=>{const r=b.dataset.xrow;upd('rows',f.rows.includes(r)?f.rows.filter(x=>x!==r):[...f.rows,r])});
+    main.querySelectorAll('[data-xlv]').forEach(b=>b.onclick=()=>{const l=+b.dataset.xlv;upd('levels',f.levels.includes(l)?f.levels.filter(x=>x!==l):[...f.levels,l].sort((a,b)=>a-b))});
+    $('#xprev').onclick=()=>goStep(1);
+    $('#xgo').onclick=()=>{if(!hasStock||!selItems.length){xMsg='Choose the stock to move first.';goStep(1);return}
+      if(!f.rows.length&&!f.racks){xMsg='Choose destination rows or specific racks.';renderXfer();return}
+      const p=xferPlanAuto(f);if(!p.plan.length){xMsg='No stock in bins matches the selection.';xPlan=null;renderXfer();return}
+      xPlan=p;xAct=Math.max(0,p.plan.findIndex(q=>q.from[0]&&q.to[0]));xMsg='';mapHL=[];xShow(p.plan[xAct]);render();window.scrollTo(0,0)};
+  }else{
+    const rs=$('#xrs');if(rs)rs.onchange=()=>{xReason=rs.value};const xnI=$('#xname');if(xnI)xnI.oninput=()=>{xName=xnI.value};
+    const rn=$('#xren');if(rn)rn.onclick=()=>{const row=$('#xnmrow');row.innerHTML=`<input id="xrenI" class="grow" maxlength="120" value="${esc(P.saved.name)}"><button class="btn sm pri" id="xrenOk">Save</button><button class="btn sm" id="xrenX">Cancel</button>`;const ip=$('#xrenI');ip.focus();ip.select();
+      $('#xrenX').onclick=()=>render();const doIt=async()=>{const v=ip.value.trim();if(!v||v===P.saved.name){render();return}const id=P.saved.id;const upd2={...st.xfers[id],name:v};delete upd2.id;if(await guarded(()=>db.doc('xfers/'+id).set(upd2),'Name updated')){st.xfers[id]=upd2;P.saved={...P.saved,name:v};render()}};$('#xrenOk').onclick=doIt;ip.onkeydown=e=>{if(e.key==='Enter')doIt();if(e.key==='Escape')render()}};const nt=$('#xnt');if(nt)nt.oninput=()=>{xNotes=nt.value};
+    main.querySelectorAll('[data-xa]').forEach(tr=>tr.onclick=()=>{xAct=+tr.dataset.xa;xShow(P.plan[xAct]);render()});
+    main.querySelectorAll('[data-xbin]').forEach(a=>a.onclick=e=>{e.preventDefault();locQuiet=true;openOnMap(a.dataset.xbin)});
+    const pv=$('#xprev');if(pv)pv.onclick=()=>{xPlan=null;xName='';goStep(2)};
+    $('#xxls').onclick=()=>xferExcel(P,P.saved?P.saved.filter:f,$('#xxmsg'));
+    main.querySelectorAll('[data-xvf]').forEach(b=>b.onclick=()=>{xVF=b.dataset.xvf;if(xVF==='left'){xAct=xFirstLeft(P);xShow(P.plan[xAct])}render()});
+    const xl=$('#xxlsl');if(xl)xl.onclick=()=>{const V2=xferVerify(P);const left=V2.items.filter(x=>x.state!=='done').map(x=>x.p);xferExcel({...P,plan:left,used:[...new Set(left.flatMap(p=>p.to.map(t=>t[0])))],qty:left.reduce((a,p)=>a+p.qty,0),short:0},P.saved.filter,$('#xxmsg'))};
+    const mk=$('#xmark');if(mk)mk.onclick=()=>askInline($('#xamsg'),'Mark this transfer as completed? The latest upload already shows every SKU in its destination bin, so stock locations will not be changed again.',async()=>{const id=P.saved.id;const upd2={...st.xfers[id],status:'done',doneAt:Date.now(),doneBy:me(),verified:true};delete upd2.id;
+      if(await guarded(()=>db.doc('xfers/'+id).set(upd2),'Transfer completed')){st.xfers[id]=upd2;xPlan=null;xCreating=false;xStep=1;xMsg=`✓ ${xRefOf(upd2,id)} completed (verified from the uploaded report).`;render()}});
+    const saveDoc=async(status)=>{const nmv=(($('#xname')||{}).value||xName||'').trim()||xferName(f,P);const {meta,parts}=xferToDoc(P,f,nmv,status);meta.ref=xferRef(meta.created,meta.qty,xferBrand(f,P.plan));meta.reason=xReason;meta.notes=xNotes.trim();if(status==='done'){meta.doneAt=Date.now();meta.doneBy=me()}
+      const id='x'+Date.now().toString(36);
+      const ok=await guarded(async()=>{for(let i=0;i<parts.length;i++)await db.doc('xferparts/'+id+'_'+i).set({plan:parts[i]});await db.doc('xfers/'+id).set(meta)},status==='done'?'Transfer saved as a record':'Draft saved');
+      return ok?[id,meta,parts.flat()]:null};
+    const xsv=$('#xsave');if(xsv)xsv.onclick=async()=>{xsv.disabled=true;const r=await saveDoc('draft');if(r){st.xfers[r[0]]=r[1];xPlan=xferFromDoc(r[0],r[1],r[2]);xName='';xMsg=`✓ Draft saved as ${r[1].ref}. Open it any time from the transfer list (← All transfers).`;render()}else xsv.disabled=false};
+    const xd=$('#xdel');if(xd)xd.onclick=()=>askInline($('#xamsg'),'Delete this saved transfer? Stock locations will not change.',async()=>{const id=P.saved.id;const n=P.saved.parts||0;if(await guarded(async()=>{await db.doc('xfers/'+id).delete();for(let i=0;i<n;i++)await db.doc('xferparts/'+id+'_'+i).delete()},'Transfer deleted')){delete st.xfers[id];xPlan=null;xCreating=false;xStep=1;xMsg='Transfer deleted.';render()}});
+    const stale=P.plan.filter(p=>p.placed===p.qty).reduce((n,p)=>n+p.from.filter(([c,q])=>{const e=binItems(c).find(x=>x[0]===p.sku);return !e||e[1]<q}).length,0);
+    const ap=$('#xapply');if(ap)ap.onclick=()=>askInline($('#xamsg'),`Confirm transfer and update locations for ${P.plan.filter(p=>p.placed===p.qty).length} SKUs? Make sure the stock has actually been moved.${stale?`\n\n Note: ${stale} source bins no longer match current stock (it may have changed since the plan was made).`:''}`,async()=>{
+      const changes={};const cur=c=>changes[c]||(changes[c]=binItems(c).map(x=>[...x]));
+      const V3=xferVerify(P);const done=P.plan.filter(p=>p.placed===p.qty);const todo=done.filter(p=>{const x=V3.map.get(p.sku);return !x||x.state!=='done'});
+      todo.forEach(p=>{const part=(V3.map.get(p.sku)||{}).state==='part';p.from.forEach(([c])=>{changes[c]=cur(c).filter(([k])=>k!==p.sku)});
+        p.to.forEach(([c,q])=>{const arr=cur(c);const e=arr.find(x=>x[0]===p.sku);if(e){e[1]=part?Math.max(e[1],q):e[1]+q}else arr.push([p.sku,q])})});
+      QUIET++;let okA=false;try{okA=await guarded(()=>saveBins(changes),'Locations updated')}finally{QUIET--}
+      if(okA){
+        if(P.saved){const id=P.saved.id;const upd2={...st.xfers[id],status:'done',doneAt:Date.now(),doneBy:me()};delete upd2.id;await guarded(()=>db.doc('xfers/'+id).set(upd2),'Record updated');st.xfers[id]=upd2}
+        else{const r=await saveDoc('done');if(r)st.xfers[r[0]]=r[1]}
+        xPlan=null;xCreating=false;xStep=1;xAct=0;xName='';xMsg=`✓ Transfer confirmed: ${todo.length} SKUs updated${done.length>todo.length?` (${done.length-todo.length} were already in place from the upload)`:''}. It is listed under Completed.`;render()}});
+  }
 }
 
 let cariQ='';
