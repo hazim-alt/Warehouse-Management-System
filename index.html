@@ -1083,7 +1083,7 @@ function findLocation(){const v=$('#gq').value.trim().toUpperCase();const msg=$(
     if(r){mapRack=r.c;mapPicked=null;if(r.id){setTierBtn(r.f===2?'up':'lo');if(PLAN)PLAN.focus([r.id]);if(MAP&&VIEW==='3d'){if(MAP.walk.on())MAP.walk.to(r.id);else MAP.setTier(r.f===2?'up':'lo')}}renderPeta();return}
     const rows=RACKS.filter(x=>x.r.toUpperCase()===v&&x.id);if(rows.length){const fl=rows.some(x=>x.f===1)?1:2;const ids=rows.filter(x=>x.f===fl).map(x=>x.id);setTierBtn(fl===2?'up':'lo');if(PLAN)PLAN.focus(ids);renderPeta();return}
     msg.textContent='Location not found: '+v;clearTimeout(findLocation.t);findLocation.t=setTimeout(()=>{msg.textContent=''},4000)}
-function avgPerBin(){let v=48;try{const s=+localStorage.getItem('wms_avgbin');if(s>=10&&s<=200)v=s}catch(e){}return v}
+function avgPerBin(){const s=+((st.settings||{}).avgBin);return s>=10&&s<=200?s:48}
 function renderPeta(){main.className='';ensureMap(false);
   const t=curTier();const tierLabel=t==='all'?'All levels':t==='up'?'Level M':'Ground floor';
   const codes=BIN_ORDER.filter(c=>t==='all'||(t==='lo'?BINS.get(c).floor===1:BINS.get(c).floor===2));
@@ -1113,7 +1113,7 @@ function renderPeta(){main.className='';ensureMap(false);
         <div class="caphd"><span>${usePct.toFixed(1)}% of space used</span><label class="small">Avg per bin <input id="avgbin" type="number" min="10" max="200" value="${avg}" aria-label="Average pieces per bin"> pcs</label></div>
         <div class="captr" role="img" aria-label="${usePct.toFixed(1)}% of estimated space used"><span style="width:${usePct.toFixed(2)}%"></span></div>
       </div>
-      <p class="small muted" style="margin:0">${fmt(near)} bins nearly full (90–100%) · ${fmt(over)} bins over capacity. Pcs space is an estimate: bins × average per bin.</p></section>
+      <p class="small muted" style="margin:0">${fmt(near)} bins nearly full (90–100%) · ${fmt(over)} bins over capacity. Pcs space is an estimate: bins × average per bin (shared by all devices).</p></section>
     <section class="card"><h2 class="ih">${ICON.chart}Bin Status</h2><div class="bars">
       ${[['empty',cnt.empty],['low',cnt.low],['mid',cnt.mid],['full',cnt.full]].map(([k,n])=>`<div class="bar"><span class="lb"><i style="background:${SC[k]}"></i>${SL[k]}</span><span class="tr"><span style="width:${(n/tot*100).toFixed(2)}%;background:${SC[k]}"></span></span><span class="vl">${fmt(n)}<small>${pc(n)}</small></span></div>`).join('')}
       <div class="bar"><span class="lb"><i style="background:var(--s-mark)"></i>Marked</span><span class="tr"><span style="width:${(markN/tot*100).toFixed(2)}%;background:var(--s-mark);min-width:${markN?'4px':'0'}"></span></span><span class="vl">${fmt(markN)}<small>${pc(markN)}</small></span></div>
@@ -1125,7 +1125,7 @@ function renderPeta(){main.className='';ensureMap(false);
     <section class="card"><details><summary>By row</summary><div class="tbl" style="margin-top:8px"><table><thead><tr><th>Row</th><th class="n">Bins</th><th class="n">Empty</th><th class="n">Used</th></tr></thead><tbody>${Object.entries(byRow).sort((a,b)=>a[0].localeCompare(b[0],undefined,{numeric:true})).map(([r,o])=>`<tr><td><a href="#" data-prow="${esc(r)}" style="color:var(--accent)">${esc(r)}</a></td><td class="n">${fmt(o.n)}</td><td class="n">${fmt(o.e)}</td><td class="n">${fmt(o.n-o.e)}</td></tr>`).join('')}</tbody></table></div></details></section>`;
   const openBin=code=>openOnMap(code);
   bindLocCards(main);
-  const ab=$('#avgbin');if(ab)ab.onchange=()=>{const v=Math.round(+ab.value);if(v>=10&&v<=200){try{localStorage.setItem('wms_avgbin',String(v))}catch(e){}}renderPeta()};
+  const ab=$('#avgbin');if(ab)ab.onchange=()=>{const v=Math.round(+ab.value);if(!(v>=10&&v<=200)||v===avgPerBin()){renderPeta();return}const prev=st.settings;st.settings={...(prev||{}),avgBin:v};renderPeta();db.doc('settings/main').set({...st.settings,avgBy:who.value.trim()||'Anonymous',avgAt:Date.now()}).catch(()=>{st.settings=prev;renderPeta()})};
   const la=$('#locall');if(la)la.onclick=()=>{renderPeta.all=!renderPeta.all;renderPeta()};
   main.querySelectorAll('[data-loc]').forEach(tr=>tr.onclick=()=>openBin(tr.dataset.loc));
   main.querySelectorAll('[data-prow]').forEach(a=>a.onclick=e=>{e.preventDefault();const row=a.dataset.prow;const rs=RACKS.filter(x=>x.r===row&&x.id);if(!rs.length)return;const fl=rs.some(x=>x.f===1)?1:2;setTierBtn(fl===2?'up':'lo');if(PLAN)PLAN.focus(rs.filter(x=>x.f===fl).map(x=>x.id));if(MAP)MAP.setTier(fl===2?'up':'lo');renderPeta()});
@@ -1569,7 +1569,7 @@ async function boot(){render();setStatus('Connecting to storage…');
   db.doc('settings/racks').onSnapshot(s=>{const cfg=s.exists?s.data():{};const key=JSON.stringify([cfg.edit||{},cfg.add||{}]);if(key===JSON.stringify([RACK_CFG.edit,RACK_CFG.add]))return;
     applyRackCfg(cfg);if(MAP){MAP.dispose();MAP=null}if(!busy())render()},()=>{});
   db.doc('settings/caps').onSnapshot(s=>{const wasClean=!capDraft||JSON.stringify({def:capDraft.def,groups:capDraft.groups})===JSON.stringify({def:CAPS.def,groups:CAPS.groups||{}});if(s.exists){const v=s.data();CAPS={def:+v.def||60,rules:Array.isArray(v.rules)?v.rules:[],groups:v.groups||null}}else CAPS=JSON.parse(JSON.stringify(DEFAULT_CAPS));if(MAP)MAP.paint();if(PLAN&&tab==='peta')PLAN.draw();if(wasClean)capDraft=null;if(!busy()&&wasClean)render()},()=>{});
-  db.doc('settings/main').onSnapshot(s=>{if(s.exists)st.settings=s.data()},()=>{});
+  db.doc('settings/main').onSnapshot(s=>{const old=avgPerBin();if(s.exists)st.settings=s.data();if(avgPerBin()!==old&&tab==='peta'&&!busy())render()},()=>{});
   db.collection('xfers').onSnapshot(snap=>{const m={};snap.docs.forEach(d=>{const v=d.data();if(v&&(Array.isArray(v.plan)||v.parts))m[d.id]=v});st.xfers=m;if(xPlan&&xPlan.saved&&m[xPlan.saved.id])xPlan.saved={id:xPlan.saved.id,...m[xPlan.saved.id]};if(!busy()&&tab==='xfer')render()},()=>{});
   db.collection('checks').onSnapshot(snap=>{const m={};snap.docs.forEach(d=>{const v=d.data();if(v&&Array.isArray(v.bins))m[d.id]=v});st.checks=m;if(!busy()&&tab==='check')render()},()=>{});
 }
