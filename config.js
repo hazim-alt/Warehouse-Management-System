@@ -1,9 +1,9 @@
-// Salin "firebaseConfig" dari Firebase Console > Project settings > Your apps > Web app
+// Firebase project: warehouse-management-sys-b44db
 window.FIREBASE_CONFIG = {
-  apiKey: "ISI_API_KEY",
-  authDomain: "ISI_PROJECT_ID.firebaseapp.com",
-  projectId: "ISI_PROJECT_ID",
-  storageBucket: "ISI_PROJECT_ID.appspot.com",
-  messagingSenderId: "ISI",
-  appId: "ISI"
+  apiKey: "AIzaSyDZfA7wZgBV3UOs0xMicueSZzHuV2mCtdI",
+  authDomain: "warehouse-management-sys-b44db.firebaseapp.com",
+  projectId: "warehouse-management-sys-b44db",
+  storageBucket: "warehouse-management-sys-b44db.firebasestorage.app",
+  messagingSenderId: "254063721445",
+  appId: "1:254063721445:web:05fc09747997fbeab58d0c"
 };
