@@ -334,6 +334,9 @@ h2.ih svg{width:20px;height:20px;color:var(--accent);flex:none}
 .savedok{padding:10px 12px;border-radius:10px;background:color-mix(in srgb,var(--ok) 14%,transparent);color:var(--fg);display:flex;align-items:center;gap:10px;flex-wrap:wrap}
 .savedok .btn{margin-left:auto}
 .note-card{border-color:var(--warn)}
+.closedbar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:10px 12px;border-radius:10px;background:var(--panel2);border:1px solid var(--line);font-size:13.5px}
+.closedbar span{flex:1}
+main.chk-closed .cxact,main.chk-closed .scanrow,main.chk-closed .addsku,main.chk-closed #cxskip,main.chk-closed #cxscanmsg{display:none!important}
 .hidnote{color:var(--warn);margin-top:-2px;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
 .hidnote span{flex:1 1 220px}
 button.btn.sm{min-height:32px;padding:0 12px;font-size:13px}
@@ -1320,7 +1323,7 @@ function renderPindah(){main.className='';const rs=relocations();$('#bp').hidden
   if(rs.length>80)rl.insertAdjacentHTML('beforeend',`<p class="small muted">Menunjuk 80 daripada ${rs.length}. Selesaikan yang di atas dulu.</p>`)}
 
 // ---------- stock check: lists built from filters ----------
-let chkCurBy={},chkSkip=new Set(),chkBF='all',chkOpen=false;
+let chkCurBy={},chkSkip=new Set(),chkBF='all',chkOpen=false,chkShowAllClosed=false;
 let chkSel=null,chkNew=false,chkF={sku:'',size:[],brand:[],kol:[],grp:[],cat:[],row:'',col:'',mode:'all',n:20,only:true};
 try{chkSel=localStorage.getItem('pg-chk')}catch(e){}
 const SZ_ORDER=['XS','S','M','L','XL','2XL','3XL','4XL','5XL','6XL'];
@@ -1381,14 +1384,16 @@ function renderCheck(){main.className='';
   if(!chkNew&&!(chkOpen&&chkSel)){chkOpen=false;
     const stats=l=>{const R=l.results||{},A=chkLive(l),d=A.filter(b=>R[b]).length,x=A.filter(b=>R[b]&&R[b].diff).length,last=Object.values(R).reduce((a,r)=>Math.max(a,r.at||0),0);return {n:A.length,d,x,last,full:A.length>0&&d===A.length}};
     const fmtD=ts=>new Date(ts||0).toLocaleString('en-GB',{day:'numeric',month:'short',year:'numeric'});
-    const card=l=>{const s=stats(l),pc=s.n?s.d/s.n*100:0;return `<button type="button" class="xli${s.full?' done':''}" data-copen="${esc(l.id)}"><div class="xlt"><b class="xln">${esc(l.name||('Random week '+(l.week||'')))}</b><span class="stpill ${s.full?(s.x?'bad':'ok'):'pend'}">${s.full?(s.x?s.x+' discrepanc'+(s.x>1?'ies':'y'):'Complete'):Math.round(pc)+'%'}</span></div>
+    const card=l=>{const s=stats(l),pc=s.n?s.d/s.n*100:0;return `<button type="button" class="xli${s.full?' done':''}" data-copen="${esc(l.id)}"><div class="xlt"><b class="xln">${esc(l.name||('Random week '+(l.week||'')))}</b><span class="stpill ${l.closed?'':s.full?(s.x?'bad':'ok'):'pend'}">${l.closed?'Closed':s.full?(s.x?s.x+' discrepanc'+(s.x>1?'ies':'y'):'Complete'):Math.round(pc)+'%'}</span></div>
       <div class="captr"><span style="width:${pc.toFixed(1)}%"></span></div>
-      <div class="small muted">${fmt(s.d)} / ${fmt(s.n)} bins counted${s.x?` · <span style="color:#ff8a8a">${s.x} with differences</span>`:''} · created ${fmtD(l.created)} by ${esc(nm(l.by))}${s.last?' · last count '+fmtD(s.last):''}</div></button>`};
-    const open=lists.filter(l=>!stats(l).full),done=lists.filter(l=>stats(l).full);
+      <div class="small muted">${fmt(s.d)} / ${fmt(s.n)} bins counted${s.x?` · <span style="color:#ff8a8a">${s.x} with differences</span>`:''} · created ${fmtD(l.created)} by ${esc(nm(l.by))}${s.last?' · last count '+fmtD(s.last):''}${l.closed?' · closed '+fmtD(l.closed.at)+' by '+esc(nm(l.closed.by)):''}</div></button>`};
+    const open=lists.filter(l=>!l.closed&&!stats(l).full),done=lists.filter(l=>!l.closed&&stats(l).full),closed=lists.filter(l=>l.closed).sort((a,b)=>(b.closed.at||0)-(a.closed.at||0));
     main.className='';main.innerHTML=`<section class="card xhead"><div class="sechd"><h2 class="ih">${ICON.chart}Stock Check</h2><button class="btn pri" id="cxnew">+ New list</button></div>
       <p class="small muted" style="margin:0">Create a counting list, then staff count each bin and save. Open a list below to continue counting.</p></section>
       <section class="card"><div class="sechd"><h2 class="ih">${ICON.used}In progress</h2><span class="small muted">${open.length}</span></div>${open.length?`<div class="xlist">${open.map(card).join('')}</div>`:'<p class="empty">No lists in progress. Press <b>+ New list</b> to create one.</p>'}</section>
-      <section class="card"><div class="sechd"><h2 class="ih">${ICON.ok}Completed</h2><span class="small muted">${done.length}</span></div>${done.length?`<div class="xlist">${done.map(card).join('')}</div>`:'<p class="empty">No completed lists yet.</p>'}</section>`;
+      <section class="card"><div class="sechd"><h2 class="ih">${ICON.ok}Completed – ready to close</h2><span class="small muted">${done.length}</span></div>${done.length?`<div class="xlist">${done.map(card).join('')}</div>`:'<p class="empty">No completed lists. A list appears here when every bin is counted.</p>'}</section>
+      <section class="card"><div class="sechd"><h2 class="ih">${ICON.box}Closed</h2><span class="small muted">${closed.length}</span></div>${closed.length?`<div class="xlist">${closed.slice(0,chkShowAllClosed?closed.length:10).map(card).join('')}</div>${closed.length>10?`<button class="linkbtn" id="cxmore">${chkShowAllClosed?'Show less':'Show all '+closed.length}</button>`:''}`:'<p class="empty">No closed lists yet. Open a list and press <b>Close stock check</b> when it is finished.</p>'}</section>`;
+    {const mo=$('#cxmore');if(mo)mo.onclick=()=>{chkShowAllClosed=!chkShowAllClosed;renderCheck()}}
     $('#cxnew').onclick=()=>{chkNew=true;render();window.scrollTo(0,0)};
     main.querySelectorAll('[data-copen]').forEach(b=>b.onclick=()=>{chkSel=b.dataset.copen;chkOpen=true;chkNew=false;mapPicked=null;try{localStorage.setItem('pg-chk',chkSel)}catch(e){}render();window.scrollTo(0,0)});
     return}
@@ -1444,6 +1449,7 @@ function renderCheck(){main.className='';
       <div class="captr" role="img" aria-label="${pct.toFixed(1)}% counted"><span style="width:${pct.toFixed(2)}%"></span></div>
       <div class="row small" style="justify-content:space-between"><span class="muted">${last?`Last saved ${new Date(last.at).toLocaleString('en-GB',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'})} by ${esc(nm(last.by))}`:'No counts saved yet'}</span><b>${fmt(done)} / ${fmt(total)}</b></div>
       <div class="row"><button class="btn" id="cxrep"${done?'':' disabled'}>⤓ Discrepancy report (Excel)</button><span class="small muted">${diffBins?fmt(diffBins)+' bin'+(diffBins>1?'s':'')+' with differences':done?'No differences so far':'Available after counts are saved'}</span></div>
+      ${c.closed?`<div class="closedbar"><span>🔒 Closed by <b>${esc(nm(c.closed.by))}</b>, ${new Date(c.closed.at).toLocaleString('en-GB')}. Counts are locked.</span><button class="linkbtn" id="cxreopen">Reopen</button></div>`:`<div class="row"><button class="btn ${left?'':'pri'}" id="cxclose">🔒 Close stock check</button><span class="small muted">${left?fmt(left)+' bin'+(left>1?'s':'')+' not counted yet':'All bins counted – ready to close'}</span></div>`}
       <div id="cxmsg" class="small"></div></section>
     ${foreign?`<section class="card note-card"><div class="row"><span><span class="code">${esc(foreign)}</span> is not in this stock check list.</span><button class="btn" id="cxback2" style="margin-left:auto">Back to ${esc(cur)}</button></div></section>`:''}
     <section class="card curbin" id="curbin">
@@ -1471,6 +1477,11 @@ function renderCheck(){main.className='';
   main.innerHTML=h+skuOptions();
   // events
   {const rp=$('#cxrep');if(rp&&c)rp.onclick=()=>chkReport(c,$('#cxmsg'))}
+  if(c&&!building){main.classList.toggle('chk-closed',!!c.closed);
+    if(c.closed)main.querySelectorAll('#cxprod input,#cxprod textarea').forEach(i=>i.disabled=true);
+    const setClosed=async(val,msg)=>{const id=chkSel;if(await guarded(async()=>{const ref=db.doc('checks/'+id);const snap=await ref.get();const cur=snap.exists?snap.data():st.checks[id];const nx={...cur};if(val)nx.closed=val;else delete nx.closed;await ref.set(nx)},msg)){const nx={...st.checks[id]};if(val)nx.closed=val;else delete nx.closed;st.checks[id]=nx;return true}return false};
+    const cl=$('#cxclose');if(cl)cl.onclick=()=>{const left=chkLive(c).filter(b=>!(c.results||{})[b]).length;askInline($('#cxmsg'),(left?`${left} bin${left>1?'s are':' is'} not counted yet. `:'')+'Close this stock check? Counts will be locked and the list moves to Closed. Stock locations are not changed.',async()=>{if(await setClosed({by:me(),at:Date.now()},'Stock check closed')){chkOpen=false;render();window.scrollTo(0,0)}})};
+    const ro=$('#cxreopen');if(ro)ro.onclick=()=>askInline($('#cxmsg'),'Reopen this stock check so counts can be changed again?',async()=>{if(await setClosed(null,'Stock check reopened'))render()})}
   const bb=$('#cxback');if(bb)bb.onclick=()=>{chkNew=false;chkOpen=false;mapPicked=null;render();window.scrollTo(0,0)};
   const sel=$('#cxsel');if(sel)sel.onchange=()=>{chkSel=sel.value;chkNew=false;try{localStorage.setItem('pg-chk',chkSel)}catch(e){}renderCheck()};
   if(building){
@@ -1523,7 +1534,7 @@ function renderCheck(){main.className='';
   main.querySelectorAll('[data-go]').forEach(x=>x.onclick=()=>go(x.dataset.go));
   main.querySelectorAll('[data-bf]').forEach(x=>x.onclick=()=>{chkBF=x.dataset.bf;main.querySelectorAll('[data-bf]').forEach(y=>y.setAttribute('aria-pressed',y===x));$('#cxbins').className='binlist bf-'+chkBF});
   {const cb=main.querySelector('.binbtn.cur');if(cb){const L=$('#cxbins');L.scrollTop=cb.offsetTop-L.offsetTop-L.clientHeight/2}}
-  $('#cxsave').onclick=async()=>{const cnt={};let miss=false;rowsEl.querySelectorAll('input.cnt').forEach(i=>{if(i.value==='')miss=true;cnt[i.dataset.k]=Math.max(0,+i.value||0)});
+  $('#cxsave').onclick=async()=>{if(c.closed){setStatus('This stock check is closed. Reopen it to change counts.',true);return}const cnt={};let miss=false;rowsEl.querySelectorAll('input.cnt').forEach(i=>{if(i.value==='')miss=true;cnt[i.dataset.k]=Math.max(0,+i.value||0)});
     const smsg=$('#cxsmsg');smsg.style.color='';
     if(miss){smsg.style.color='var(--warn)';smsg.textContent='Enter a count for every SKU in the bin (enter 0 if none).';setStatus('Enter a count for every SKU in the bin (enter 0 if none).',true);const i=[...rowsEl.querySelectorAll('input.cnt')].find(x=>x.value==='');if(i)i.focus();return}
     const diff=exp.some(([k,q])=>cnt[k]!==q)||Object.keys(cnt).some(k=>!exp.find(x=>x[0]===k));
