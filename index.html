@@ -1,9 +1,9 @@
 <!doctype html>
-<html lang="ms">
+<html lang="en">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Sistem Pengurusan Gudang</title>
+<title>Warehouse Management System</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&family=Barlow+Condensed:wght@600;700&display=swap">
 <style>
 *{box-sizing:border-box}body{margin:0}
@@ -225,7 +225,7 @@ th,td{border-bottom-color:var(--line)}
 (function(){
   const cfg=window.FIREBASE_CONFIG;
   const fail=t=>{const o=document.getElementById('login');o.hidden=false;document.getElementById('lmsg').textContent=t};
-  if(!cfg||!cfg.apiKey||/ISI_/.test(cfg.apiKey)){window.addEventListener('DOMContentLoaded',()=>fail('Firebase belum disetup. Isi maklumat dalam config.js (lihat README).'));return}
+  if(!cfg||!cfg.apiKey||/ISI_/.test(cfg.apiKey)){window.addEventListener('DOMContentLoaded',()=>fail('Firebase is not set up yet. Fill in config.js (see README).'));return}
   firebase.initializeApp(cfg);const fs=firebase.firestore(),auth=firebase.auth();
   const mapErr=e=>({code:e&&e.code==='permission-denied'?'invalid_argument':e&&e.code==='resource-exhausted'?'quota_exceeded':(e&&e.code)||'unavailable',message:String(e&&e.message||e)});
   const wrap=p=>p.catch(e=>{throw mapErr(e)});
@@ -249,80 +249,80 @@ th,td{border-bottom-color:var(--line)}
   auth.onAuthStateChanged(async u=>{await ready();const o=document.getElementById('login');
     if(!u){o.hidden=false;return}
     // only emails listed in the staff collection may use the system
-    try{const s=await fs.doc('staff/'+u.email.toLowerCase()).get();if(!s.exists)throw 0}catch(e){fail('Akaun '+u.email+' belum dibenarkan. Minta admin tambah emel ini dalam senarai staf.');document.getElementById('lout').hidden=false;return}
+    try{const s=await fs.doc('staff/'+u.email.toLowerCase()).get();if(!s.exists)throw 0}catch(e){fail('Account '+u.email+' is not allowed yet. Ask the admin to add this email to the staff list.');document.getElementById('lout').hidden=false;return}
     o.hidden=true;document.getElementById('userchip').hidden=false;document.getElementById('useremail').textContent=u.email;
     const w=document.getElementById('who');if(w&&!w.value)w.value=(u.displayName||u.email.split('@')[0]);
     window.claude={use:async n=>n==='db'?fsDb:n==='downloads'?downloads:null};
     if(!started){started=true;window.__startApp()}});
   window.addEventListener('DOMContentLoaded',()=>{
-    const go=async()=>{const e=document.getElementById('lemail').value.trim(),p=document.getElementById('lpass').value;document.getElementById('lmsg').textContent='Log masuk…';
-      try{await auth.signInWithEmailAndPassword(e,p)}catch(err){document.getElementById('lmsg').textContent=/wrong-password|invalid-credential|user-not-found|invalid-login/.test(err.code||'')?'Emel atau kata laluan salah.':'Tak dapat log masuk ('+(err.code||'ralat')+').'}};
+    const go=async()=>{const e=document.getElementById('lemail').value.trim(),p=document.getElementById('lpass').value;document.getElementById('lmsg').textContent='Signing in…';
+      try{await auth.signInWithEmailAndPassword(e,p)}catch(err){document.getElementById('lmsg').textContent=/wrong-password|invalid-credential|user-not-found|invalid-login/.test(err.code||'')?'Wrong email or password.':'Could not sign in ('+(err.code||'error')+').'}};
     document.getElementById('lgo').onclick=go;document.getElementById('lpass').onkeydown=e=>{if(e.key==='Enter')go()};
-    document.getElementById('lreset').onclick=async()=>{const e=document.getElementById('lemail').value.trim();if(!e){document.getElementById('lmsg').textContent='Isi emel dulu.';return}
-      try{await auth.sendPasswordResetEmail(e);document.getElementById('lmsg').textContent='Emel tukar kata laluan dihantar ke '+e+'.'}catch(err){document.getElementById('lmsg').textContent='Tak dapat hantar ('+(err.code||'ralat')+').'}};
+    document.getElementById('lreset').onclick=async()=>{const e=document.getElementById('lemail').value.trim();if(!e){document.getElementById('lmsg').textContent='Enter your email first.';return}
+      try{await auth.sendPasswordResetEmail(e);document.getElementById('lmsg').textContent='Password reset email sent to '+e+'.'}catch(err){document.getElementById('lmsg').textContent='Could not send ('+(err.code||'error')+').'}};
     const out=()=>auth.signOut().then(()=>location.reload());document.getElementById('lout').onclick=out;document.getElementById('logout').onclick=out});
 })();
 // one-time import of data exported from the old system (admin, empty database)
 async function checkImport(db){try{const s=await db.doc('master/p0').get();if(s.exists)return}catch(e){return}
-  const box=document.createElement('div');box.className='importbox';box.innerHTML=`<div class="card"><h2>Data awal belum ada</h2><p class="small muted">Pilih fail <b>data-export.json</b> untuk masukkan data dari sistem lama. Ini dibuat sekali sahaja.</p><input type="file" id="impf" accept=".json"><div id="impmsg" class="small"></div></div>`;
+  const box=document.createElement('div');box.className='importbox';box.innerHTML=`<div class="card"><h2>No initial data yet</h2><p class="small muted">Choose the <b>data-export.json</b> file to import data from the old system. This is done only once.</p><input type="file" id="impf" accept=".json"><div id="impmsg" class="small"></div></div>`;
   document.body.appendChild(box);
   box.querySelector('#impf').onchange=async e=>{const f=e.target.files[0];if(!f)return;const msg=box.querySelector('#impmsg');
-    try{const all=JSON.parse(await f.text());const keys=Object.keys(all);let n=0;for(const k of keys){await db.doc(k).set(all[k]);n++;msg.textContent=`Memasukkan ${n} / ${keys.length}…`}
-      msg.textContent='✓ Selesai. Memuat semula…';setTimeout(()=>location.reload(),1200)}catch(err){msg.textContent='Gagal: '+(err.message||err.code||err)}}}
+    try{const all=JSON.parse(await f.text());const keys=Object.keys(all);let n=0;for(const k of keys){await db.doc(k).set(all[k]);n++;msg.textContent=`Importing ${n} / ${keys.length}…`}
+      msg.textContent='✓ Done. Reloading…';setTimeout(()=>location.reload(),1200)}catch(err){msg.textContent='Failed: '+(err.message||err.code||err)}}}
 
 </script>
 </head>
 <body>
 
 
-<div id="login" hidden><div class="lcard"><div class="brand"><div class="logo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21V8l9-5 9 5v13"/><path d="M7 21v-8h10v8"/><path d="M7 17h10"/></svg></div><div><h1>Sistem Pengurusan Gudang</h1><div class="small muted">Log masuk untuk teruskan</div></div></div>
-  <label class="small" for="lemail">Emel</label><input id="lemail" type="email" autocomplete="username">
-  <label class="small" for="lpass">Kata laluan</label><input id="lpass" type="password" autocomplete="current-password">
-  <button class="btn pri" id="lgo">Log masuk</button><button class="linkbtn" id="lreset" style="justify-self:start">Lupa kata laluan?</button>
-  <div id="lmsg" class="small" style="color:var(--warn)"></div><button class="btn" id="lout" hidden>Log keluar</button></div></div>
+<div id="login" hidden><div class="lcard"><div class="brand"><div class="logo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21V8l9-5 9 5v13"/><path d="M7 21v-8h10v8"/><path d="M7 17h10"/></svg></div><div><h1>Sistem Pengurusan Gudang</h1><div class="small muted">Sign in to continue</div></div></div>
+  <label class="small" for="lemail">Email</label><input id="lemail" type="email" autocomplete="username">
+  <label class="small" for="lpass">Password</label><input id="lpass" type="password" autocomplete="current-password">
+  <button class="btn pri" id="lgo">Sign in</button><button class="linkbtn" id="lreset" style="justify-self:start">Forgot password?</button>
+  <div id="lmsg" class="small" style="color:var(--warn)"></div><button class="btn" id="lout" hidden>Sign out</button></div></div>
 <header>
   <div class="top">
-    <div class="brand"><div class="logo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 21V8l9-5 9 5v13"/><path d="M7 21v-8h10v8"/><path d="M7 17h10"/></svg></div><div><h1>Sistem Pengurusan Gudang</h1><div id="subtitle">Peta Gudang · lokasi dan penggunaan bin</div></div></div>
+    <div class="brand"><div class="logo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 21V8l9-5 9 5v13"/><path d="M7 21v-8h10v8"/><path d="M7 17h10"/></svg></div><div><h1>Warehouse Management System</h1><div id="subtitle">Warehouse Map · bin locations and usage</div></div></div>
     <div class="hright">
-      <div class="sync"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg><div>Data disegerakkan<b id="synct">–</b><span id="status">Menyambung…</span></div></div>
-      <div id="userchip" class="sync" hidden><div><span id="useremail"></span><br><button class="linkbtn" id="logout" style="padding:0">Log keluar</button></div></div>
-      <label class="who" for="who"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg><input id="who" type="text" maxlength="24" placeholder="Nama staf" aria-label="Nama staf"></label>
+      <div class="sync"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg><div>Data synced<b id="synct">–</b><span id="status">Connecting…</span></div></div>
+      <div id="userchip" class="sync" hidden><div><span id="useremail"></span><br><button class="linkbtn" id="logout" style="padding:0">Sign out</button></div></div>
+      <label class="who" for="who"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg><input id="who" type="text" maxlength="24" placeholder="Staff name" aria-label="Staff name"></label>
     </div>
   </div>
   <nav role="tablist" aria-label="Menu">
-    <button role="tab" data-tab="peta" aria-selected="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s-7-6.2-7-11a7 7 0 0 1 14 0c0 4.8-7 11-7 11z"/><circle cx="12" cy="10" r="2.5"/></svg>Peta Gudang</button>
-    <button role="tab" data-tab="masuk" hidden>Barang masuk <span class="badge" id="bq" hidden></span></button>
-    <button role="tab" data-tab="pindah" hidden>Cadangan pindah <span class="badge" id="bp" hidden></span></button>
+    <button role="tab" data-tab="peta" aria-selected="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s-7-6.2-7-11a7 7 0 0 1 14 0c0 4.8-7 11-7 11z"/><circle cx="12" cy="10" r="2.5"/></svg>Warehouse Map</button>
+    <button role="tab" data-tab="masuk" hidden>Incoming <span class="badge" id="bq" hidden></span></button>
+    <button role="tab" data-tab="pindah" hidden>Move suggestions <span class="badge" id="bp" hidden></span></button>
     <button role="tab" data-tab="check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M9 3v3h6V3"/><path d="m9 13 2 2 4-4"/></svg>Stock Check</button>
     <button role="tab" data-tab="xfer"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h13l-3-3M20 17H7l3 3"/></svg>Transfer Bin</button>
-    <button role="tab" data-tab="cari"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>Cari Bin</button>
-    <button role="tab" data-tab="upload"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 18a4.5 4.5 0 0 1-.5-9A6 6 0 0 1 18 9a4 4 0 0 1-1 9"/><path d="M12 12v8"/><path d="m9 15 3-3 3 3"/></svg>Upload Stok</button>
-    <button role="tab" data-tab="cap"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><ellipse cx="12" cy="5" rx="7" ry="3"/><path d="M5 5v14c0 1.7 3.1 3 7 3s7-1.3 7-3V5"/><path d="M5 12c0 1.7 3.1 3 7 3s7-1.3 7-3"/></svg>Kapasiti Bin</button>
-    <button role="tab" data-tab="rak"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>Tetapan Rak</button>
+    <button role="tab" data-tab="cari"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>Find Bin</button>
+    <button role="tab" data-tab="upload"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 18a4.5 4.5 0 0 1-.5-9A6 6 0 0 1 18 9a4 4 0 0 1-1 9"/><path d="M12 12v8"/><path d="m9 15 3-3 3 3"/></svg>Upload Stock</button>
+    <button role="tab" data-tab="cap"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><ellipse cx="12" cy="5" rx="7" ry="3"/><path d="M5 5v14c0 1.7 3.1 3 7 3s7-1.3 7-3V5"/><path d="M5 12c0 1.7 3.1 3 7 3s7-1.3 7-3"/></svg>Bin Capacity</button>
+    <button role="tab" data-tab="rak"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>Rack Settings</button>
   </nav>
 </header>
 <div id="wrap"><section id="mapwrap" hidden>
   <div class="maptb mtools">
-    <span class="seg" role="group" aria-label="Tingkat"><button data-t="all" data-3d><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m12 2 10 6-10 6L2 8z"/><path d="m2 16 10 6 10-6"/></svg>Semua tingkat</button><button data-t="lo" aria-pressed="true">Ground Floor</button><button data-t="up">Level M</button></span>
+    <span class="seg" role="group" aria-label="Tingkat"><button data-t="all" data-3d><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m12 2 10 6-10 6L2 8z"/><path d="m2 16 10 6 10-6"/></svg>All levels</button><button data-t="lo" aria-pressed="true">Ground Floor</button><button data-t="up">Level M</button></span>
     <span class="sp"></span>
-    <button id="mclr" class="tbtn" data-fill data-hl><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"/></svg>Buang tanda</button>
-    <button id="mmulti" class="tbtn" data-edit aria-pressed="false">Pilih banyak</button><button id="mcodes" class="tbtn" data-edit data-3d aria-pressed="true">Kod rak</button>
+    <button id="mclr" class="tbtn" data-fill data-hl><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"/></svg>Clear marks</button>
+    <button id="mmulti" class="tbtn" data-edit aria-pressed="false">Multi-select</button><button id="mcodes" class="tbtn" data-edit data-3d aria-pressed="true">Rack code</button>
     <span class="seg" role="group" aria-label="Paparan"><button data-v="3d">3D</button><button data-v="2d">2D</button></span>
     <button id="mreset" class="tbtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/></svg>Reset View</button>
   </div>
-  <div id="map" aria-label="Peta gudang"><div id="plan2d" style="position:absolute;inset:0"></div>
+  <div id="map" aria-label="Warehouse map"><div id="plan2d" style="position:absolute;inset:0"></div>
     <div class="mfloat mtools">
-      <div class="grp" data-2d><button id="zin" class="tbtn" data-2d aria-label="Zoom masuk">＋</button><button id="zout" class="tbtn" data-2d aria-label="Zoom keluar">－</button></div>
-      <button id="mwalk" class="tbtn peg" aria-pressed="false" title="Seret ke peta, atau tekan kemudian ketik tempat di peta"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="12" cy="4.5" r="2.6"/><path d="M8.5 8.5h7l-.9 6.2h-1.4L12.6 22h-1.2l-.6-7.3H9.4z"/></svg><span>Letak orang</span></button>
-      <button id="mtop" class="tbtn" data-3d><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>Pandangan atas</button>
+      <div class="grp" data-2d><button id="zin" class="tbtn" data-2d aria-label="Zoom in">＋</button><button id="zout" class="tbtn" data-2d aria-label="Zoom out">－</button></div>
+      <button id="mwalk" class="tbtn peg" aria-pressed="false" title="Drag onto the map, or click then tap a spot on the map"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="12" cy="4.5" r="2.6"/><path d="M8.5 8.5h7l-.9 6.2h-1.4L12.6 22h-1.2l-.6-7.3H9.4z"/></svg><span>Drop person</span></button>
+      <button id="mtop" class="tbtn" data-3d><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>Top view</button>
     </div>
-    <div id="pegtip" hidden>Ketik mana-mana tempat di peta untuk letak orang · <button id="pegx" class="linkbtn">Batal</button></div>
-    <div id="walkpad" hidden><div class="whint">Seret untuk pandang sekeliling · komputer: W A S D / anak panah</div>
-      <div class="wgrid"><span></span><button data-w="f" aria-label="Depan">▲</button><span></span><button data-w="l" aria-label="Pusing kiri">⟲</button><button data-w="b" aria-label="Belakang">▼</button><button data-w="r" aria-label="Pusing kanan">⟳</button></div>
-      <button id="wfloor" class="wfl">Naik ke Level M</button></div>
+    <div id="pegtip" hidden>Tap anywhere on the map to drop the person · <button id="pegx" class="linkbtn">Cancel</button></div>
+    <div id="walkpad" hidden><div class="whint">Drag to look around · keyboard: W A S D / arrow keys</div>
+      <div class="wgrid"><span></span><button data-w="f" aria-label="Forward">▲</button><span></span><button data-w="l" aria-label="Turn left">⟲</button><button data-w="b" aria-label="Back">▼</button><button data-w="r" aria-label="Turn right">⟳</button></div>
+      <button id="wfloor" class="wfl">Go up to Level M</button></div>
   </div>
-  <div class="legend3" id="legedit" hidden><span>Klik rak dalam peta untuk pilih. Rak dipilih jadi <b style="color:#ffd43b">kuning</b>. Warna lain ikut row.</span></div>
-  <div class="legend3" id="legfill"><span id="legnote"></span><span><i style="background:var(--s-empty)"></i>Kosong</span><span><i style="background:var(--s-low)"></i>Bawah 50%</span><span><i style="background:var(--s-mid)"></i>50–89%</span><span><i style="background:var(--s-full)"></i>Penuh</span><span><i style="background:var(--s-mark)"></i>Ditanda</span></div>
+  <div class="legend3" id="legedit" hidden><span>Click a rack on the map to select it. Selected racks turn <b style="color:#ffd43b">yellow</b>. Other colours follow the row.</span></div>
+  <div class="legend3" id="legfill"><span id="legnote"></span><span><i style="background:var(--s-empty)"></i>Empty</span><span><i style="background:var(--s-low)"></i>Under 50%</span><span><i style="background:var(--s-mid)"></i>50–89%</span><span><i style="background:var(--s-full)"></i>Full</span><span><i style="background:var(--s-mark)"></i>Marked</span></div>
 </section>
 <main id="main"></main></div>
 
@@ -366,7 +366,7 @@ function catOf(grp,desc){const t=(grp||'')+' '+(desc||'');
 function normSize(s){s=String(s||'').trim();let m=s.match(/^(\d+)\s*-\s*(\d+)\s*years?$/i);if(m)return `${m[1]}-${m[2]} thn`;m=s.match(/^(\d+)\s*-\s*(\d+)\s*months?$/i);if(m)return `${m[1]}-${m[2]} bln`;return s.toUpperCase()}
 function parseDesc(d){const p=String(d||'').split(' - ').map(x=>x.trim()).filter(Boolean);
   if(p.length>=3)return {ser:p[0],col:p.slice(1,-1).join(' - '),size:normSize(p[p.length-1])};
-  if(p.length===2)return {ser:p[0],col:p[1],size:'TIADA SAIZ'};return {ser:String(d||''),col:'',size:'TIADA SAIZ'}}
+  if(p.length===2)return {ser:p[0],col:p[1],size:'NO SIZE'};return {ser:String(d||''),col:'',size:'NO SIZE'}}
 const isPat=s=>String(s.brand||'').trim().toUpperCase()==='PATAWALI';
 const isCekak=s=>s.cat==='Men'&&/cekak musang/i.test((s.grp||'')+' '+(s.ser||''));
 const DEFAULT_CAPS={def:60,rules:[{kw:'baby',cap:90},{kw:'boys',cap:90},{kw:'girls',cap:90},{kw:'kids',cap:90},{kw:'cekak musang',cap:30},{kw:'top',cap:60}]};
@@ -381,11 +381,11 @@ let db=null;const st={master:{},loc:{},queue:{},check:null,checks:{},xfers:{},se
 const HIDDEN_TABS=['masuk','pindah'];let tab='peta';try{const t=localStorage.getItem('pg-tab');if(t&&!HIDDEN_TABS.includes(t))tab=t}catch(e){}
 const who=$('#who');try{who.value=localStorage.getItem('pg-who')||''}catch(e){}
 who.oninput=()=>{try{localStorage.setItem('pg-who',who.value.trim())}catch(e){}};
-const me=()=>who.value.trim()||'Tanpa nama';
+const me=()=>who.value.trim()||'Anonymous';
 const setStatus=(t,bad)=>{const s=$('#status');s.textContent=t;s.classList.toggle('bad',!!bad)};
 const kolOf=k=>{const m=String(k).match(/^[A-Za-z]+?[Xx](\d+)/);return m?'X'+m[1]:''};
 const kolSort=(a,b)=>(parseInt(b.slice(1))||0)-(parseInt(a.slice(1))||0);
-function sku(s){const m=st.master[s];if(!m)return null;return {sku:s,desc:m[0],brand:m[1],grp:m[2],cat:m[3],ser:m[4],col:m[5],size:m[6],qty:m[7],kol:kolOf(s)}}
+function sku(s){const m=st.master[s];if(!m)return null;return {sku:s,desc:m[0],brand:m[1],grp:m[2],cat:m[3],ser:m[4],col:m[5],size:(m[6]==='TIADA'+' SAIZ'?'NO SIZE':String(m[6]).replace(/ thn$/,' yrs').replace(/ bln$/,' mths')),qty:m[7],kol:kolOf(s)}}
 // occupancy helpers
 let LOCAT={};function indexLoc(){LOCAT={};for(const row in st.loc)for(const c in st.loc[row])LOCAT[c]=row}
 const binItems=code=>{const r=LOCAT[code];return (r&&st.loc[r]&&st.loc[r][code])||[]};
@@ -404,36 +404,36 @@ async function saveBins(changes){ // changes: {binCode: [[sku,qty],...]}
   indexLoc();
 }
 function addTo(changes,code,s,q){const arr=(changes[code]||binItems(code).map(x=>x.slice())).slice();const i=arr.findIndex(x=>x[0]===s);if(i>=0)arr[i]=[s,arr[i][1]+q];else arr.push([s,q]);changes[code]=arr.filter(x=>x[1]>0);return changes}
-async function guarded(fn,okMsg){if(!db){setStatus('Tak boleh simpan: storan tidak disambung.',true);return false}
-  try{setStatus('Menyimpan…');await fn();setStatus('✓ '+(okMsg||'Disimpan'));return true}
-  catch(e){setStatus(e&&e.code==='invalid_argument'?'Tak dapat disimpan: data terlalu besar, atau anda cuma ada akses lihat.':e&&e.code==='quota_exceeded'?'Tak dapat disimpan: ruang data penuh. Padam rekod lama.':'Gagal simpan ('+(e&&e.code||'?')+'). Cuba lagi.',true);return false}}
+async function guarded(fn,okMsg){if(!db){setStatus('Cannot save: storage not connected.',true);return false}
+  try{setStatus('Saving…');await fn();setStatus('✓ '+(okMsg||'Disimpan'));return true}
+  catch(e){setStatus(e&&e.code==='invalid_argument'?'Cannot save: the data is too large, or you only have view access.':e&&e.code==='quota_exceeded'?'Cannot save: data storage is full. Delete old records.':'Save failed ('+(e&&e.code||'?')+'). Try again.',true);return false}}
 // ---------- putaway suggestion ----------
 function suggestBins(s,qty,exclude){const cap=capOf(s),g=groupOf(s),ps=planSize(s),out=[];let left=qty;const used=new Set(exclude||[]);
   const take=(code,why)=>{if(left<=0||used.has(code))return;const free=binItems(code).length?binCap(code)-binQty(code):cap;if(free<=0)return;const q=Math.min(free,left);out.push({code,qty:q,why});left-=q;used.add(code)};
-  skuLocs(s.sku).forEach(l=>take(l.code,'SKU sama sudah ada di bin ini'));
-  BIN_ORDER.forEach(c=>{if(left>0&&binItems(c).length&&binGroup(c)===g)take(c,isPat(s)?'Series & saiz sama':'Saiz sama (brand lain, campur series)')});
+  skuLocs(s.sku).forEach(l=>take(l.code,'Same SKU already in this bin'));
+  BIN_ORDER.forEach(c=>{if(left>0&&binItems(c).length&&binGroup(c)===g)take(c,isPat(s)?'Same series & size':'Same size (other brand, mixed series)')});
   const planned=BIN_ORDER.filter(c=>{const b=BINS.get(c);return b.plan&&b.plan[0]===s.cat&&b.plan[1]===ps});
-  planned.forEach(c=>{if(left>0&&!binItems(c).length)take(c,'Bin kosong dalam rak saiz '+ps)});
+  planned.forEach(c=>{if(left>0&&!binItems(c).length)take(c,'Empty bin in the size rack '+ps)});
   if(left>0){const racksSame=new Set();BIN_ORDER.forEach(c=>{const it=binItems(c)[0];const k=it&&sku(it[0]);if(k&&k.cat===s.cat&&planSize(k)===ps)racksSame.add(BINS.get(c).rack)});
-    BIN_ORDER.forEach(c=>{if(left>0&&!binItems(c).length&&racksSame.has(BINS.get(c).rack))take(c,'Bin kosong dalam rak yang simpan saiz '+ps)})}
-  if(left>0)BIN_ORDER.forEach(c=>{const b=BINS.get(c);if(left>0&&!binItems(c).length&&b.row==='2-A')take(c,'Bin kosong di row simpanan 2-A')});
-  if(left>0)BIN_ORDER.forEach(c=>{const b=BINS.get(c);if(left>0&&!binItems(c).length&&!b.plan&&!/Defect/i.test(b.row))take(c,'Bin kosong (tiada pelan khas)')});
+    BIN_ORDER.forEach(c=>{if(left>0&&!binItems(c).length&&racksSame.has(BINS.get(c).rack))take(c,'Empty bin in a rack that holds size '+ps)})}
+  if(left>0)BIN_ORDER.forEach(c=>{const b=BINS.get(c);if(left>0&&!binItems(c).length&&b.row==='2-A')take(c,'Empty bin in reserve row 2-A')});
+  if(left>0)BIN_ORDER.forEach(c=>{const b=BINS.get(c);if(left>0&&!binItems(c).length&&!b.plan&&!/Defect/i.test(b.row))take(c,'Empty bin (no special plan)')});
   return {out,left}}
 // ---------- relocation suggestions ----------
 function relocations(){const res=[];const allCodes=[];for(const row in st.loc)for(const c in st.loc[row])allCodes.push(c);
   // 1) wrong rack for the size plan
   allCodes.forEach(c=>{const b=BINS.get(c);if(!b||!b.plan)return;binItems(c).forEach(([k,q])=>{const s=sku(k);if(!s)return;if(s.cat!==b.plan[0]||planSize(s)!==b.plan[1]){
-    const sg=suggestBins(s,q,[c]);if(sg.out.length)res.push({type:'Salah rak saiz',score:3,sku:k,from:c,to:sg.out,qty:q,why:`Rak ${b.rack} untuk ${b.plan[0]} ${b.plan[1]}, barang ini ${s.cat} ${s.size}`})}})});
+    const sg=suggestBins(s,q,[c]);if(sg.out.length)res.push({type:'Wrong size rack',score:3,sku:k,from:c,to:sg.out,qty:q,why:`Rack ${b.rack} is for ${b.plan[0]} ${b.plan[1]}, this item is ${s.cat} ${s.size}`})}})});
   // 2) overfull
-  allCodes.forEach(c=>{const over=binQty(c)-binCap(c);if(over>0){const [k]=binItems(c).slice().sort((a,b)=>b[1]-a[1])[0];const s=sku(k);if(!s)return;const sg=suggestBins(s,over,[c]);if(sg.out.length)res.push({type:'Bin terlebih penuh',score:3,sku:k,from:c,to:sg.out,qty:over,why:`${fmt(binQty(c))} helai, had ${binCap(c)}`})}});
+  allCodes.forEach(c=>{const over=binQty(c)-binCap(c);if(over>0){const [k]=binItems(c).slice().sort((a,b)=>b[1]-a[1])[0];const s=sku(k);if(!s)return;const sg=suggestBins(s,over,[c]);if(sg.out.length)res.push({type:'Overfull bin',score:3,sku:k,from:c,to:sg.out,qty:over,why:`${fmt(binQty(c))} pcs, limit ${binCap(c)}`})}});
   // 3) same SKU split across bins that would fit in one
   const seen=new Set();allCodes.forEach(c=>binItems(c).forEach(([k])=>{if(seen.has(k))return;seen.add(k);const L=skuLocs(k);if(L.length<2)return;const s=sku(k);if(!s)return;
     const tot=L.reduce((a,x)=>a+x.qty,0);const main=L.slice().sort((a,b)=>b.qty-a.qty)[0];if(binQty(main.code)-main.qty+tot<=binCap(main.code)){
-      L.filter(x=>x.code!==main.code).forEach(x=>res.push({type:'Satukan SKU',score:2,sku:k,from:x.code,to:[{code:main.code,qty:x.qty,why:'Bin utama SKU ini'}],qty:x.qty,why:`SKU ada di ${L.length} bin, muat dalam satu`}))}}));
+      L.filter(x=>x.code!==main.code).forEach(x=>res.push({type:'Merge SKU',score:2,sku:k,from:x.code,to:[{code:main.code,qty:x.qty,why:'Main bin for this SKU'}],qty:x.qty,why:`SKU is in ${L.length} bins, fits in one`}))}}));
   // 4) two low bins of the same group in the same rack
   const byG={};allCodes.forEach(c=>{const g=binGroup(c);if(!g)return;const b=BINS.get(c);const key=g+'@'+b.rack;(byG[key]=byG[key]||[]).push(c)});
   Object.values(byG).forEach(cs=>{const low=cs.filter(c=>binQty(c)<=binCap(c)*0.4).sort((a,b)=>binQty(a)-binQty(b));
-    while(low.length>=2){const a=low.shift(),b=low.pop();if(binQty(a)+binQty(b)<=binCap(b)){binItems(a).forEach(([k,q])=>res.push({type:'Gabung bin separuh kosong',score:1,sku:k,from:a,to:[{code:b,qty:q,why:'Bin sekumpulan dalam rak sama'}],qty:q,why:`${a} (${binQty(a)}) + ${b} (${binQty(b)}) muat satu bin; ${a} jadi kosong`}))}else break}});
+    while(low.length>=2){const a=low.shift(),b=low.pop();if(binQty(a)+binQty(b)<=binCap(b)){binItems(a).forEach(([k,q])=>res.push({type:'Merge half-empty bins',score:1,sku:k,from:a,to:[{code:b,qty:q,why:'Same-group bin in the same rack'}],qty:q,why:`${a} (${binQty(a)}) + ${b} (${binQty(b)}) fit in one bin; ${a} becomes empty`}))}else break}});
   return res.sort((a,b)=>b.score-a.score)}
 function fillLevel(code){const q=binQty(code);if(!q)return 'empty';const r=q/binCap(code);return r>=0.9?'full':r>=0.5?'mid':'low'}
 let mapPicked=null,mapHL=[];
@@ -736,12 +736,12 @@ function Plan2D(host,onRack){
     parts.push(`<rect x="${B[0]}" y="${B[1]}" width="${B[2]-B[0]}" height="${B[3]-B[1]}" fill="var(--floor)" stroke="var(--room)" stroke-width="3"/>`);
     if(floor===1)PLAN_DATA.deck.forEach(d=>parts.push(`<rect x="${d[0]}" y="${d[1]}" width="${d[2]-d[0]}" height="${d[3]-d[1]}" fill="var(--chip)" stroke="none"/>`));
     PLAN_DATA.rooms.forEach(r=>parts.push(`<g opacity="${floor===1?0.45:1}"><rect x="${r[0]}" y="${r[1]}" width="${r[2]-r[0]}" height="${r[3]-r[1]}" fill="var(--chip)" stroke="var(--line)" stroke-width="1.5"/><text x="${(r[0]+r[2])/2}" y="${(r[1]+r[3])/2}" font-size="${Math.min(10,(r[2]-r[0])/8)}" fill="var(--muted)" text-anchor="middle" dominant-baseline="middle" font-weight="600">${esc(r[4])}</text></g>`));
-    PLAN_DATA.stairs.forEach(s=>parts.push(`<rect x="${Math.min(s[0],s[2])}" y="${s[1]}" width="${Math.abs(s[2]-s[0])}" height="${s[3]-s[1]}" fill="#2f5fa8" opacity=".7"/><text x="${(s[0]+s[2])/2}" y="${(s[1]+s[3])/2}" font-size="7" fill="#fff" text-anchor="middle" dominant-baseline="middle">Tangga</text>`));
+    PLAN_DATA.stairs.forEach(s=>parts.push(`<rect x="${Math.min(s[0],s[2])}" y="${s[1]}" width="${Math.abs(s[2]-s[0])}" height="${s[3]-s[1]}" fill="#2f5fa8" opacity=".7"/><text x="${(s[0]+s[2])/2}" y="${(s[1]+s[3])/2}" font-size="7" fill="#fff" text-anchor="middle" dominant-baseline="middle">Stairs</text>`));
     PLAN_DATA.pillars.forEach(([x,y])=>parts.push(`<rect x="${x-9}" y="${y-9}" width="18" height="18" fill="var(--room)"/>`));
     PLAN_DATA.racks.filter(p=>p.t===floor).forEach(p=>{const r=rb.get(p.id);if(!r)return;const [x1,y1,x2,y2]=p.f;const w=x2-x1,h=y2-y1;
       let fill,tip;
-      if(mode==='edit'){fill=sel.has(p.id)?'#ffd43b':rowColor(r.r);tip=`${r.c} · row ${r.r} · ${r.l} tingkat × ${r.n} bin`}
-      else{const u=rackUse(r);fill=useColor(u);tip=`${r.c} · ${u.used}/${u.tot} bin diguna · ${fmt(u.q)} helai`}
+      if(mode==='edit'){fill=sel.has(p.id)?'#ffd43b':rowColor(r.r);tip=`${r.c} · row ${r.r} · ${r.l} levels × ${r.n} bin`}
+      else{const u=rackUse(r);fill=useColor(u);tip=`${r.c} · ${u.used}/${u.tot} bins used · ${fmt(u.q)} pcs`}
       const isCur=mode!=='edit'&&cur===p.id,isHl=mode!=='edit'&&hlR.has(p.id);const strong=isCur||isHl;
       const stroke=isCur?'#ffffff':isHl?STATUS.mark:'rgba(0,0,0,.35)';
       const vert=h>w,len=vert?h:w,dep=vert?w:h;const fs=Math.max(3,Math.min(dep*0.62,len/(r.c.length*0.62)));
@@ -779,10 +779,10 @@ function rackGrid(r,{pick,hl}={}){
       const bg={empty:'color-mix(in srgb,var(--s-empty) 22%,var(--panel2))',low:STATUS.low,mid:STATUS.mid,full:STATUS.full}[f];const ink=f==='empty'?'var(--s-empty)':(f==='mid'?'#1b2229':'#fff');
       const ring=code===pick?'outline:3px solid var(--fg);outline-offset:1px;':(hl&&hl.includes(code)?'outline:3px solid #a855f7;outline-offset:1px;':'');
       h+=`<button data-bin="${esc(code)}" title="${esc(code)}" style="${ring}background:${bg};color:${ink};border:0;border-radius:5px;padding:6px 0;min-height:38px;font:600 12px var(--body);cursor:pointer;line-height:1.1">${b}<br><span style="font-weight:700">${q||''}</span></button>`}}
-  return h+`</div><div class="small muted" style="margin-top:6px">Nombor atas = bin, nombor bawah = helai. Tingkat paling atas di atas.</div>`}
+  return h+`</div><div class="small muted" style="margin-top:6px">Top number = bin, bottom number = pieces. Top level is shown first.</div>`}
 
 // ---------- rack settings (visual) ----------
-function askInline(el,text,yes){el.innerHTML=`<div class="card" style="margin:6px 0 0;border-color:var(--warn)"><div style="white-space:pre-line">${esc(text)}</div><div class="row" style="margin-top:8px"><button class="btn pri" data-y>Ya, teruskan</button><button class="btn" data-n>Batal</button></div></div>`;
+function askInline(el,text,yes){el.innerHTML=`<div class="card" style="margin:6px 0 0;border-color:var(--warn)"><div style="white-space:pre-line">${esc(text)}</div><div class="row" style="margin-top:8px"><button class="btn pri" data-y>Yes, continue</button><button class="btn" data-n>Cancel</button></div></div>`;
   el.querySelector('[data-y]').onclick=()=>{el.innerHTML='';yes()};el.querySelector('[data-n]').onclick=()=>{el.innerHTML=''}}
 let rakSelK=[],rakMulti=false,rakMsg='';
 const RK=k=>RACKS.find(r=>r.k===k);
@@ -800,7 +800,7 @@ function putRack(cfg,oldR,newR){
   const base=RACKS_BASE.find(x=>x.k===oldR.k);if(!base)return;const d={};
   ['c','r','l','n'].forEach(f=>{if(newR[f]!==base[f])d[f]=newR[f]});delete cfg.edit[base.c];
   if(Object.keys(d).length)cfg.edit[oldR.k]=d;else delete cfg.edit[oldR.k]}
-async function saveRackCfg(cfg,msg){const ok=await guarded(()=>db.doc('settings/racks').set({...cfg,by:who.value.trim()||'Tanpa nama',at:Date.now()}),msg);
+async function saveRackCfg(cfg,msg){const ok=await guarded(()=>db.doc('settings/racks').set({...cfg,by:who.value.trim()||'Anonymous',at:Date.now()}),msg);
   if(ok){applyRackCfg(cfg);rakSelK=rakSelK.filter(k=>RK(k));if(MAP){MAP.dispose();MAP=null}rakMsg='✓ '+msg;render()}return ok}
 function renderRak(){main.className='';ensureMap(true);
   const rows=[...new Set(RACKS.map(r=>r.r))].sort(natSort);
@@ -809,40 +809,40 @@ function renderRak(){main.className='';ensureMap(true);
   const off=RACKS.filter(r=>!r.id).sort((a,b)=>natSort(a.c,b.c));
   const nEdit=Object.keys(RACK_CFG.edit).length,nAdd=Object.keys(RACK_CFG.add).length;
   const tq=T.reduce((a,r)=>a+rackQty(r),0);
-  main.innerHTML=`<section class="card"><h2>Rak dipilih${T.length?` (${T.length})`:''}</h2>
-    ${!T.length?`<p class="small muted">Klik rak dalam peta untuk pilih. Tekan <b>Pilih banyak</b> di atas peta untuk pilih beberapa rak, atau klik nama row di bawah untuk pilih satu row.</p>`:`
+  main.innerHTML=`<section class="card"><h2>Selected racks${T.length?` (${T.length})`:''}</h2>
+    ${!T.length?`<p class="small muted">Click a rack on the map to select it. Press <b>Multi-select</b> above the map to pick several racks, or click a row name below to select a whole row.</p>`:`
     <div class="chips">${T.map(r=>`<span>${esc(r.c)}</span>`).join('')}</div>
-    <p class="small muted" style="margin:6px 0 0">${T.map(r=>r.f===2?'Level M':'Ground floor').filter((v,i,a)=>a.indexOf(v)===i).join(' / ')} · ${fmt(tq)} helai dalam rak ini${T.some(r=>!r.id)?' · ada rak tiada dalam peta 3D':''}</p>
+    <p class="small muted" style="margin:6px 0 0">${T.map(r=>r.f===2?'Level M':'Ground floor').filter((v,i,a)=>a.indexOf(v)===i).join(' / ')} · ${fmt(tq)} pcs in these racks${T.some(r=>!r.id)?' · some racks are not on the 3D map':''}</p>
     <div class="fgrid">
-      ${one?`<label for="ec">Kod rak</label><input id="ec" value="${esc(one.c)}" autocomplete="off">`:
-      `<span>Kod rak</span><label class="row small"><input type="checkbox" id="eren"> Tukar kod ikut urutan klik</label>
-       <span></span><div class="row" id="erenw" hidden><input id="epre" value="${esc(same('r')||T[0].r)}" style="width:90px" aria-label="Awalan kod"><input id="estart" type="number" min="0" value="1" style="width:80px" aria-label="Nombor mula"><span class="small muted" id="eprev"></span></div>`}
-      <label for="er">Row</label><div class="row"><select id="er" class="grow">${one?'':'<option value="">(kekal)</option>'}${rows.map(r=>`<option${(one&&one.r===r)||(!one&&same('r')===r&&false)?' selected':''}>${esc(r)}</option>`).join('')}<option value="__new">Row baru…</option></select><input id="ern" placeholder="Nama row" hidden style="width:120px"></div>
-      <label for="el">Tingkat</label><input id="el" type="number" min="1" max="12" value="${same('l')}" placeholder="${T.length>1?'(kekal – berbeza)':''}">
-      <label for="en">Bin / tingkat</label><input id="en" type="number" min="1" max="20" value="${same('n')}" placeholder="${T.length>1?'(kekal – berbeza)':''}">
+      ${one?`<label for="ec">Rack code</label><input id="ec" value="${esc(one.c)}" autocomplete="off">`:
+      `<span>Rack code</span><label class="row small"><input type="checkbox" id="eren"> Renumber in click order</label>
+       <span></span><div class="row" id="erenw" hidden><input id="epre" value="${esc(same('r')||T[0].r)}" style="width:90px" aria-label="Code prefix"><input id="estart" type="number" min="0" value="1" style="width:80px" aria-label="Start number"><span class="small muted" id="eprev"></span></div>`}
+      <label for="er">Row</label><div class="row"><select id="er" class="grow">${one?'':'<option value="">(keep)</option>'}${rows.map(r=>`<option${(one&&one.r===r)||(!one&&same('r')===r&&false)?' selected':''}>${esc(r)}</option>`).join('')}<option value="__new">New row…</option></select><input id="ern" placeholder="Row name" hidden style="width:120px"></div>
+      <label for="el">Levels</label><input id="el" type="number" min="1" max="12" value="${same('l')}" placeholder="${T.length>1?'(keep – mixed)':''}">
+      <label for="en">Bins / level</label><input id="en" type="number" min="1" max="20" value="${same('n')}" placeholder="${T.length>1?'(keep – mixed)':''}">
     </div>
-    <div class="row" style="margin-top:10px"><button class="btn pri" id="esave">Simpan</button><button class="btn" id="eclr">Kosongkan pilihan</button>
-      ${T.some(r=>!r.added&&RACK_CFG.edit[r.k])?'<button class="btn" id="ereset">Kembali asal</button>':''}${T.every(r=>r.added)?'<button class="btn" id="edel">Padam rak</button>':''}</div>`}
+    <div class="row" style="margin-top:10px"><button class="btn pri" id="esave">Save</button><button class="btn" id="eclr">Clear selection</button>
+      ${T.some(r=>!r.added&&RACK_CFG.edit[r.k])?'<button class="btn" id="ereset">Reset to original</button>':''}${T.every(r=>r.added)?'<button class="btn" id="edel">Delete rack</button>':''}</div>`}
     <div id="emsg" class="small" style="margin-top:6px">${rakMsg?esc(rakMsg):''}</div>
   </section>
-  <section class="card"><h2>Row</h2><p class="small muted" style="margin:0 0 6px">Klik row untuk pilih semua rak dalam row tu.</p><div class="rowlist">
-    ${rows.map(row=>{const rs=RACKS.filter(r=>r.r===row);return `<button class="rowbtn" data-row="${esc(row)}"><span class="sw" style="background:${esc(rowColor(row))}">${esc(row)}</span><span>${rs.length} rak</span><span class="meta">${fmt(rs.reduce((a,r)=>a+r.l*r.n,0))} bin</span></button>`}).join('')}
+  <section class="card"><h2>Row</h2><p class="small muted" style="margin:0 0 6px">Click a row to select all its racks.</p><div class="rowlist">
+    ${rows.map(row=>{const rs=RACKS.filter(r=>r.r===row);return `<button class="rowbtn" data-row="${esc(row)}"><span class="sw" style="background:${esc(rowColor(row))}">${esc(row)}</span><span>${rs.length} racks</span><span class="meta">${fmt(rs.reduce((a,r)=>a+r.l*r.n,0))} bin</span></button>`}).join('')}
   </div></section>
-  <section class="card"><h2>Rak tiada dalam peta 3D</h2>
-    ${off.length?`<div class="tbl"><table><thead><tr><th>Rak</th><th>Row</th><th class="n">Tingkat × bin</th><th class="n">Helai</th></tr></thead><tbody>
-      ${off.map(r=>`<tr><td><a href="#" data-k="${esc(r.k)}">${esc(r.c)}</a>${r.added?' <span class="pill">baru</span>':''}</td><td>${esc(r.r)}</td><td class="n">${r.l} × ${r.n}</td><td class="n">${fmt(rackQty(r))}</td></tr>`).join('')}</tbody></table></div>
-      <p class="small muted">Rak ini ada dalam report atau ditambah sendiri, tapi belum ada kedudukan dalam peta. Kalau satu rak dalam peta sebenarnya rak ini, klik rak tu dalam peta dan tukar kodnya. Stok akan terus nampak di situ.</p>`:'<p class="small muted">Tiada.</p>'}
-    <h3 style="margin:14px 0 6px;font-size:15px">Tambah rak baru</h3>
-    <div class="row"><input id="ac" placeholder="Kod rak (cth 1-E14)" style="width:150px" autocomplete="off">
-      <select id="ar">${rows.map(r=>`<option>${esc(r)}</option>`).join('')}<option value="__new">Row baru…</option></select>
-      <input id="arn" placeholder="Nama row baru" hidden style="width:130px">
+  <section class="card"><h2>Racks not on the 3D map</h2>
+    ${off.length?`<div class="tbl"><table><thead><tr><th>Rack</th><th>Row</th><th class="n">Levels × bins</th><th class="n">Pcs</th></tr></thead><tbody>
+      ${off.map(r=>`<tr><td><a href="#" data-k="${esc(r.k)}">${esc(r.c)}</a>${r.added?' <span class="pill">new</span>':''}</td><td>${esc(r.r)}</td><td class="n">${r.l} × ${r.n}</td><td class="n">${fmt(rackQty(r))}</td></tr>`).join('')}</tbody></table></div>
+      <p class="small muted">These racks are in the report or were added manually but have no position on the map. If a rack on the map is actually one of these, click it and change its code. The stock will then show there.</p>`:'<p class="small muted">None.</p>'}
+    <h3 style="margin:14px 0 6px;font-size:15px">Add a new rack</h3>
+    <div class="row"><input id="ac" placeholder="Rack code (e.g. 1-E14)" style="width:150px" autocomplete="off">
+      <select id="ar">${rows.map(r=>`<option>${esc(r)}</option>`).join('')}<option value="__new">New row…</option></select>
+      <input id="arn" placeholder="New row name" hidden style="width:130px">
       <select id="af"><option value="1">Ground floor</option><option value="2">Level M</option></select></div>
-    <div class="row" style="margin-top:8px"><label>Tingkat <input id="al" type="number" min="1" max="12" value="6" style="width:72px"></label>
-      <label>Bin <input id="an" type="number" min="1" max="20" value="8" style="width:72px"></label><button class="btn pri" id="ago">Tambah</button></div>
+    <div class="row" style="margin-top:8px"><label>Levels <input id="al" type="number" min="1" max="12" value="6" style="width:72px"></label>
+      <label>Bins <input id="an" type="number" min="1" max="20" value="8" style="width:72px"></label><button class="btn pri" id="ago">Add</button></div>
     <div id="amsg" class="small"></div>
-    <p class="small muted">Rak baru terus boleh guna untuk simpan barang, cari dan stock check. Beritahu Claude di mana rak tu supaya dilukis dalam peta.</p>
+    <p class="small muted">A new rack can be used straight away for storing, finding and stock checks. Tell Claude where it is so it can be drawn on the map.</p>
   </section>
-  ${nEdit||nAdd?`<p class="small muted">${nEdit} rak diubah dan ${nAdd} rak ditambah sejak susun atur asal.</p>`:''}`;
+  ${nEdit||nAdd?`<p class="small muted">${nEdit} racks changed and ${nAdd} racks added since the original layout.</p>`:''}`;
   // events
   main.querySelectorAll('[data-row]').forEach(b=>b.onclick=()=>{rakMsg='';rakSelK=RACKS.filter(r=>r.r===b.dataset.row).sort((a,b2)=>natSort(a.c,b2.c)).map(r=>r.k);{const rs=RACKS.filter(r=>r.r===b.dataset.row&&r.id);if(rs.length){const fl=rs.some(x=>x.f===1)?1:2;setTierBtn(fl===2?'up':'lo');if(MAP)MAP.setTier(fl===2?'up':'lo');if(PLAN)PLAN.focus(rs.filter(x=>x.f===fl).map(x=>x.id))}}if(MAP)MAP.setSel(rakSelK.filter(k=>!k.includes(':')));renderRak()});
   main.querySelectorAll('[data-k]').forEach(a=>a.onclick=e=>{e.preventDefault();rakToggle(a.dataset.k)});
@@ -850,9 +850,9 @@ function renderRak(){main.className='';ensureMap(true);
   $('#ac').oninput=()=>{const v=$('#ac').value.trim().toUpperCase();const m=rows.filter(r=>v.startsWith(r)&&/^\d/.test(v.slice(r.length))).sort((x,y)=>y.length-x.length)[0];if(m){ar.value=m;$('#arn').hidden=true}};
   $('#ago').onclick=async()=>{const c=$('#ac').value.trim().toUpperCase().replace(/\s+/g,'');const row=ar.value==='__new'?$('#arn').value.trim():ar.value;
     const f=+$('#af').value,l=+$('#al').value,n=+$('#an').value;const msg=t=>$('#amsg').innerHTML=`<span style="color:var(--bad)">${esc(t)}</span>`;
-    if(!codeOk(c))return msg('Kod rak tak sah. Guna huruf, nombor dan "-" sahaja (cth 1-E14).');
-    if(RACKS.some(r=>r.c===c&&!r.orphan))return msg(`Kod ${c} sudah ada.`);if(!row)return msg('Isi nama row.');if(!(l>=1&&l<=12&&n>=1&&n<=20))return msg('Tingkat mesti 1–12 dan bin 1–20.');
-    const cfg=cfgClone();cfg.add[c]={r:row,f,l,n};rakSelK=['a:'+c];await saveRackCfg(cfg,`Rak ${c} ditambah`)};
+    if(!codeOk(c))return msg('Invalid rack code. Use letters, numbers and "-" only (e.g. 1-E14).');
+    if(RACKS.some(r=>r.c===c&&!r.orphan))return msg(`Code ${c} already exists.`);if(!row)return msg('Enter a row name.');if(!(l>=1&&l<=12&&n>=1&&n<=20))return msg('Levels must be 1–12 and bins 1–20.');
+    const cfg=cfgClone();cfg.add[c]={r:row,f,l,n};rakSelK=['a:'+c];await saveRackCfg(cfg,`Rack ${c} added`)};
   if(!T.length)return;
   const er=$('#er');er.onchange=()=>{$('#ern').hidden=er.value!=='__new'};
   const eren=$('#eren');
@@ -862,38 +862,38 @@ function renderRak(){main.className='';ensureMap(true);
   const err=t=>{rakMsg='';$('#emsg').innerHTML=`<span style="color:var(--bad)">${esc(t)}</span>`};
   $('#esave').onclick=async()=>{
     const lv=$('#el').value.trim(),nv=$('#en').value.trim();const l=lv?+lv:null,n=nv?+nv:null;
-    if(l!==null&&!(l>=1&&l<=12))return err('Tingkat mesti 1–12.');if(n!==null&&!(n>=1&&n<=20))return err('Bin mesti 1–20.');
-    let row=er.value==='__new'?$('#ern').value.trim():er.value;if(er.value==='__new'&&!row)return err('Isi nama row baru.');
+    if(l!==null&&!(l>=1&&l<=12))return err('Levels must be 1–12.');if(n!==null&&!(n>=1&&n<=20))return err('Bins must be 1–20.');
+    let row=er.value==='__new'?$('#ern').value.trim():er.value;if(er.value==='__new'&&!row)return err('Enter the new row name.');
     const newC={};
-    if(one){const c=$('#ec').value.trim().toUpperCase().replace(/\s+/g,'');if(!codeOk(c))return err('Kod rak tak sah. Guna huruf, nombor dan "-" (cth 1-A3).');if(c!==one.c)newC[one.k]=c}
-    else if(eren&&eren.checked){const p=$('#epre').value.trim().toUpperCase(),s0=+$('#estart').value||0;T.forEach((r,i)=>newC[r.k]=p+(s0+i));if(Object.values(newC).some(c=>!codeOk(c)))return err('Awalan kod tak sah.')}
+    if(one){const c=$('#ec').value.trim().toUpperCase().replace(/\s+/g,'');if(!codeOk(c))return err('Invalid rack code. Use letters, numbers and "-" (e.g. 1-A3).');if(c!==one.c)newC[one.k]=c}
+    else if(eren&&eren.checked){const p=$('#epre').value.trim().toUpperCase(),s0=+$('#estart').value||0;T.forEach((r,i)=>newC[r.k]=p+(s0+i));if(Object.values(newC).some(c=>!codeOk(c)))return err('Invalid code prefix.')}
     // proposed state
     const prop=T.map(r=>({o:r,n:{...r,c:newC[r.k]||r.c,r:row||r.r,l:l??r.l,n:n??r.n}}));
     const tk=new Set(T.map(r=>r.k));let swap=null;
     const others=RACKS.filter(r=>!tk.has(r.k)&&!r.orphan&&(r.id||r.added));
     if(one&&newC[one.k]){const y=others.find(r=>r.c===newC[one.k]);if(y){swap={o:y,n:{...y,c:one.c}}}}
-    else{const clash=others.filter(r=>Object.values(newC).includes(r.c)).map(r=>r.c);if(clash.length)return err(`Kod ini sudah digunakan rak lain: ${clash.join(', ')}. Tukar kod rak tu dulu.`)}
+    else{const clash=others.filter(r=>Object.values(newC).includes(r.c)).map(r=>r.c);if(clash.length)return err(`These codes are used by other racks: ${clash.join(', ')}. Change those rack codes first.`)}
     const finals=[...prop,...(swap?[swap]:[])];
     const all=RACKS.filter(r=>!r.orphan&&(r.id||r.added)&&!finals.some(f=>f.o.k===r.k)).map(r=>r.c).concat(finals.map(f=>f.n.c));
-    const dup=all.filter((c,i)=>all.indexOf(c)!==i);if(dup.length)return err(`Kod berulang: ${[...new Set(dup)].join(', ')}.`);
+    const dup=all.filter((c,i)=>all.indexOf(c)!==i);if(dup.length)return err(`Duplicate codes: ${[...new Set(dup)].join(', ')}.`);
     // stock safety
     const lost=prop.filter(p=>p.n.c===p.o.c).flatMap(p=>rackStock(p.o.c,p.n.l,p.n.n));
-    if(lost.length)return err(`Tak boleh simpan. Bin ini masih ada barang dan akan hilang: ${lost.slice(0,10).join(', ')}${lost.length>10?' …':''}. Pindahkan barang dulu.`);
+    if(lost.length)return err(`Cannot save. These bins still hold stock and would disappear: ${lost.slice(0,10).join(', ')}${lost.length>10?' …':''}. Move the stock first.`);
     const moved=finals.filter(f=>f.n.c!==f.o.c&&rackQty(f.o)>0);
     const commit=async()=>{
     const cfg=cfgClone();finals.forEach(f=>putRack(cfg,f.o,f.n));
     rakSelK=finals.filter(f=>tk.has(f.o.k)).map(f=>f.o.added?'a:'+f.n.c:f.o.k);
-    await saveRackCfg(cfg,(T.length>1?`${T.length} rak dikemas kini`:`Rak ${prop[0].n.c} dikemas kini`)+(swap?`. Rak yang dulu berkod ${swap.o.c} sekarang ${swap.n.c}`:''))};
-    if(moved.length)askInline($('#emsg'),`Barang ikut kod bin, bukan kedudukan dalam peta.\n\n${moved.map(f=>`Stok ${f.o.c} (${fmt(rackQty(f.o))} helai) kekal dengan kod ${f.o.c}, tak ikut rak yang ditukar kod`).join('\n')}\n\nTeruskan?`.replace('\n\nTeruskan?',''),commit);else commit()};
+    await saveRackCfg(cfg,(T.length>1?`${T.length} racks updated`:`Rack ${prop[0].n.c} updated`)+(swap?`. The rack formerly coded ${swap.o.c} is now ${swap.n.c}`:''))};
+    if(moved.length)askInline($('#emsg'),`Stock follows the bin code, not the position on the map.\n\n${moved.map(f=>`Stock ${f.o.c} (${fmt(rackQty(f.o))} pcs) stays with code ${f.o.c}, not with the renamed rack`).join('\n')}\n\nTeruskan?`.replace('\n\nTeruskan?',''),commit);else commit()};
   const rr=$('#ereset');if(rr)rr.onclick=async()=>{const cfg=cfgClone();const tgt=T.filter(r=>!r.added);
     const lost=tgt.flatMap(r=>{const b=RACKS_BASE.find(x=>x.k===r.k);return b&&b.c===r.c?rackStock(r.c,b.l,b.n):[]});
-    if(lost.length)return err(`Bin ini masih ada barang: ${lost.slice(0,10).join(', ')}. Pindahkan dulu.`);
+    if(lost.length)return err(`These bins still hold stock: ${lost.slice(0,10).join(', ')}. Move it first.`);
     tgt.forEach(r=>{delete cfg.edit[r.k]});
     const test=RACKS.filter(r=>!r.orphan&&(r.id||r.added)).map(r=>{if(!tgt.some(t=>t.k===r.k))return r.c;return RACKS_BASE.find(x=>x.k===r.k).c});
-    const dup=test.filter((c,i)=>test.indexOf(c)!==i);if(dup.length)return err(`Tak boleh kembali asal: kod ${[...new Set(dup)].join(', ')} sedang digunakan rak lain.`);
-    await saveRackCfg(cfg,`${tgt.length} rak kembali asal`)};
-  const ed=$('#edel');if(ed)ed.onclick=async()=>{const st2=T.filter(r=>rackQty(r)>0);if(st2.length)return err(`Rak ini masih ada barang: ${st2.map(r=>r.c).join(', ')}. Pindahkan dulu.`);
-    askInline($('#emsg'),`Padam ${T.map(r=>r.c).join(', ')}?`,async()=>{const cfg=cfgClone();T.forEach(r=>delete cfg.add[r.c]);rakSelK=[];await saveRackCfg(cfg,`${T.length} rak dipadam`)})};
+    const dup=test.filter((c,i)=>test.indexOf(c)!==i);if(dup.length)return err(`Cannot reset: codes ${[...new Set(dup)].join(', ')} are used by other racks.`);
+    await saveRackCfg(cfg,`${tgt.length} racks reset to original`)};
+  const ed=$('#edel');if(ed)ed.onclick=async()=>{const st2=T.filter(r=>rackQty(r)>0);if(st2.length)return err(`These racks still hold stock: ${st2.map(r=>r.c).join(', ')}. Move it first.`);
+    askInline($('#emsg'),`Delete ${T.map(r=>r.c).join(', ')}?`,async()=>{const cfg=cfgClone();T.forEach(r=>delete cfg.add[r.c]);rakSelK=[];await saveRackCfg(cfg,`${T.length} racks deleted`)})};
 }
 
 // ---------- weekly random check ----------
@@ -903,14 +903,14 @@ function seeded(seed){let h=2166136261;for(const ch of seed)h=Math.imul(h^ch.cha
 const main=$('#main');
 function render(){document.querySelectorAll('nav button').forEach(b=>b.setAttribute('aria-selected',b.dataset.tab===tab));
   const q=Object.keys(st.queue).length;$('#bq').hidden=!q;$('#bq').textContent=q;
-  if(!st.ready.m){main.className='';main.innerHTML='<div class="card"><p class="empty">Memuatkan data stok…</p></div>';return}
-  const SUB={peta:'Peta Gudang · lokasi dan penggunaan bin',check:'Stock Check · kiraan stok',cari:'Cari Bin · cari SKU atau lokasi',xfer:'Transfer Bin · cadangan susunan untuk senang pick',upload:'Upload Stok · kemas kini data',cap:'Kapasiti Bin · helai setiap bin',rak:'Tetapan Rak · susun atur dan kod rak',masuk:'Barang masuk',pindah:'Cadangan pindah'};$('#subtitle').textContent=SUB[tab]||'';
+  if(!st.ready.m){main.className='';main.innerHTML='<div class="card"><p class="empty">Loading stock data…</p></div>';return}
+  const SUB={peta:'Warehouse Map · bin locations and usage',check:'Stock Check · stock counts',cari:'Find Bin · find an SKU or location',xfer:'Transfer Bin · easy-pick layout suggestions',upload:'Upload Stock · update data',cap:'Bin Capacity · pieces per bin',rak:'Rack Settings · layout and rack codes',masuk:'Incoming',pindah:'Move suggestions'};$('#subtitle').textContent=SUB[tab]||'';
   $('#mapwrap').hidden=false;$('#wrap').classList.add('side');$('#wrap').classList.toggle('compact',tab!=='peta'&&tab!=='rak');
   document.documentElement.style.setProperty('--hdr',document.querySelector('header').offsetHeight+'px');
   ({xfer:window.renderXfer,cap:window.renderCap,rak:renderRak,peta:renderPeta,masuk:renderMasuk,pindah:renderPindah,check:window.renderCheck,cari:window.renderCari,upload:window.renderUpload}[tab])()}
 document.querySelectorAll('nav button').forEach(b=>b.onclick=()=>{if(tab!==b.dataset.tab){mapRack=null;mapPicked=null;mapHL=[];locQuiet=false;window.scrollTo(0,0)}tab=b.dataset.tab;try{localStorage.setItem('pg-tab',tab)}catch(e){}render()});
 const skuOptions=()=>`<datalist id="skus">${Object.keys(st.master).slice(0,4000).map(k=>`<option value="${esc(k)}">`).join('')}</datalist>`;
-function sugHTML(s,qty,sg){return `<div class="list">${sg.out.map(o=>`<div class="sug"><span class="code">${esc(o.code)}</span> · <b>${fmt(o.qty)}</b> helai<div class="small muted">${esc(o.why)} · ${binItems(o.code).length?`ada ${fmt(binQty(o.code))}/${binCap(o.code)}`:'kosong'}</div></div>`).join('')}${sg.left>0?`<div class="pill bad">Tiada bin untuk ${fmt(sg.left)} helai lagi</div>`:''}</div>`}
+function sugHTML(s,qty,sg){return `<div class="list">${sg.out.map(o=>`<div class="sug"><span class="code">${esc(o.code)}</span> · <b>${fmt(o.qty)}</b> pcs<div class="small muted">${esc(o.why)} · ${binItems(o.code).length?`has ${fmt(binQty(o.code))}/${binCap(o.code)}`:'empty'}</div></div>`).join('')}${sg.left>0?`<div class="pill bad">Tiada bin untuk ${fmt(sg.left)} pcs lagi</div>`:''}</div>`}
 function skuLine(s){return `<div class="t">${esc(s.sku)}</div><div class="small muted">${esc(s.desc)}</div><div class="row small"><span class="pill">${esc(s.cat)}</span><span class="pill">${esc(s.size)}</span><span class="pill">${esc(s.brand)}</span>${s.kol?`<span class="pill">Koleksi ${esc(s.kol)}</span>`:''}${isCekak(s)?'<span class="pill">Cekak Musang · maks 30</span>':''}</div>`}
 
 let _hlKey='',locQuiet=false;
@@ -920,26 +920,26 @@ function setTierBtn(t){document.querySelectorAll('.mtools [data-t]').forEach(x=>
 function mapClickRack(rid){locQuiet=false;if(tab==='rak'){rakToggle(rid);return}const r=RACKS.find(x=>x.id===rid);if(!r)return;mapRack=r.c;mapPicked=null;render()}
 function openOnMap(code,noRender){const r=rackOfCode(code);if(!r)return;mapRack=r.c;mapPicked=code;if(r.id){setTierBtn(r.f===2?'up':'lo');if(PLAN&&VIEW==='2d')PLAN.focus([r.id]);if(MAP&&VIEW==='3d'){MAP.setTier(r.f===2?'up':'lo');MAP.pick(code);MAP.focus(code)}}if(!noRender)render()}
 // selected rack / bin card, shown on top of whichever panel is open
-function locCardsHTML(){let pick='';const SC={empty:'var(--s-empty)',low:'var(--s-low)',mid:'var(--s-mid)',full:'var(--s-full)'},SL={empty:'Kosong',low:'Bawah 50%',mid:'50–89%',full:'Penuh'};
-  const badge=(c,q,cap)=>{const f=fillLevel(c);return `<span class="badge2" style="background:color-mix(in srgb,${SC[f]} 22%,transparent);color:${SC[f]}">${q>cap?'Lebih kapasiti':SL[f]}</span>`};
+function locCardsHTML(){let pick='';const SC={empty:'var(--s-empty)',low:'var(--s-low)',mid:'var(--s-mid)',full:'var(--s-full)'},SL={empty:'Empty',low:'Under 50%',mid:'50–89%',full:'Full'};
+  const badge=(c,q,cap)=>{const f=fillLevel(c);return `<span class="badge2" style="background:color-mix(in srgb,${SC[f]} 22%,transparent);color:${SC[f]}">${q>cap?'Over capacity':SL[f]}</span>`};
   if(mapPicked&&BINS.get(mapPicked)){const b=BINS.get(mapPicked),it=binItems(mapPicked),q=binQty(mapPicked),cap=binCap(mapPicked);
     pick=`<section class="card"><div class="pickhd"><h2>${esc(mapPicked)}</h2>${badge(mapPicked,q,cap)}</div>
-      <div class="small muted">Row ${esc(b.row)} · ${b.floor===2?'Level M':'Ground floor'} · <b style="color:var(--fg)">${fmt(q)} / ${cap}</b> helai${it.length?' · '+Math.round(q/cap*100)+'% penuh':''}</div>
-      <div class="tbl"><table><thead><tr><th>SKU</th><th>Warna · saiz</th><th class="n">Qty</th></tr></thead><tbody>${it.map(([k,n])=>`<tr><td><span class="code">${esc(k)}</span></td><td>${esc(sku(k)?.col||'')} · ${esc(sku(k)?.size||'')}</td><td class="n">${n}</td></tr>`).join('')||'<tr><td colspan="3" class="empty">Bin kosong</td></tr>'}</tbody></table></div></section>`}
+      <div class="small muted">Row ${esc(b.row)} · ${b.floor===2?'Level M':'Ground floor'} · <b style="color:var(--fg)">${fmt(q)} / ${cap}</b> pcs${it.length?' · '+Math.round(q/cap*100)+'% full':''}</div>
+      <div class="tbl"><table><thead><tr><th>SKU</th><th>Colour · size</th><th class="n">Qty</th></tr></thead><tbody>${it.map(([k,n])=>`<tr><td><span class="code">${esc(k)}</span></td><td>${esc(sku(k)?.col||'')} · ${esc(sku(k)?.size||'')}</td><td class="n">${n}</td></tr>`).join('')||'<tr><td colspan="3" class="empty">Empty bin</td></tr>'}</tbody></table></div></section>`}
   const rk=mapRack&&RACKS.find(r=>r.c===mapRack);if(!rk)return pick;const u=rackUse(rk);
-  return `<section class="card"><div class="pickhd"><h2>Rak ${esc(rk.c)}</h2><span class="pill">Row ${esc(rk.r)}</span><span class="pill">${rk.f===2?'Level M':'Ground floor'}</span><button class="btn" data-rkclose>Tutup</button></div>
-    <div class="small muted">${u.used} / ${u.tot} bin diguna · ${u.tot-u.used} kosong · ${fmt(u.q)} helai${rk.id?'':' · tiada dalam peta'}</div>${rackGrid(rk,{pick:mapPicked,hl:tabHL()})}</section>${pick}`}
+  return `<section class="card"><div class="pickhd"><h2>Rack ${esc(rk.c)}</h2><span class="pill">Row ${esc(rk.r)}</span><span class="pill">${rk.f===2?'Level M':'Ground floor'}</span><button class="btn" data-rkclose>Close</button></div>
+    <div class="small muted">${u.used} / ${u.tot} bins used · ${u.tot-u.used} empty · ${fmt(u.q)} pcs${rk.id?'':' · not on the map'}</div>${rackGrid(rk,{pick:mapPicked,hl:tabHL()})}</section>${pick}`}
 function bindLocCards(root){root.querySelectorAll('[data-rkclose]').forEach(b=>b.onclick=()=>{mapRack=null;mapPicked=null;render()});
   root.querySelectorAll('[data-bin]').forEach(b=>b.onclick=()=>{mapPicked=b.dataset.bin;if(MAP)MAP.pick(mapPicked);render()})}
-function walkUI(){const on=!!(MAP&&MAP.walk.on())&&VIEW==='3d';$('#walkpad').hidden=!on;$('#mwalk').setAttribute('aria-pressed',on);$('#mwalk').querySelector('span').textContent=on?'Keluar mod jalan':'Letak orang';
-  $('#mtop').hidden=on||VIEW!=='3d';if(on)$('#wfloor').textContent=MAP.walk.getFloor()===1?'Turun ke Ground floor':'Naik ke Level M'}
+function walkUI(){const on=!!(MAP&&MAP.walk.on())&&VIEW==='3d';$('#walkpad').hidden=!on;$('#mwalk').setAttribute('aria-pressed',on);$('#mwalk').querySelector('span').textContent=on?'Exit walk mode':'Drop person';
+  $('#mtop').hidden=on||VIEW!=='3d';if(on)$('#wfloor').textContent=MAP.walk.getFloor()===1?'Go down to Ground floor':'Go up to Level M'}
 function ensureMap(edit){
   const v=VIEW;
   document.querySelectorAll('.mtools [data-v]').forEach(b=>b.setAttribute('aria-pressed',b.dataset.v===v));
   document.querySelectorAll('.mtools button,.mtools .grp').forEach(b=>{const d=b.dataset;b.hidden=(d['3d']!==undefined&&v!=='3d')||(d['2d']!==undefined&&v!=='2d')||(d.edit!==undefined&&!edit)||(d.fill!==undefined&&edit)||(d.hl!==undefined&&(!mapHL.length||tab==='check'||tab==='xfer'))});
   if(v==='2d'&&curTier()==='all')setTierBtn('lo');
   $('#legedit').hidden=!edit;$('#legfill').hidden=edit;
-  $('#legnote').textContent=v==='2d'?'Warna rak ikut bin diguna:':'';
+  $('#legnote').textContent=v==='2d'?'Rack colour by bins used:':'';
   $('#plan2d').hidden=v!=='2d';
   // wire the toolbar once
   if(!ensureMap.wired){ensureMap.wired=true;
@@ -984,7 +984,7 @@ function ensureMap(edit){
   if(MAP){const k=HL.join(',');if(k!==_hlKey){_hlKey=k;MAP.highlight(HL)}MAP.setMode(edit?'edit':'fill');if(edit)MAP.setSel(selIds);else MAP.paint()}
   walkUI()}
 function renderPeta(){main.className='';ensureMap(false);
-  const t=curTier();const tierLabel=t==='all'?'Semua tingkat':t==='up'?'Level M':'Ground floor';
+  const t=curTier();const tierLabel=t==='all'?'All levels':t==='up'?'Level M':'Ground floor';
   const codes=BIN_ORDER.filter(c=>t==='all'||(t==='lo'?BINS.get(c).floor===1:BINS.get(c).floor===2));
   const cnt={empty:0,low:0,mid:0,full:0};let near=0,over=0;const hot=[];
   codes.forEach(c=>{const f=fillLevel(c);cnt[f]++;if(f==='full'){const q=binQty(c),cap=binCap(c);if(q>cap)over++;else near++;hot.push([c,q,cap])}else if(f==='mid'){hot.push([c,binQty(c),binCap(c)])}});
@@ -993,37 +993,37 @@ function renderPeta(){main.className='';ensureMap(false);
   hot.sort((a,b)=>b[1]/b[2]-a[1]/a[2]);
   const byRow={};codes.forEach(c=>{const r=BINS.get(c).row;const o=byRow[r]=byRow[r]||{n:0,e:0};o.n++;if(!binItems(c).length)o.e++});
   const SC={empty:'var(--s-empty)',low:'var(--s-low)',mid:'var(--s-mid)',full:'var(--s-full)'};
-  const SL={empty:'Kosong',low:'Bawah 50%',mid:'50–89%',full:'Penuh'};
-  const badge=(c,q,cap)=>{const f=fillLevel(c);const ov=q>cap;return `<span class="badge2" style="background:color-mix(in srgb,${SC[f]} 22%,transparent);color:${SC[f]}">${ov?'Lebih kapasiti':SL[f]}</span>`};
+  const SL={empty:'Empty',low:'Under 50%',mid:'50–89%',full:'Full'};
+  const badge=(c,q,cap)=>{const f=fillLevel(c);const ov=q>cap;return `<span class="badge2" style="background:color-mix(in srgb,${SC[f]} 22%,transparent);color:${SC[f]}">${ov?'Over capacity':SL[f]}</span>`};
   const kpi=(icon,col,lab,num,pct,tip)=>`<div class="kpi" title="${esc(tip)}"><div class="hd"><span class="ic" style="background:color-mix(in srgb,${col} 20%,transparent);color:${col}">${ICON[icon]}</span><span class="lab">${lab}</span></div><div class="ft"><span class="num">${fmt(num)}</span>${pct?`<span class="pct" style="color:${col}">${pct}</span>`:''}</div></div>`;
   const showN=renderPeta.all?40:6;
-  main.innerHTML=`<section class="card"><div class="searchbar"><label class="sbox">${ICON.search}<input id="gq" list="gl" placeholder="Cari rak, row atau bin (cth 1-G16)" autocomplete="off" aria-label="Cari lokasi"></label><button class="btn pri" id="ggo">Cari</button></div>
+  main.innerHTML=`<section class="card"><div class="searchbar"><label class="sbox">${ICON.search}<input id="gq" list="gl" placeholder="Find rack, row or bin (e.g. 1-G16)" autocomplete="off" aria-label="Find location"></label><button class="btn pri" id="ggo">Find</button></div>
       <datalist id="gl">${[...new Set(RACKS.map(r=>r.r))].map(r=>`<option value="${esc(r)}">`).join('')}${RACKS.map(r=>`<option value="${esc(r.c)}">`).join('')}</datalist><div id="gmsg" class="small" style="color:var(--warn)"></div></section>
     ${locCardsHTML()}
-    <section class="card"><div class="sechd"><h2>Ringkasan bin</h2><span class="small">${tierLabel}</span></div>
+    <section class="card"><div class="sechd"><h2>Bin summary</h2><span class="small">${tierLabel}</span></div>
       <div class="kpis">
-        ${kpi('box','var(--accent)','Jumlah Bin',codes.length,'','Semua bin di '+tierLabel)}
-        ${kpi('ok','var(--s-empty)','Kosong',cnt.empty,pc(cnt.empty),'Bin tanpa barang')}
-        ${kpi('warn','var(--s-mid)','Hampir Penuh',near,pc(near),'Bin 90–100% daripada kapasiti')}
-        ${kpi('alert','var(--s-full)','Perlu Perhatian',over,pc(over),'Bin melebihi kapasiti — perlu dipindah sebahagian')}
+        ${kpi('box','var(--accent)','Total Bins',codes.length,'','All bins on '+tierLabel)}
+        ${kpi('ok','var(--s-empty)','Empty',cnt.empty,pc(cnt.empty),'Bins with no stock')}
+        ${kpi('warn','var(--s-mid)','Nearly Full',near,pc(near),'Bins at 90–100% of capacity')}
+        ${kpi('alert','var(--s-full)','Needs Attention',over,pc(over),'Bins over capacity — move some stock out')}
       </div>
-      <p class="small muted" style="margin:0">Hampir Penuh = 90–100% kapasiti. Perlu Perhatian = melebihi kapasiti bin.</p></section>
-    <section class="card"><h2>Status bin</h2><div class="bars">
+      <p class="small muted" style="margin:0">Nearly Full = 90–100% of capacity. Needs Attention = over bin capacity.</p></section>
+    <section class="card"><h2>Bin status</h2><div class="bars">
       ${[['empty',cnt.empty],['low',cnt.low],['mid',cnt.mid],['full',cnt.full]].map(([k,n])=>`<div class="bar"><span class="lb"><i style="background:${SC[k]}"></i>${SL[k]}</span><span class="tr"><span style="width:${(n/tot*100).toFixed(2)}%;background:${SC[k]}"></span></span><span class="vl">${fmt(n)}<small>${pc(n)}</small></span></div>`).join('')}
-      <div class="bar"><span class="lb"><i style="background:var(--s-mark)"></i>Ditanda</span><span class="tr"><span style="width:${(markN/tot*100).toFixed(2)}%;background:var(--s-mark);min-width:${markN?'4px':'0'}"></span></span><span class="vl">${fmt(markN)}<small>${pc(markN)}</small></span></div>
+      <div class="bar"><span class="lb"><i style="background:var(--s-mark)"></i>Marked</span><span class="tr"><span style="width:${(markN/tot*100).toFixed(2)}%;background:var(--s-mark);min-width:${markN?'4px':'0'}"></span></span><span class="vl">${fmt(markN)}<small>${pc(markN)}</small></span></div>
     </div></section>
-    <section class="card loc"><div class="sechd"><h2>Lokasi paling padat</h2><span class="small">${fmt(hot.length)} bin 50% ke atas</span></div>
-      ${hot.length?`<div class="tbl"><table><thead><tr><th>Lokasi</th><th class="n">Kapasiti</th><th class="n">Diguna</th><th>Status</th></tr></thead><tbody>
+    <section class="card loc"><div class="sechd"><h2>Most crowded locations</h2><span class="small">${fmt(hot.length)} bins at 50% or more</span></div>
+      ${hot.length?`<div class="tbl"><table><thead><tr><th>Location</th><th class="n">Capacity</th><th class="n">Used</th><th>Status</th></tr></thead><tbody>
       ${hot.slice(0,showN).map(([c,q,cap])=>`<tr data-loc="${esc(c)}"><td><span class="code">${esc(c)}</span></td><td class="n">${cap}</td><td class="n">${fmt(q)}</td><td>${badge(c,q,cap)}</td></tr>`).join('')}</tbody></table></div>
-      ${hot.length>6?`<button class="linkbtn" id="locall">${renderPeta.all?'Tunjuk sikit':'Lihat lebih banyak →'}</button>`:''}`:'<p class="empty">Tiada bin 50% ke atas di '+tierLabel+'.</p>'}</section>
-    <section class="card"><details><summary>Ikut row</summary><div class="tbl" style="margin-top:8px"><table><thead><tr><th>Row</th><th class="n">Bin</th><th class="n">Kosong</th><th class="n">Diguna</th></tr></thead><tbody>${Object.entries(byRow).sort((a,b)=>a[0].localeCompare(b[0],undefined,{numeric:true})).map(([r,o])=>`<tr><td><a href="#" data-prow="${esc(r)}" style="color:var(--accent)">${esc(r)}</a></td><td class="n">${fmt(o.n)}</td><td class="n">${fmt(o.e)}</td><td class="n">${fmt(o.n-o.e)}</td></tr>`).join('')}</tbody></table></div></details></section>`;
+      ${hot.length>6?`<button class="linkbtn" id="locall">${renderPeta.all?'Show less':'Show more →'}</button>`:''}`:'<p class="empty">No bins at 50% or more on '+tierLabel+'.</p>'}</section>
+    <section class="card"><details><summary>By row</summary><div class="tbl" style="margin-top:8px"><table><thead><tr><th>Row</th><th class="n">Bins</th><th class="n">Empty</th><th class="n">Used</th></tr></thead><tbody>${Object.entries(byRow).sort((a,b)=>a[0].localeCompare(b[0],undefined,{numeric:true})).map(([r,o])=>`<tr><td><a href="#" data-prow="${esc(r)}" style="color:var(--accent)">${esc(r)}</a></td><td class="n">${fmt(o.n)}</td><td class="n">${fmt(o.e)}</td><td class="n">${fmt(o.n-o.e)}</td></tr>`).join('')}</tbody></table></div></details></section>`;
   const openBin=code=>openOnMap(code);
   const go=()=>{const v=$('#gq').value.trim().toUpperCase();if(!v)return;
     if(BINS.has(v)){openBin(v);return}
     const r=RACKS.find(x=>x.c===v);
     if(r){mapRack=r.c;mapPicked=null;if(r.id){setTierBtn(r.f===2?'up':'lo');if(PLAN)PLAN.focus([r.id]);if(MAP&&VIEW==='3d'){if(MAP.walk.on())MAP.walk.to(r.id);else MAP.setTier(r.f===2?'up':'lo')}}renderPeta();return}
     const rows=RACKS.filter(x=>x.r.toUpperCase()===v&&x.id);if(rows.length){const fl=rows.some(x=>x.f===1)?1:2;const ids=rows.filter(x=>x.f===fl).map(x=>x.id);setTierBtn(fl===2?'up':'lo');if(PLAN)PLAN.focus(ids);renderPeta();return}
-    $('#gmsg').textContent='Tak jumpa lokasi '+v};
+    $('#gmsg').textContent='Location not found: '+v};
   $('#ggo').onclick=go;$('#gq').onkeydown=e=>{if(e.key==='Enter')go()};
   bindLocCards(main);
   const la=$('#locall');if(la)la.onclick=()=>{renderPeta.all=!renderPeta.all;renderPeta()};
@@ -1032,39 +1032,39 @@ function renderPeta(){main.className='';ensureMap(false);
 }
 function renderMasuk(){main.className='two';
   const q=Object.entries(st.queue);
-  main.innerHTML=`<section class="card"><h2>Simpan barang baru</h2>
-    <p class="small muted">Imbas atau taip SKU dan kuantiti. Sistem cadangkan bin ikut saiz, series dan ruang kosong.</p>
+  main.innerHTML=`<section class="card"><h2>Put away new stock</h2>
+    <p class="small muted">Scan or type the SKU and quantity. The system suggests bins by size, series and free space.</p>
     <div class="row"><input id="ms" class="grow" list="skus" placeholder="SKU" autocomplete="off"><input id="mq" type="number" min="1" value="1" aria-label="Kuantiti"><button class="btn pri" id="mgo">Cadang bin</button></div>
     <div id="mres"></div>${skuOptions()}</section>
-  <section class="card"><h2>Menunggu disimpan <span class="pill">${q.length} SKU</span></h2>
-    <p class="small muted">Dari upload stok terkini: kuantiti yang belum ada di mana-mana bin.</p>
-    <div class="list" id="qlist">${q.length?'':'<p class="empty">Tiada barang menunggu.</p>'}</div></section>`;
-  const show=(code,qty,box)=>{const s=sku(code);if(!s){box.innerHTML='<p class="pill bad">SKU tak dijumpai dalam data stok. Upload stok terkini dulu.</p>';return}
-    const sg=suggestBins(s,qty);box.innerHTML=`<div class="item">${skuLine(s)}${sugHTML(s,qty,sg)}<div class="row"><button class="btn ok" data-done>Dah letak di bin ini</button><button class="btn" data-map>Tunjuk di peta</button></div></div>`;
+  <section class="card"><h2>Waiting to put away <span class="pill">${q.length} SKU</span></h2>
+    <p class="small muted">From the latest stock upload: quantities not yet in any bin.</p>
+    <div class="list" id="qlist">${q.length?'':'<p class="empty">Nothing waiting.</p>'}</div></section>`;
+  const show=(code,qty,box)=>{const s=sku(code);if(!s){box.innerHTML='<p class="pill bad">SKU not found in stock data. Upload the latest stock first.</p>';return}
+    const sg=suggestBins(s,qty);box.innerHTML=`<div class="item">${skuLine(s)}${sugHTML(s,qty,sg)}<div class="row"><button class="btn ok" data-done>Placed in this bin</button><button class="btn" data-map>Show on map</button></div></div>`;
     box.querySelector('[data-map]').onclick=()=>showOnMap(sg.out.map(o=>o.code));
     box.querySelector('[data-done]').onclick=async()=>{const ch={};sg.out.forEach(o=>addTo(ch,o.code,s.sku,o.qty));
-      if(await guarded(async()=>{await saveBins(ch);if(st.queue[s.sku]){const left=st.queue[s.sku]-sg.out.reduce((a,o)=>a+o.qty,0);const nq={...st.queue};if(left>0)nq[s.sku]=left;else delete nq[s.sku];st.queue=nq;await db.doc('queue/pending').set({items:nq})}},`${s.sku} disimpan`))render()}};
+      if(await guarded(async()=>{await saveBins(ch);if(st.queue[s.sku]){const left=st.queue[s.sku]-sg.out.reduce((a,o)=>a+o.qty,0);const nq={...st.queue};if(left>0)nq[s.sku]=left;else delete nq[s.sku];st.queue=nq;await db.doc('queue/pending').set({items:nq})}},`${s.sku} saved`))render()}};
   $('#mgo').onclick=()=>show($('#ms').value.trim(),Math.max(1,+$('#mq').value||1),$('#mres'));
   $('#ms').onkeydown=e=>{if(e.key==='Enter')$('#mgo').click()};
   const ql=$('#qlist');q.slice(0,60).forEach(([k,qty])=>{const s=sku(k);const d=document.createElement('div');d.className='item';
-    d.innerHTML=`${s?skuLine(s):`<div class="t">${esc(k)}</div>`}<div class="row"><b>${fmt(qty)} helai</b><button class="btn" data-k>Cadang bin</button></div><div data-box></div>`;
+    d.innerHTML=`${s?skuLine(s):`<div class="t">${esc(k)}</div>`}<div class="row"><b>${fmt(qty)} pcs</b><button class="btn" data-k>Cadang bin</button></div><div data-box></div>`;
     d.querySelector('[data-k]').onclick=()=>show(k,qty,d.querySelector('[data-box]'));ql.appendChild(d)});
   if(q.length>60)ql.insertAdjacentHTML('beforeend',`<p class="small muted">+ ${q.length-60} SKU lagi. Simpan yang di atas dulu.</p>`)}
 
 function renderPindah(){main.className='';const rs=relocations();$('#bp').hidden=!rs.length;$('#bp').textContent=rs.length;
   const types=[...new Set(rs.map(r=>r.type))];
-  main.innerHTML=`<section class="card"><h2>Cadangan pindah bin</h2>
-    <p class="small muted">Dikira daripada lokasi semasa. Tekan <b>Dah pindah</b> selepas barang dialih supaya lokasi dikemas kini.</p>
-    <div class="stats">${types.map(t=>`<div class="stat"><b>${rs.filter(r=>r.type===t).length}</b><span>${esc(t)}</span></div>`).join('')||'<div class="stat"><b>0</b><span>Tiada cadangan</span></div>'}</div>
+  main.innerHTML=`<section class="card"><h2>Bin move suggestions</h2>
+    <p class="small muted">Calculated from current locations. Press <b>Moved</b> after the stock is moved so the location is updated.</p>
+    <div class="stats">${types.map(t=>`<div class="stat"><b>${rs.filter(r=>r.type===t).length}</b><span>${esc(t)}</span></div>`).join('')||'<div class="stat"><b>0</b><span>No suggestions</span></div>'}</div>
     <div class="list" id="rl"></div></section>`;
   const rl=$('#rl');rs.slice(0,80).forEach(r=>{const s=sku(r.sku);const d=document.createElement('div');d.className='item';
     d.innerHTML=`<div class="row"><span class="pill warn">${esc(r.type)}</span><span class="small muted">${esc(r.why)}</span></div>${s?skuLine(s):''}
-      <div>Dari <span class="code">${esc(r.from)}</span> ke ${r.to.map(o=>`<span class="code">${esc(o.code)}</span> (${fmt(o.qty)})`).join(', ')} · <b>${fmt(r.qty)}</b> helai</div>
-      <div class="row"><button class="btn ok" data-m>Dah pindah</button><button class="btn" data-map>Tunjuk di peta</button></div>`;
+      <div>Dari <span class="code">${esc(r.from)}</span> ke ${r.to.map(o=>`<span class="code">${esc(o.code)}</span> (${fmt(o.qty)})`).join(', ')} · <b>${fmt(r.qty)}</b> pcs</div>
+      <div class="row"><button class="btn ok" data-m>Moved</button><button class="btn" data-map>Show on map</button></div>`;
     d.querySelector('[data-map]').onclick=()=>showOnMap([r.from,...r.to.map(o=>o.code)]);
     d.querySelector('[data-m]').onclick=async()=>{const ch={};let moved=0;r.to.forEach(o=>{addTo(ch,o.code,r.sku,o.qty);moved+=o.qty});addTo(ch,r.from,r.sku,-moved);
-      if(await guarded(()=>saveBins(ch),'Lokasi dikemas kini'))render()};rl.appendChild(d)});
-  if(!rs.length)rl.innerHTML='<p class="empty">Susunan sekarang dah kemas. Tiada cadangan pindah.</p>';
+      if(await guarded(()=>saveBins(ch),'Locations updated'))render()};rl.appendChild(d)});
+  if(!rs.length)rl.innerHTML='<p class="empty">The layout is already tidy. No move suggestions.</p>';
   if(rs.length>80)rl.insertAdjacentHTML('beforeend',`<p class="small muted">Menunjuk 80 daripada ${rs.length}. Selesaikan yang di atas dulu.</p>`)}
 
 // ---------- stock check: lists built from filters ----------
@@ -1079,9 +1079,9 @@ function chkMatchSku(s,f){if(!s)return false;
   if(!fHas(f.size,s.size)||!fHas(f.brand,s.brand)||!fHas(f.kol,s.kol)||!fHas(f.grp,s.grp||'')||!fHas(f.cat,s.cat))return false;
   if(f.col&&!(s.col||'').toLowerCase().includes(f.col.toLowerCase()))return false;return true}
 // multi-select controls: chips for short lists, add-from-list for long ones
-function multiChips(key,opts,sel){const a=fArr(sel);return `<div class="chips2" data-mkey="${key}">${opts.map(o=>`<button type="button" class="chip2" data-mv="${esc(o)}" aria-pressed="${a.includes(o)}">${esc(o)}</button>`).join('')}${a.length?`<button type="button" class="chip2 clr" data-mclr>Semua</button>`:''}</div>`}
-function multiPick(key,opts,sel,ph){const a=fArr(sel);return `<div data-mkey="${key}"><div class="chips2">${a.map(o=>`<button type="button" class="chip2" aria-pressed="true" data-mv="${esc(o)}" title="Buang">${esc(o)} ✕</button>`).join('')}</div>
-  <select data-madd style="width:100%;margin-top:${a.length?6:0}px"><option value="">${a.length?'+ Tambah lagi…':ph}</option>${opts.filter(o=>!a.includes(o)).map(o=>`<option>${esc(o)}</option>`).join('')}</select></div>`}
+function multiChips(key,opts,sel){const a=fArr(sel);return `<div class="chips2" data-mkey="${key}">${opts.map(o=>`<button type="button" class="chip2" data-mv="${esc(o)}" aria-pressed="${a.includes(o)}">${esc(o)}</button>`).join('')}${a.length?`<button type="button" class="chip2 clr" data-mclr>All</button>`:''}</div>`}
+function multiPick(key,opts,sel,ph){const a=fArr(sel);return `<div data-mkey="${key}"><div class="chips2">${a.map(o=>`<button type="button" class="chip2" aria-pressed="true" data-mv="${esc(o)}" title="Remove">${esc(o)} ✕</button>`).join('')}</div>
+  <select data-madd style="width:100%;margin-top:${a.length?6:0}px"><option value="">${a.length?'+ Add more…':ph}</option>${opts.filter(o=>!a.includes(o)).map(o=>`<option>${esc(o)}</option>`).join('')}</select></div>`}
 function bindMulti(root,f,after){root.querySelectorAll('[data-mkey]').forEach(box=>{const k=box.dataset.mkey;
   box.querySelectorAll('[data-mv]').forEach(b=>b.onclick=()=>{const a=fArr(f[k]);const v=b.dataset.mv;f[k]=a.includes(v)?a.filter(x=>x!==v):[...a,v];if(k==='brand')f.kol=fArr(f.kol).filter(x=>kols(f.brand).includes(x));after()});
   const c=box.querySelector('[data-mclr]');if(c)c.onclick=()=>{f[k]=[];after()};
@@ -1091,8 +1091,8 @@ function chkMatches(f){const out=[];let skus=new Set(),q=0;
   BIN_ORDER.forEach(code=>{const b=BINS.get(code);if(f.row&&b.row!==f.row)return;const it=binItems(code);if(!it.length)return;
     const hit=skuFilterOn(f)?it.filter(([k])=>chkMatchSku(sku(k),f)):it;if(!hit.length)return;out.push(code);hit.forEach(([k,n])=>{skus.add(k);q+=n})});
   return {bins:out,skus:skus.size,qty:q}}
-function chkName(f){const p=[];if(f.sku)p.push('SKU "'+f.sku+'"');const J=v=>fArr(v).join('/');if(J(f.brand))p.push(J(f.brand));if(J(f.kol))p.push('Koleksi '+J(f.kol));if(J(f.grp))p.push(J(f.grp));if(J(f.cat))p.push(J(f.cat));if(J(f.size))p.push('Saiz '+J(f.size));if(f.col)p.push('Warna "'+f.col+'"');if(f.row)p.push('Row '+f.row);
-  return (p.join(' · ')||'Semua bin')+(f.mode==='rand'?` (rawak ${f.n})`:'')}
+function chkName(f){const p=[];if(f.sku)p.push('SKU "'+f.sku+'"');const J=v=>fArr(v).join('/');if(J(f.brand))p.push(J(f.brand));if(J(f.kol))p.push('Collection '+J(f.kol));if(J(f.grp))p.push(J(f.grp));if(J(f.cat))p.push(J(f.cat));if(J(f.size))p.push('Size '+J(f.size));if(f.col)p.push('Colour "'+f.col+'"');if(f.row)p.push('Row '+f.row);
+  return (p.join(' · ')||'All bins')+(f.mode==='rand'?` (random ${f.n})`:'')}
 const kols=brand=>[...new Set(Object.keys(st.master).map(sku).filter(s=>fHas(brand,s.brand)).map(s=>s.kol).filter(Boolean))].sort(kolSort);
 const chkList=()=>Object.entries(st.checks||{}).map(([id,c])=>({id,...c})).sort((a,b)=>(b.created||0)-(a.created||0));
 function chkRows(c,code){const it=binItems(code);return c.only&&c.filter&&skuFilterOn(c.filter)?it.filter(([k])=>chkMatchSku(sku(k),c.filter)):it}
@@ -1104,34 +1104,34 @@ function renderCheck(){main.className='';
   const sizes=[...new Set(M.map(s=>s.size).filter(Boolean))].sort(szSort),brands=[...new Set(M.map(s=>s.brand).filter(Boolean))].sort(),
     grps=[...new Set(M.map(s=>s.grp).filter(Boolean))].sort(),rows=[...new Set(RACKS.map(r=>r.r))].sort(natSort);
   const f=chkF;const m=building?chkMatches(f):null;
-  let h=`<section class="card"><div class="row"><h2 style="margin-right:auto">Stock check</h2>${building&&lists.length?'<button class="btn" id="cxback">Kembali ke senarai</button>':'<button class="btn pri" id="cxnew">+ Buat senarai baru</button>'}</div>
-    ${lists.length?`<div class="row" style="margin-top:6px"><label for="cxsel" class="small">Senarai</label><select id="cxsel" class="grow">${lists.map(l=>{const d=Object.keys(l.results||{}).length;return `<option value="${esc(l.id)}"${l.id===chkSel&&!building?' selected':''}>${esc(l.name||('Rawak minggu '+(l.week||'')))} · ${d}/${l.bins.length} dikira · ${new Date(l.created||0).toLocaleDateString('ms-MY')}</option>`}).join('')}</select></div>`:''}</section>`;
+  let h=`<section class="card"><div class="row"><h2 style="margin-right:auto">Stock check</h2>${building&&lists.length?'<button class="btn" id="cxback">Back to lists</button>':'<button class="btn pri" id="cxnew">+ New list</button>'}</div>
+    ${lists.length?`<div class="row" style="margin-top:6px"><label for="cxsel" class="small">List</label><select id="cxsel" class="grow">${lists.map(l=>{const d=Object.keys(l.results||{}).length;return `<option value="${esc(l.id)}"${l.id===chkSel&&!building?' selected':''}>${esc(l.name||('Random week '+(l.week||'')))} · ${d}/${l.bins.length} counted · ${new Date(l.created||0).toLocaleDateString('en-GB')}</option>`}).join('')}</select></div>`:''}</section>`;
   if(building){
-    h+=`<section class="card"><h2>Buat senarai baru</h2><p class="small muted">Pilih apa yang nak dikira. Kosongkan mana-mana kotak untuk "semua".</p>
+    h+=`<section class="card"><h2>New list</h2><p class="small muted">Choose what to count. Leave a box empty for "all".</p>
       <div class="fgrid">
-        <label for="fs">SKU / nama</label><input id="fs" list="skus" value="${esc(f.sku)}" placeholder="cth PTX2TBD atau Teluk Belanga" autocomplete="off">
-        <span>Brand</span>${multiPick('brand',brands,f.brand,'Semua brand')}
-        <span>Koleksi</span>${multiChips('kol',kols(f.brand),f.kol)}
-        <span>Item group</span>${multiPick('grp',grps,f.grp,'Semua item group')}
-        <span>Kategori</span>${multiChips('cat',['Men','Women','Kids','Baby'],f.cat)}
-        <span>Saiz</span>${multiChips('size',sizes,f.size)}
-        <label for="fw">Warna</label><input id="fw" value="${esc(f.col)}" placeholder="cth Brick Red" autocomplete="off">
-        <label for="fr">Row</label><select id="fr">${opt(rows,f.row,'Semua row')}</select>
-        <span>Bin</span><div class="row"><label class="row small"><input type="radio" name="fm" value="all"${f.mode==='all'?' checked':''}> Semua bin sepadan</label>
-          <label class="row small"><input type="radio" name="fm" value="rand"${f.mode==='rand'?' checked':''}> Rawak <input id="fn" type="number" min="1" max="500" value="${f.n}" style="width:72px"> bin</label></div>
+        <label for="fs">SKU / name</label><input id="fs" list="skus" value="${esc(f.sku)}" placeholder="e.g. PTX2TBD or Teluk Belanga" autocomplete="off">
+        <span>Brand</span>${multiPick('brand',brands,f.brand,'All brands')}
+        <span>Collection</span>${multiChips('kol',kols(f.brand),f.kol)}
+        <span>Item group</span>${multiPick('grp',grps,f.grp,'All item groups')}
+        <span>Category</span>${multiChips('cat',['Men','Women','Kids','Baby'],f.cat)}
+        <span>Size</span>${multiChips('size',sizes,f.size)}
+        <label for="fw">Colour</label><input id="fw" value="${esc(f.col)}" placeholder="e.g. Brick Red" autocomplete="off">
+        <label for="fr">Row</label><select id="fr">${opt(rows,f.row,'All rows')}</select>
+        <span>Bins</span><div class="row"><label class="row small"><input type="radio" name="fm" value="all"${f.mode==='all'?' checked':''}> All matching bins</label>
+          <label class="row small"><input type="radio" name="fm" value="rand"${f.mode==='rand'?' checked':''}> Random <input id="fn" type="number" min="1" max="500" value="${f.n}" style="width:72px"> bin</label></div>
       </div>
-      ${skuFilterOn(f)?`<label class="row small" style="margin-top:8px"><input type="checkbox" id="fo"${f.only?' checked':''}> Kira SKU yang dipilih sahaja (SKU lain dalam bin tu tak perlu dikira)</label>`:''}
-      <div class="stats" style="margin-top:10px"><div class="stat"><b>${fmt(m.bins.length)}</b><span>Bin sepadan</span></div><div class="stat"><b>${fmt(m.skus)}</b><span>SKU</span></div><div class="stat"><b>${fmt(m.qty)}</b><span>Helai</span></div></div>
-      <div class="row" style="margin-top:10px"><button class="btn pri" id="fgo"${m.bins.length?'':' disabled'}>Buat senarai (${fmt(f.mode==='rand'?Math.min(f.n,m.bins.length):m.bins.length)} bin)</button><button class="btn" id="fclr">Kosongkan pilihan</button></div>
-      ${m.bins.length>200&&f.mode==='all'?'<p class="small" style="color:var(--warn)">Senarai ni panjang. Pertimbang pilih "Rawak" atau tapis lagi.</p>':''}</section>`;
+      ${skuFilterOn(f)?`<label class="row small" style="margin-top:8px"><input type="checkbox" id="fo"${f.only?' checked':''}> Count the selected SKUs only (other SKUs in the bin need not be counted)</label>`:''}
+      <div class="stats" style="margin-top:10px"><div class="stat"><b>${fmt(m.bins.length)}</b><span>Matching bins</span></div><div class="stat"><b>${fmt(m.skus)}</b><span>SKU</span></div><div class="stat"><b>${fmt(m.qty)}</b><span>Pcs</span></div></div>
+      <div class="row" style="margin-top:10px"><button class="btn pri" id="fgo"${m.bins.length?'':' disabled'}>Create list (${fmt(f.mode==='rand'?Math.min(f.n,m.bins.length):m.bins.length)} bin)</button><button class="btn" id="fclr">Clear selection</button></div>
+      ${m.bins.length>200&&f.mode==='all'?'<p class="small" style="color:var(--warn)">This list is long. Consider "Random" or narrow the filter.</p>':''}</section>`;
   }else if(c){
     const done=Object.keys(c.results||{}).length,diffBins=Object.values(c.results||{}).filter(r=>r.diff).length;
-    h+=`<section class="card"><div class="row"><h2 style="margin-right:auto">${esc(c.name||('Rawak minggu '+(c.week||'')))}</h2><button class="btn" id="cxdel">Padam senarai</button></div>
-      <p class="small muted" style="margin:2px 0 8px">Dibuat oleh ${esc(c.by||'-')} · ${new Date(c.created||0).toLocaleString('ms-MY')}${c.only&&c.filter&&skuFilterOn(c.filter)?' · kira SKU dipilih sahaja':''}</p>
-      <div class="stats"><div class="stat"><b>${done}/${c.bins.length}</b><span>Bin dikira</span></div><div class="stat"><b>${diffBins}</b><span>Bin ada beza</span></div>
-      <div class="stat"><b>${done?Math.round((done-diffBins)/done*100):0}%</b><span>Ketepatan</span></div></div>
+    h+=`<section class="card"><div class="row"><h2 style="margin-right:auto">${esc(c.name||('Random week '+(c.week||'')))}</h2><button class="btn" id="cxdel">Delete list</button></div>
+      <p class="small muted" style="margin:2px 0 8px">Created by ${esc(c.by||'-')} · ${new Date(c.created||0).toLocaleString('en-GB')}${c.only&&c.filter&&skuFilterOn(c.filter)?' · selected SKUs only':''}</p>
+      <div class="stats"><div class="stat"><b>${done}/${c.bins.length}</b><span>Bins counted</span></div><div class="stat"><b>${diffBins}</b><span>Bins with differences</span></div>
+      <div class="stat"><b>${done?Math.round((done-diffBins)/done*100):0}%</b><span>Accuracy</span></div></div>
       <div id="cxmsg" class="small"></div>
-      <p class="small muted">Kira setiap bin, isi kuantiti sebenar, kemudian tekan Simpan kiraan.</p><div class="list" id="cl"></div></section>`}
+      <p class="small muted">Count each bin, enter the actual quantity, then press Save count.</p><div class="list" id="cl"></div></section>`}
   main.innerHTML=h+skuOptions();
   // events
   const nb=$('#cxnew');if(nb)nb.onclick=()=>{chkNew=true;renderCheck()};
@@ -1147,61 +1147,61 @@ function renderCheck(){main.className='';
     $('#fclr').onclick=()=>{chkF={sku:'',size:[],brand:[],kol:[],grp:[],cat:[],row:'',col:'',mode:'all',n:20,only:true};renderCheck()};
     $('#fgo').onclick=async()=>{let bins=[...m.bins];if(f.mode==='rand'){for(let i=bins.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[bins[i],bins[j]]=[bins[j],bins[i]]}bins=bins.slice(0,f.n).sort((a,b)=>BINS.get(a).ord-BINS.get(b).ord)}
       const id='c'+Date.now().toString(36);const body={name:chkName(f),filter:{...f},only:skuFilterOn(f)&&f.only,bins,results:{},created:Date.now(),by:me()};
-      if(await guarded(()=>db.doc('checks/'+id).set(body),'Senarai dibuat')){st.checks[id]=body;chkSel=id;chkNew=false;try{localStorage.setItem('pg-chk',id)}catch(e){}renderCheck()}};
+      if(await guarded(()=>db.doc('checks/'+id).set(body),'List created')){st.checks[id]=body;chkSel=id;chkNew=false;try{localStorage.setItem('pg-chk',id)}catch(e){}renderCheck()}};
     return}
   if(!c)return;
-  $('#cxdel').onclick=()=>askInline($('#cxmsg'),'Padam senarai ini? Kiraan yang dah disimpan dalam senarai ni pun hilang.',async()=>{if(await guarded(()=>db.doc('checks/'+chkSel).delete(),'Senarai dipadam')){delete st.checks[chkSel];chkSel=null;renderCheck()}});
+  $('#cxdel').onclick=()=>askInline($('#cxmsg'),'Delete this list? Counts saved in it will also be lost.',async()=>{if(await guarded(()=>db.doc('checks/'+chkSel).delete(),'List deleted')){delete st.checks[chkSel];chkSel=null;renderCheck()}});
   const cl=$('#cl');c.bins.forEach(code=>{const r=(c.results||{})[code];const exp=chkRows(c,code);const d=document.createElement('div');d.className='item';
-    const rowsH=exp.map(([k,q])=>{const got=r&&r.c&&k in r.c?r.c[k]:'';return `<tr class="${r&&got!==''&&+got!==q?'diff':''}"><td><span class="code">${esc(k)}</span><div class="small muted">${esc(sku(k)?.col||'')} ${esc(sku(k)?.size||'')}</div></td><td class="n">${q}</td><td class="n"><input type="number" min="0" data-k="${esc(k)}" value="${got}" aria-label="Kiraan ${esc(k)}"></td></tr>`}).join('');
-    d.innerHTML=`<div class="row"><span class="code">${esc(code)}</span>${r?(r.diff?'<span class="pill bad">Ada beza</span>':'<span class="pill ok">Tepat</span>'):'<span class="pill">Belum dikira</span>'}${r?`<span class="small muted">oleh ${esc(r.by)}</span>`:''}</div>
-      <div class="tbl"><table><thead><tr><th>SKU</th><th class="n">Sistem</th><th class="n">Kiraan</th></tr></thead><tbody>${rowsH||'<tr><td colspan="3" class="empty">Tiada SKU dipilih dalam bin ini sekarang</td></tr>'}</tbody></table></div>
-      ${c.only?'':`<details><summary class="small">SKU lain dijumpai dalam bin ini</summary><div class="row" style="margin-top:6px"><input class="grow" data-xs list="skus" placeholder="SKU"><input type="number" min="1" data-xq placeholder="Qty"></div></details>`}
-      <div class="row"><button class="btn pri" data-save>Simpan kiraan</button>${r&&r.diff?'<button class="btn" data-apply>Kemas kini lokasi ikut kiraan</button>':''}</div>`;
+    const rowsH=exp.map(([k,q])=>{const got=r&&r.c&&k in r.c?r.c[k]:'';return `<tr class="${r&&got!==''&&+got!==q?'diff':''}"><td><span class="code">${esc(k)}</span><div class="small muted">${esc(sku(k)?.col||'')} ${esc(sku(k)?.size||'')}</div></td><td class="n">${q}</td><td class="n"><input type="number" min="0" data-k="${esc(k)}" value="${got}" aria-label="Count ${esc(k)}"></td></tr>`}).join('');
+    d.innerHTML=`<div class="row"><span class="code">${esc(code)}</span>${r?(r.diff?'<span class="pill bad">Difference</span>':'<span class="pill ok">Correct</span>'):'<span class="pill">Not counted</span>'}${r?`<span class="small muted">oleh ${esc(r.by)}</span>`:''}</div>
+      <div class="tbl"><table><thead><tr><th>SKU</th><th class="n">System</th><th class="n">Count</th></tr></thead><tbody>${rowsH||'<tr><td colspan="3" class="empty">No selected SKUs in this bin now</td></tr>'}</tbody></table></div>
+      ${c.only?'':`<details><summary class="small">Other SKU found in this bin</summary><div class="row" style="margin-top:6px"><input class="grow" data-xs list="skus" placeholder="SKU"><input type="number" min="1" data-xq placeholder="Qty"></div></details>`}
+      <div class="row"><button class="btn pri" data-save>Save count</button>${r&&r.diff?'<button class="btn" data-apply>Update location from count</button>':''}</div>`;
     d.querySelector('[data-save]').onclick=async()=>{const cnt={};let miss=false;d.querySelectorAll('input[data-k]').forEach(i=>{if(i.value==='')miss=true;cnt[i.dataset.k]=Math.max(0,+i.value||0)});
       const xsI=d.querySelector('[data-xs]');if(xsI){const xs=xsI.value.trim(),xq=+d.querySelector('[data-xq]').value||0;if(xs&&xq>0)cnt[xs]=(cnt[xs]||0)+xq}
-      if(miss){setStatus('Isi kiraan untuk semua SKU dalam bin (isi 0 jika tiada).',true);return}
+      if(miss){setStatus('Enter a count for every SKU in the bin (enter 0 if none).',true);return}
       const diff=exp.some(([k,q])=>cnt[k]!==q)||Object.keys(cnt).some(k=>!exp.find(x=>x[0]===k));
       const res={c:cnt,diff,by:me(),at:Date.now()};const id=chkSel;
-      if(await guarded(async()=>{const ref=db.doc('checks/'+id);const snap=await ref.get();const cur=snap.exists?snap.data():c;await ref.set({...cur,results:{...(cur.results||{}),[code]:res}})},`${code} disimpan`)){st.checks[id]={...st.checks[id],results:{...(st.checks[id].results||{}),[code]:res}};renderCheck()}};
+      if(await guarded(async()=>{const ref=db.doc('checks/'+id);const snap=await ref.get();const cur=snap.exists?snap.data():c;await ref.set({...cur,results:{...(cur.results||{}),[code]:res}})},`${code} saved`)){st.checks[id]={...st.checks[id],results:{...(st.checks[id].results||{}),[code]:res}};renderCheck()}};
     const ap=d.querySelector('[data-apply]');if(ap)ap.onclick=async()=>{
       // replace only the counted SKUs; keep other SKUs in the bin as they are
       const counted=new Set(Object.keys(r.c));const keep=binItems(code).filter(([k])=>!counted.has(k));
       const arr=[...keep,...Object.entries(r.c).filter(([,q])=>q>0)];
-      if(await guarded(()=>saveBins({[code]:arr}),'Lokasi ikut kiraan'))renderCheck()};
-    d.querySelector('.row .code').style.cursor='pointer';d.querySelector('.row .code').title='Tunjuk di peta';d.querySelector('.row .code').onclick=()=>{locQuiet=true;openOnMap(code)};
+      if(await guarded(()=>saveBins({[code]:arr}),'Location updated from count'))renderCheck()};
+    d.querySelector('.row .code').style.cursor='pointer';d.querySelector('.row .code').title='Show on map';d.querySelector('.row .code').onclick=()=>{locQuiet=true;openOnMap(code)};
     cl.appendChild(d)});
 }
 
 // ---------- bin capacity: one number per item group ----------
 let capDraft=null,capMsg='',capFilter='';
 function groupList(){const g={};Object.keys(st.master).forEach(k=>{const s=sku(k);const n=s.grp||'';const o=g[n]=g[n]||{n:0,ex:s,brands:new Set(),blob:n.toLowerCase()};o.n++;if(s.brand)o.brands.add(s.brand);const tx=((s.desc||'')+' '+(s.brand||'')+' '+n).toLowerCase();(o.txt=o.txt||[]).push(tx);o.blob+=' '+tx});return Object.entries(g).sort((a,b)=>b[1].n-a[1].n)}
-function capTest(q){q=q.trim();if(!q)return '';const s=sku(q)||sku(q.toUpperCase());if(!s)return 'SKU tak jumpa.';
-  const g=s.grp||'';const viaG=CAPS.groups&&CAPS.groups[g];return `<b>${esc(s.sku)} – ${esc(s.desc)}</b><br>Jenis: ${esc(g||'(tiada)')} · Kapasiti: <b>${capOf(s)} helai/bin</b>${viaG?'':' (kapasiti lalai)'}`}
+function capTest(q){q=q.trim();if(!q)return '';const s=sku(q)||sku(q.toUpperCase());if(!s)return 'SKU not found.';
+  const g=s.grp||'';const viaG=CAPS.groups&&CAPS.groups[g];return `<b>${esc(s.sku)} – ${esc(s.desc)}</b><br>Type: ${esc(g||'(none)')} · Capacity: <b>${capOf(s)} pcs/bin</b>${viaG?'':' (default capacity)'}`}
 function renderCap(){main.className='';
   const groups=groupList();
   if(!capDraft){capDraft={def:CAPS.def,groups:{}};groups.forEach(([g,o])=>{capDraft.groups[g]=capOf(o.ex)})}
   const d=capDraft;const savedJson=JSON.stringify({def:CAPS.def,groups:CAPS.groups||{}});
   const dirty=JSON.stringify({def:d.def,groups:d.groups})!==savedJson||!CAPS.groups;
   const f=capFilter.trim().toLowerCase();const shown=groups.filter(([g,o])=>!f||o.blob.includes(f));const hits={};if(f)shown.forEach(([g,o])=>hits[g]=o.txt.filter(t=>t.includes(f)).length);
-  main.innerHTML=`<section class="card"><h2>Kapasiti bin</h2>
-    <p class="small muted">Satu baris untuk setiap jenis barang (item group). Isi berapa helai muat <b>satu bin</b>. Itu sahaja.</p>
-    <div class="row" style="margin-top:8px"><input id="cf" class="grow" placeholder="Cari (cth samping, cekak musang, boys, top)" value="${esc(capFilter)}" autocomplete="off">
-      ${f?`<span class="small">Tukar yang ditanda ✓ jadi</span><input id="cbulk" type="number" min="1" max="999" style="width:80px;text-align:right" placeholder="60"><button class="btn" id="cbgo">Guna</button>`:''}</div>
-    <div class="tbl" style="margin-top:8px"><table><thead><tr>${f?'<th style="width:30px">✓</th>':''}<th>Jenis barang</th><th class="n">SKU</th><th class="n" style="width:110px">Helai / bin</th></tr></thead><tbody>
-    ${shown.map(([g,o])=>`<tr>${f?`<td><input type="checkbox" data-pick="${esc(g)}"${hits[g]*2>=o.n?' checked':''} aria-label="Pilih"></td>`:''}<td>${esc(g||'(tiada jenis)')}${f&&hits[g]<o.n?` <span class="pill">${hits[g]} / ${o.n} SKU sepadan</span>`:''}<div class="small muted">${esc([...o.brands].slice(0,3).join(', '))} · cth ${esc(o.ex.desc)}</div></td><td class="n">${fmt(o.n)}</td><td class="n"><input data-g="${esc(g)}" type="number" min="1" max="999" value="${d.groups[g]??d.def}" style="width:90px;text-align:right"></td></tr>`).join('')||'<tr><td colspan="4" class="empty">Tiada jenis sepadan</td></tr>'}
+  main.innerHTML=`<section class="card"><h2>Bin capacity</h2>
+    <p class="small muted">One row per product type (item group). Enter how many pieces fit in <b>one bin</b>. That is all.</p>
+    <div class="row" style="margin-top:8px"><input id="cf" class="grow" placeholder="Search (e.g. samping, cekak musang, boys, top)" value="${esc(capFilter)}" autocomplete="off">
+      ${f?`<span class="small">Set ticked rows to</span><input id="cbulk" type="number" min="1" max="999" style="width:80px;text-align:right" placeholder="60"><button class="btn" id="cbgo">Apply</button>`:''}</div>
+    <div class="tbl" style="margin-top:8px"><table><thead><tr>${f?'<th style="width:30px">✓</th>':''}<th>Product type</th><th class="n">SKU</th><th class="n" style="width:110px">Pcs / bin</th></tr></thead><tbody>
+    ${shown.map(([g,o])=>`<tr>${f?`<td><input type="checkbox" data-pick="${esc(g)}"${hits[g]*2>=o.n?' checked':''} aria-label="Select"></td>`:''}<td>${esc(g||'(no type)')}${f&&hits[g]<o.n?` <span class="pill">${hits[g]} / ${o.n} SKUs match</span>`:''}<div class="small muted">${esc([...o.brands].slice(0,3).join(', '))} · e.g. ${esc(o.ex.desc)}</div></td><td class="n">${fmt(o.n)}</td><td class="n"><input data-g="${esc(g)}" type="number" min="1" max="999" value="${d.groups[g]??d.def}" style="width:90px;text-align:right"></td></tr>`).join('')||'<tr><td colspan="4" class="empty">No matching type</td></tr>'}
     </tbody></table></div>
-    <div class="row" style="margin-top:10px"><label>SKU jenis baru (belum ada dalam senarai) guna <input id="cdef" type="number" min="1" max="999" value="${d.def}" style="width:80px;text-align:right"> helai / bin</label></div>
-    <div class="row" style="margin-top:12px"><button class="btn pri" id="csave"${dirty?'':' disabled'}>Simpan</button>${dirty&&CAPS.groups?'<button class="btn" id="cundo">Batal perubahan</button><span class="small" style="color:var(--warn)">Belum disimpan</span>':''}<span class="small">${esc(capMsg)}</span></div>
-    ${CAPS.groups?'':'<p class="small muted">Nombor di atas ialah tetapan semasa sistem. Semak dan tukar mana yang tak betul, kemudian tekan Simpan.</p>'}
+    <div class="row" style="margin-top:10px"><label>New SKU types (not yet listed) use <input id="cdef" type="number" min="1" max="999" value="${d.def}" style="width:80px;text-align:right"> pcs / bin</label></div>
+    <div class="row" style="margin-top:12px"><button class="btn pri" id="csave"${dirty?'':' disabled'}>Save</button>${dirty&&CAPS.groups?'<button class="btn" id="cundo">Discard changes</button><span class="small" style="color:var(--warn)">Not saved</span>':''}<span class="small">${esc(capMsg)}</span></div>
+    ${CAPS.groups?'':'<p class="small muted">The numbers above are the current system settings. Check them, change any that are wrong, then press Save.</p>'}
   </section>
-  <section class="card"><h2>Uji satu SKU</h2><input id="ctq" list="skus" placeholder="Taip kod SKU" autocomplete="off" style="width:100%"><div id="ctr" class="small" style="margin-top:8px"></div></section>`;
+  <section class="card"><h2>Test one SKU</h2><input id="ctq" list="skus" placeholder="Type an SKU code" autocomplete="off" style="width:100%"><div id="ctr" class="small" style="margin-top:8px"></div></section>`;
   const cf=$('#cf');cf.oninput=()=>{capFilter=cf.value;const pos=cf.selectionStart;renderCap();const n=$('#cf');n.focus();n.setSelectionRange(pos,pos)};
   main.querySelectorAll('[data-g]').forEach(x=>x.onchange=()=>{d.groups[x.dataset.g]=+x.value||d.def;capMsg='';renderCap()});
   $('#cdef').onchange=()=>{d.def=+$('#cdef').value||60;renderCap()};
   const bg=$('#cbgo');if(bg)bg.onclick=()=>{const v=+$('#cbulk').value;if(!(v>0))return;main.querySelectorAll('[data-pick]:checked').forEach(c=>d.groups[c.dataset.pick]=v);capMsg='';renderCap()};
   const cu=$('#cundo');if(cu)cu.onclick=()=>{capDraft=null;capMsg='';renderCap()};
   $('#csave').onclick=async()=>{const body={def:+d.def||60,groups:{...d.groups},rules:[]};
-    if(await guarded(()=>db.doc('settings/caps').set({...body,by:who.value.trim()||'Tanpa nama',at:Date.now()}),'Kapasiti bin disimpan')){CAPS=body;capDraft=null;capMsg='✓ Disimpan. Warna bin kini ikut kapasiti baru.';if(MAP)MAP.paint();renderCap()}};
+    if(await guarded(()=>db.doc('settings/caps').set({...body,by:who.value.trim()||'Anonymous',at:Date.now()}),'Bin capacity saved')){CAPS=body;capDraft=null;capMsg='✓ Saved. Bin colours now follow the new capacity.';if(MAP)MAP.paint();renderCap()}};
   const ct=$('#ctq');ct.oninput=()=>{$('#ctr').innerHTML=capTest(ct.value)};
 }
 
@@ -1236,29 +1236,29 @@ function xferPlan(f){
   return {plan,dest,used,short,qty:items.reduce((a,w)=>a+w.qty,0),moves:plan.reduce((a,p)=>a+p.from.filter(([c])=>!p.to.some(t=>t[0]===c)).length,0)}}
 async function xferExcel(P,f,msgEl){
   const dl=window.claude?await window.claude.use('downloads'):null;
-  if(!dl||!window.XLSX){msgEl.textContent='Muat turun tak tersedia.';return}
-  const now=new Date(),stamp=now.toLocaleString('ms-MY');
-  const J=v=>fArr(v).join(', ');const crit=[f.sku&&'SKU/nama: '+f.sku,J(f.brand)&&'Brand: '+J(f.brand),J(f.kol)&&'Koleksi: '+J(f.kol),J(f.grp)&&'Item group: '+J(f.grp),J(f.cat)&&'Kategori: '+J(f.cat),J(f.size)&&'Saiz: '+J(f.size),f.col&&'Warna: '+f.col,f.from&&'Dari row: '+f.from].filter(Boolean).join(' · ')||'-';
-  const dest=[f.rows.length&&'Row: '+f.rows.join(', ')+(P.added&&P.added.length?' + sambung ke '+P.added.join(', '):''),f.levels.length&&'Tingkat: '+f.levels.map(l=>'L'+l).join(', '),f.racks&&'Rak: '+f.racks].filter(Boolean).join(' · ');
-  const head=[['Transfer Bin – senarai pindah'],['Dicetak',stamp],['Stok',crit],['Tujuan',dest],['Asingkan koleksi',f.sepKol?'Ya':'Tidak'],['Susun ikut',f.order==='size'?'Saiz, kemudian siri dan warna':'Siri dan warna, kemudian saiz'],['Jumlah',`${P.plan.length} SKU · ${P.qty} helai · ${P.used.length} bin`],[]];
+  if(!dl||!window.XLSX){msgEl.textContent='Download not available.';return}
+  const now=new Date(),stamp=now.toLocaleString('en-GB');
+  const J=v=>fArr(v).join(', ');const crit=[f.sku&&'SKU/name: '+f.sku,J(f.brand)&&'Brand: '+J(f.brand),J(f.kol)&&'Collection: '+J(f.kol),J(f.grp)&&'Item group: '+J(f.grp),J(f.cat)&&'Category: '+J(f.cat),J(f.size)&&'Size: '+J(f.size),f.col&&'Colour: '+f.col,f.from&&'From row: '+f.from].filter(Boolean).join(' · ')||'-';
+  const dest=[f.rows.length&&'Row: '+f.rows.join(', ')+(P.added&&P.added.length?' + continued into '+P.added.join(', '):''),f.levels.length&&'Levels: '+f.levels.map(l=>'L'+l).join(', '),f.racks&&'Racks: '+f.racks].filter(Boolean).join(' · ');
+  const head=[['Transfer Bin – move list'],['Printed',stamp],['Stock',crit],['Destination',dest],['Separate collections',f.sepKol?'Yes':'No'],['Sort by',f.order==='size'?'Size, then series and colour':'Series and colour, then size'],['Total',`${P.plan.length} SKU · ${P.qty} pcs · ${P.used.length} bin`],[]];
   // one row per movement: split each SKU's source bins across its destination bins
   const ord=c=>{const b=BINS.get(c);return b?[b.rack,b.level,b.bin]:[c,0,0]};const cmp=(a,b)=>{const x=ord(a),y=ord(b);return natSort(x[0],y[0])||x[1]-y[1]||x[2]-y[2]};
   const moves=[];P.plan.filter(p=>p.placed).forEach(p=>{const src=p.from.map(([c,q])=>[c,q]).sort((a,b)=>cmp(a[0],b[0]));let si=0;
     p.to.forEach(([dc,dq])=>{let need=dq;while(need>0&&si<src.length){const t=Math.min(need,src[si][1]);moves.push({p,from:src[si][0],to:dc,q:t});src[si][1]-=t;need-=t;if(!src[si][1])si++}})});
-  const s1=[...head,['No','Ke bin','SKU','Koleksi','Produk','Warna','Saiz','Qty','Ambil dari bin','Siap ✓']];
+  const s1=[...head,['No','To bin','SKU','Collection','Product','Colour','Size','Qty','Take from bin','Done ✓']];
   [...moves].sort((a,b)=>cmp(a.to,b.to)||cmp(a.from,b.from)).forEach((m,i)=>s1.push([i+1,m.to,m.p.sku,m.p.s.kol||'',m.p.s.ser||m.p.s.desc,m.p.s.col||'',m.p.s.size||'',m.q,m.from,'']));
-  const s2=[...head,['No','Ambil dari bin','SKU','Koleksi','Warna','Saiz','Qty','Hantar ke bin','Siap ✓']];
+  const s2=[...head,['No','Take from bin','SKU','Collection','Colour','Size','Qty','Send to bin','Done ✓']];
   [...moves].sort((a,b)=>cmp(a.from,b.from)||cmp(a.to,b.to)).forEach((m,i)=>s2.push([i+1,m.from,m.p.sku,m.p.s.kol||'',m.p.s.col||'',m.p.s.size||'',m.q,m.to,'']));
   const short=P.plan.filter(p=>p.placed<p.qty);
   const wb=XLSX.utils.book_new();
   const mk=(aoa,cols)=>{const ws=XLSX.utils.aoa_to_sheet(aoa);ws['!cols']=cols.map(w=>({wch:w}));return ws};
-  XLSX.utils.book_append_sheet(wb,mk(s1,[5,14,18,8,34,16,8,7,14,8]),'Ikut bin tujuan');
-  XLSX.utils.book_append_sheet(wb,mk(s2,[5,16,18,8,16,8,7,14,8]),'Ikut bin asal');
-  if(short.length)XLSX.utils.book_append_sheet(wb,mk([['SKU','Warna','Saiz','Jumlah helai','Dapat diletak','Tak dapat diletak'],...short.map(p=>[p.sku,p.s.col||'',p.s.size||'',p.qty,p.placed,p.qty-p.placed])],[18,16,8,12,12,16]),'Tak cukup bin');
+  XLSX.utils.book_append_sheet(wb,mk(s1,[5,14,18,8,34,16,8,7,14,8]),'By destination bin');
+  XLSX.utils.book_append_sheet(wb,mk(s2,[5,16,18,8,16,8,7,14,8]),'By source bin');
+  if(short.length)XLSX.utils.book_append_sheet(wb,mk([['SKU','Colour','Size','Total pcs','Placed','Not placed'],...short.map(p=>[p.sku,p.s.col||'',p.s.size||'',p.qty,p.placed,p.qty-p.placed])],[18,16,8,12,12,16]),'Not enough bins');
   const buf=XLSX.write(wb,{type:'array',bookType:'xlsx'});
   const fn=`Transfer_Bin_${now.getFullYear()}${String(now.getMonth()+1).padStart(2,'0')}${String(now.getDate()).padStart(2,'0')}_${String(now.getHours()).padStart(2,'0')}${String(now.getMinutes()).padStart(2,'0')}.xlsx`;
-  try{await dl.save({filename:fn,data:buf});msgEl.textContent='✓ Fail '+fn+' dimuat turun. Buka dalam Excel untuk cetak.'}
-  catch(e){msgEl.textContent=e&&e.code==='declined'?'Muat turun dibatalkan.':e&&e.code==='rate_limited'?'Tunggu sekejap dan cuba lagi.':'Muat turun tak dapat dibuat di paparan ini.'}}
+  try{await dl.save({filename:fn,data:buf});msgEl.textContent='✓ File '+fn+' downloaded. Open it in Excel to print.'}
+  catch(e){msgEl.textContent=e&&e.code==='declined'?'Download cancelled.':e&&e.code==='rate_limited'?'Wait a moment and try again.':'Download is not possible in this view.'}}
 // saved transfer plans (collection xfers)
 // a database document holds at most 256 KiB, so the plan is stored in parts (xferparts/<id>_<n>)
 function xferToDoc(P,f,name,status){const items=P.plan.map(p=>({k:p.sku,q:p.qty,p:p.placed,f:p.from,t:p.to}));const parts=[];let cur=[],size=0;
@@ -1287,54 +1287,54 @@ function renderXfer(){main.className='';
   const f=xf;const P=xPlan;
   const saved=Object.entries(st.xfers||{}).sort((a,b)=>(b[1].created||0)-(a[1].created||0));
   const viewing=P&&P.saved;
-  let h=saved.length?`<section class="card"><div class="row"><h2 style="margin-right:auto">Cadangan disimpan</h2>${viewing?'<button class="btn pri" id="xnew">+ Cadangan baru</button>':''}</div>
-    <select id="xsel"><option value="">${viewing?'— pilih —':'Pilih untuk rujuk balik ('+saved.length+')'}</option>${saved.map(([id,d])=>`<option value="${esc(id)}"${viewing&&viewing.id===id?' selected':''}>${d.status==='done'?'✓ ':'• '}${esc(d.name)} · ${new Date(d.created||0).toLocaleDateString('ms-MY')}</option>`).join('')}</select>
-    <p class="small muted" style="margin:0">✓ = dah dipindah · • = belum dipindah</p></section>`:'';
-  if(!viewing)h+=`<section class="card"><h2>Transfer Bin Suggestion</h2><p class="small muted">Pilih stok yang nak disusun semula, kemudian pilih row dan tingkat tujuan. Sistem cadang susunan yang senang dipick.</p>
-    <h3 style="margin:6px 0 0">1. Stok yang nak dipindah</h3>
+  let h=saved.length?`<section class="card"><div class="row"><h2 style="margin-right:auto">Saved suggestions</h2>${viewing?'<button class="btn pri" id="xnew">+ New suggestion</button>':''}</div>
+    <select id="xsel"><option value="">${viewing?'— select —':'Select to look back ('+saved.length+')'}</option>${saved.map(([id,d])=>`<option value="${esc(id)}"${viewing&&viewing.id===id?' selected':''}>${d.status==='done'?'✓ ':'• '}${esc(d.name)} · ${new Date(d.created||0).toLocaleDateString('en-GB')}</option>`).join('')}</select>
+    <p class="small muted" style="margin:0">✓ = moved · • = not moved yet</p></section>`:'';
+  if(!viewing)h+=`<section class="card"><h2>Transfer Bin Suggestion</h2><p class="small muted">Choose the stock to rearrange, then pick the destination rows and levels. The system suggests an easy-to-pick layout.</p>
+    <h3 style="margin:6px 0 0">1. Stock to move</h3>
     <div class="fgrid">
-      <label for="xs">SKU / nama</label><input id="xs" list="skus" value="${esc(f.sku)}" placeholder="cth PTX2TBD atau Teluk Belanga" autocomplete="off">
-      <span>Brand</span>${multiPick('brand',brands,f.brand,'Semua brand')}
-      <span>Koleksi</span>${multiChips('kol',kols(f.brand),f.kol)}
-      <span>Item group</span>${multiPick('grp',grps,f.grp,'Semua item group')}
-      <span>Kategori</span>${multiChips('cat',['Men','Women','Kids','Baby'],f.cat)}
-      <span>Saiz</span>${multiChips('size',sizes,f.size)}
-      <label for="xw">Warna</label><input id="xw" value="${esc(f.col)}" placeholder="cth Brick Red" autocomplete="off">
-      <label for="xfr">Sekarang di row</label><select id="xfr">${opt(rows,f.from,'Semua row')}</select>
+      <label for="xs">SKU / name</label><input id="xs" list="skus" value="${esc(f.sku)}" placeholder="e.g. PTX2TBD or Teluk Belanga" autocomplete="off">
+      <span>Brand</span>${multiPick('brand',brands,f.brand,'All brands')}
+      <span>Collection</span>${multiChips('kol',kols(f.brand),f.kol)}
+      <span>Item group</span>${multiPick('grp',grps,f.grp,'All item groups')}
+      <span>Category</span>${multiChips('cat',['Men','Women','Kids','Baby'],f.cat)}
+      <span>Size</span>${multiChips('size',sizes,f.size)}
+      <label for="xw">Colour</label><input id="xw" value="${esc(f.col)}" placeholder="e.g. Brick Red" autocomplete="off">
+      <label for="xfr">Currently in row</label><select id="xfr">${opt(rows,f.from,'All rows')}</select>
     </div>
-    <h3 style="margin:10px 0 0">2. Tujuan</h3>
-    <div class="small muted">Row (boleh pilih lebih dari satu)</div>
+    <h3 style="margin:10px 0 0">2. Destination</h3>
+    <div class="small muted">Rows (you can pick more than one)</div>
     <div class="chips2">${rows.map(r=>`<button class="chip2" data-xrow="${esc(r)}" aria-pressed="${f.rows.includes(r)}">${esc(r)}</button>`).join('')}</div>
-    <div class="small muted" style="margin-top:6px">Tingkat (kosongkan untuk semua)</div>
+    <div class="small muted" style="margin-top:6px">Levels (leave empty for all)</div>
     <div class="chips2">${Array.from({length:maxL},(_,i)=>i+1).map(l=>`<button class="chip2" data-xlv="${l}" aria-pressed="${f.levels.includes(l)}">L${l}</button>`).join('')}</div>
-    <div class="fgrid"><label for="xr">Rak tertentu</label><input id="xr" value="${esc(f.racks)}" placeholder="pilihan, cth 1-G1, 1-G2" autocomplete="off"></div>
-    <h3 style="margin:10px 0 0">3. Cara susun</h3>
-    <div class="fgrid"><label for="xo">Susun ikut</label><select id="xo"><option value="size"${f.order==='size'?' selected':''}>Saiz dahulu, kemudian siri dan warna</option><option value="ser"${f.order==='ser'?' selected':''}>Siri dan warna dahulu, kemudian saiz</option></select></div>
-    <label class="row small"><input type="checkbox" id="xk2"${f.sepKol?' checked':''}> Asingkan ikut koleksi (koleksi terbaru dahulu, cth X4 → X3 → X2)</label>
-    <label class="row small"><input type="checkbox" id="xn"${f.newRack?' checked':''}> Mula ${f.order==='size'?'setiap saiz':'setiap siri/warna'} pada rak baru</label>
-    <label class="row small"><input type="checkbox" id="xa"${f.auto?' checked':''}> Kalau bin tak cukup, sambung ke row sebelah secara automatik</label>
-    <label class="row small"><input type="checkbox" id="xm"${f.mix?' checked':''}> Benarkan SKU ${f.order==='size'?'saiz sama':'siri/warna sama'} berkongsi bin yang belum penuh</label>
-    <div class="row"><button class="btn pri" id="xgo">Cadang susunan</button>${P?'<button class="btn" id="xclr">Kosongkan</button>':''}</div>
+    <div class="fgrid"><label for="xr">Specific racks</label><input id="xr" value="${esc(f.racks)}" placeholder="optional, e.g. 1-G1, 1-G2" autocomplete="off"></div>
+    <h3 style="margin:10px 0 0">3. Arrangement</h3>
+    <div class="fgrid"><label for="xo">Sort by</label><select id="xo"><option value="size"${f.order==='size'?' selected':''}>Size first, then series and colour</option><option value="ser"${f.order==='ser'?' selected':''}>Series and colour first, then size</option></select></div>
+    <label class="row small"><input type="checkbox" id="xk2"${f.sepKol?' checked':''}> Separate by collection (newest first, e.g. X4 → X3 → X2)</label>
+    <label class="row small"><input type="checkbox" id="xn"${f.newRack?' checked':''}> Start ${f.order==='size'? 'each size':'each series/colour'} on a new rack</label>
+    <label class="row small"><input type="checkbox" id="xa"${f.auto?' checked':''}> If bins run out, continue into the next row automatically</label>
+    <label class="row small"><input type="checkbox" id="xm"${f.mix?' checked':''}> Let SKUs of the ${f.order==='size'?'same size':'same series/colour'} share a bin that is not yet full</label>
+    <div class="row"><button class="btn pri" id="xgo">Suggest layout</button>${P?'<button class="btn" id="xclr">Clear</button>':''}</div>
     <div id="xmsg" class="small">${esc(xMsg)}</div></section>`;
   else if(xMsg)h+=`<section class="card"><div class="small">${esc(xMsg)}</div></section>`;
   if(P){const placedAll=P.plan.every(p=>p.placed===p.qty);
     const sv=P.saved;
-    h+=`<section class="card"><div class="pickhd"><h2>${sv?esc(sv.name):'Cadangan'}</h2>${sv?(sv.status==='done'?'<span class="badge2" style="background:color-mix(in srgb,var(--ok) 22%,transparent);color:var(--ok)">Dah dipindah</span>':'<span class="badge2" style="background:color-mix(in srgb,var(--warn) 22%,transparent);color:var(--warn)">Belum dipindah</span>'):''}</div>
-      ${sv?`<p class="small muted" style="margin:0">Disimpan oleh ${esc(sv.by||'-')} · ${new Date(sv.created||0).toLocaleString('ms-MY')}${sv.status==='done'?` · dipindah oleh ${esc(sv.doneBy||'-')} · ${new Date(sv.doneAt||0).toLocaleString('ms-MY')}`:''}</p>`:''}
-      <div class="stats"><div class="stat"><b>${fmt(P.plan.length)}</b><span>SKU</span></div><div class="stat"><b>${fmt(P.qty)}</b><span>Helai</span></div><div class="stat"><b>${fmt(P.used.length)}</b><span>Bin diperlukan</span></div><div class="stat"><b>${fmt(P.dest.length)}</b><span>Bin tujuan tersedia</span></div></div>
-      ${P.added&&P.added.length?`<p class="small" style="color:var(--warn)">Row dipilih tak cukup, jadi sistem sambung ke row sebelah: <b>${P.added.map(esc).join(', ')}</b>.</p>`:''}
-      ${P.short?`<p class="small" style="color:var(--bad)">Tak cukup bin: ${fmt(P.short)} helai tak dapat diletak. Tambah row atau tingkat tujuan.</p>`:''}
-      <p class="small muted">Bin tujuan ditanda ungu di peta. Klik kod bin untuk tengok di peta.</p>
-      <div class="tbl"><table><thead><tr><th>SKU</th><th>Dari</th><th>Ke</th></tr></thead><tbody>
-      ${P.plan.map(p=>`<tr><td><span class="code">${esc(p.sku)}</span><div class="small muted">${p.s.kol?esc(p.s.kol)+' · ':''}${esc(p.s.size)} · ${esc(p.s.col||'')} · ${fmt(p.qty)} helai</div></td>
+    h+=`<section class="card"><div class="pickhd"><h2>${sv?esc(sv.name):'Suggestion'}</h2>${sv?(sv.status==='done'?'<span class="badge2" style="background:color-mix(in srgb,var(--ok) 22%,transparent);color:var(--ok)">Moved</span>':'<span class="badge2" style="background:color-mix(in srgb,var(--warn) 22%,transparent);color:var(--warn)">Not moved yet</span>'):''}</div>
+      ${sv?`<p class="small muted" style="margin:0">Saved by ${esc(sv.by||'-')} · ${new Date(sv.created||0).toLocaleString('en-GB')}${sv.status==='done'?` · moved by ${esc(sv.doneBy||'-')} · ${new Date(sv.doneAt||0).toLocaleString('en-GB')}`:''}</p>`:''}
+      <div class="stats"><div class="stat"><b>${fmt(P.plan.length)}</b><span>SKU</span></div><div class="stat"><b>${fmt(P.qty)}</b><span>Pcs</span></div><div class="stat"><b>${fmt(P.used.length)}</b><span>Bins needed</span></div><div class="stat"><b>${fmt(P.dest.length)}</b><span>Destination bins available</span></div></div>
+      ${P.added&&P.added.length?`<p class="small" style="color:var(--warn)">The chosen rows were not enough, so the system continued into: <b>${P.added.map(esc).join(', ')}</b>.</p>`:''}
+      ${P.short?`<p class="small" style="color:var(--bad)">Not enough bins: ${fmt(P.short)} pcs could not be placed. Add destination rows or levels.</p>`:''}
+      <p class="small muted">Destination bins are marked purple on the map. Click a bin code to see it on the map.</p>
+      <div class="tbl"><table><thead><tr><th>SKU</th><th>From</th><th>To</th></tr></thead><tbody>
+      ${P.plan.map(p=>`<tr><td><span class="code">${esc(p.sku)}</span><div class="small muted">${p.s.kol?esc(p.s.kol)+' · ':''}${esc(p.s.size)} · ${esc(p.s.col||'')} · ${fmt(p.qty)} pcs</div></td>
         <td class="small">${p.from.map(([c,q])=>`<a href="#" data-xbin="${esc(c)}" style="color:var(--fg)">${esc(c)}</a> (${q})`).join('<br>')}</td>
-        <td class="small">${p.to.map(([c,q])=>`<a href="#" data-xbin="${esc(c)}" style="color:var(--accent)">${esc(c)}</a> (${q})`).join('<br>')||'<span style="color:var(--bad)">tiada bin</span>'}</td></tr>`).join('')}
+        <td class="small">${p.to.map(([c,q])=>`<a href="#" data-xbin="${esc(c)}" style="color:var(--accent)">${esc(c)}</a> (${q})`).join('<br>')||'<span style="color:var(--bad)">no bin</span>'}</td></tr>`).join('')}
       </tbody></table></div>
-      <div class="row">${sv?'':'<button class="btn pri" id="xsave">Simpan cadangan</button>'}<button class="btn${sv?' pri':''}" id="xxls">Muat turun Excel untuk cetak</button></div><div id="xxmsg" class="small"></div>
-      <div class="row">${sv&&sv.status==='done'?'':`<button class="btn ok" id="xapply"${P.plan.some(p=>p.placed)?'':' disabled'}>Dah pindah semua – kemas kini lokasi</button>`}${sv?'<button class="btn" id="xdel">Padam cadangan</button>':''}</div><div id="xamsg" class="small"></div>
-      ${placedAll?'':'<p class="small muted">SKU tanpa bin tujuan tak akan diubah.</p>'}</section>`}
+      <div class="row">${sv?'':'<button class="btn pri" id="xsave">Save suggestion</button>'}<button class="btn${sv?' pri':''}" id="xxls">Download Excel to print</button></div><div id="xxmsg" class="small"></div>
+      <div class="row">${sv&&sv.status==='done'?'':`<button class="btn ok" id="xapply"${P.plan.some(p=>p.placed)?'':' disabled'}>All moved – update locations</button>`}${sv?'<button class="btn" id="xdel">Delete suggestion</button>':''}</div><div id="xamsg" class="small"></div>
+      ${placedAll?'':'<p class="small muted">SKUs without a destination bin will not be changed.</p>'}</section>`}
   main.innerHTML=h+skuOptions();
-  const xs=$('#xsel');if(xs)xs.onchange=async()=>{const id=xs.value;if(!id){xPlan=null;render();return}setStatus('Memuatkan cadangan…');let p=null;try{p=await xferLoad(id)}catch(e){}if(!p){setStatus('Cadangan tak dapat dibuka.',true);return}setStatus('✓ Cadangan dibuka');xPlan=p;xMsg='';locQuiet=true;const first=xPlan.used[0];if(first)openOnMap(first,true);render()};
+  const xs=$('#xsel');if(xs)xs.onchange=async()=>{const id=xs.value;if(!id){xPlan=null;render();return}setStatus('Loading suggestion…');let p=null;try{p=await xferLoad(id)}catch(e){}if(!p){setStatus('The suggestion could not be opened.',true);return}setStatus('✓ Suggestion opened');xPlan=p;xMsg='';locQuiet=true;const first=xPlan.used[0];if(first)openOnMap(first,true);render()};
   const xn=$('#xnew');if(xn)xn.onclick=()=>{xPlan=null;xMsg='';render()};
   if(!viewing){
   const upd=(k,v)=>{xf[k]=v;xPlan=null;xMsg='';renderXfer()};
@@ -1344,9 +1344,9 @@ function renderXfer(){main.className='';
   $('#xn').onchange=e=>upd('newRack',e.target.checked);$('#xa').onchange=e=>upd('auto',e.target.checked);$('#xk2').onchange=e=>upd('sepKol',e.target.checked);$('#xm').onchange=e=>upd('mix',e.target.checked);
   main.querySelectorAll('[data-xrow]').forEach(b=>b.onclick=()=>{const r=b.dataset.xrow;upd('rows',f.rows.includes(r)?f.rows.filter(x=>x!==r):[...f.rows,r])});
   main.querySelectorAll('[data-xlv]').forEach(b=>b.onclick=()=>{const l=+b.dataset.xlv;upd('levels',f.levels.includes(l)?f.levels.filter(x=>x!==l):[...f.levels,l].sort((a,b)=>a-b))});
-  $('#xgo').onclick=()=>{if(!skuFilterOn(f)&&!f.from){xMsg='Pilih sekurang-kurangnya satu: SKU, brand, item group, kategori, saiz, warna atau row asal.';renderXfer();return}
-    if(!f.rows.length&&!f.racks){xMsg='Pilih row tujuan atau rak tertentu.';renderXfer();return}
-    const p=xferPlanAuto(f);if(!p.plan.length){xMsg='Tiada stok dalam bin yang sepadan dengan pilihan.';xPlan=null;renderXfer();return}
+  $('#xgo').onclick=()=>{if(!skuFilterOn(f)&&!f.from){xMsg='Choose at least one: SKU, brand, item group, category, size, colour or source row.';renderXfer();return}
+    if(!f.rows.length&&!f.racks){xMsg='Choose destination rows or specific racks.';renderXfer();return}
+    const p=xferPlanAuto(f);if(!p.plan.length){xMsg='No stock in bins matches the selection.';xPlan=null;renderXfer();return}
     xPlan=p;xMsg='';mapHL=[];locQuiet=true;const first=p.used[0];if(first)openOnMap(first,true);render()};
   const xc=$('#xclr');if(xc)xc.onclick=()=>{xPlan=null;xMsg='';render()};
   }
@@ -1354,33 +1354,33 @@ function renderXfer(){main.className='';
   const xx=$('#xxls');if(xx)xx.onclick=()=>xferExcel(P,P.saved?P.saved.filter:f,$('#xxmsg'));
   const saveDoc=async(status)=>{const {meta,parts}=xferToDoc(P,f,xferName(f,P),status);if(status==='done'){meta.doneAt=Date.now();meta.doneBy=me()}
     const id='x'+Date.now().toString(36);
-    const ok=await guarded(async()=>{for(let i=0;i<parts.length;i++)await db.doc('xferparts/'+id+'_'+i).set({plan:parts[i]});await db.doc('xfers/'+id).set(meta)},status==='done'?'Cadangan disimpan sebagai rekod':'Cadangan disimpan');
+    const ok=await guarded(async()=>{for(let i=0;i<parts.length;i++)await db.doc('xferparts/'+id+'_'+i).set({plan:parts[i]});await db.doc('xfers/'+id).set(meta)},status==='done'?'Suggestion saved as a record':'Saved suggestions');
     return ok?[id,meta,parts.flat()]:null};
   const xsv=$('#xsave');if(xsv)xsv.onclick=async()=>{const r=await saveDoc('draft');if(r){st.xfers[r[0]]=r[1];xPlan=xferFromDoc(r[0],r[1],r[2]);render()}};
-  const xd=$('#xdel');if(xd)xd.onclick=()=>askInline($('#xamsg'),'Padam cadangan ini? Lokasi stok tak berubah.',async()=>{const id=P.saved.id;const n=P.saved.parts||0;if(await guarded(async()=>{await db.doc('xfers/'+id).delete();for(let i=0;i<n;i++)await db.doc('xferparts/'+id+'_'+i).delete()},'Cadangan dipadam')){delete st.xfers[id];xPlan=null;render()}});
+  const xd=$('#xdel');if(xd)xd.onclick=()=>askInline($('#xamsg'),'Delete this suggestion? Stock locations will not change.',async()=>{const id=P.saved.id;const n=P.saved.parts||0;if(await guarded(async()=>{await db.doc('xfers/'+id).delete();for(let i=0;i<n;i++)await db.doc('xferparts/'+id+'_'+i).delete()},'Suggestion deleted')){delete st.xfers[id];xPlan=null;render()}});
   const stale=!P?0:P.plan.filter(p=>p.placed===p.qty).reduce((n,p)=>n+p.from.filter(([c,q])=>{const e=binItems(c).find(x=>x[0]===p.sku);return !e||e[1]<q}).length,0);
-  const ap=$('#xapply');if(ap)ap.onclick=()=>askInline($('#xamsg'),`Kemas kini lokasi untuk ${P.plan.filter(p=>p.placed===p.qty).length} SKU? Pastikan barang dah betul-betul dialih.${stale?`\n\nPerhatian: ${stale} bin asal dah tak sama dengan stok semasa (mungkin dah berubah sejak cadangan dibuat).`:''}`,async()=>{
+  const ap=$('#xapply');if(ap)ap.onclick=()=>askInline($('#xamsg'),`Update locations for ${P.plan.filter(p=>p.placed===p.qty).length} SKUs? Make sure the stock has actually been moved.${stale?`\n\n Note: ${stale} source bins no longer match current stock (it may have changed since the suggestion was made).`:''}`,async()=>{
     const changes={};const cur=c=>changes[c]||(changes[c]=binItems(c).map(x=>[...x]));
     const done=P.plan.filter(p=>p.placed===p.qty);
     done.forEach(p=>p.from.forEach(([c])=>{changes[c]=cur(c).filter(([k])=>k!==p.sku)}));
     done.forEach(p=>p.to.forEach(([c,q])=>{const arr=cur(c);const e=arr.find(x=>x[0]===p.sku);if(e)e[1]+=q;else arr.push([p.sku,q])}));
-    QUIET++;let okA=false;try{okA=await guarded(()=>saveBins(changes),'Lokasi dikemas kini')}finally{QUIET--}
+    QUIET++;let okA=false;try{okA=await guarded(()=>saveBins(changes),'Locations updated')}finally{QUIET--}
     if(okA){
-      if(P.saved){const id=P.saved.id;const upd2={...st.xfers[id],status:'done',doneAt:Date.now(),doneBy:me()};delete upd2.id;await guarded(()=>db.doc('xfers/'+id).set(upd2),'Rekod dikemas kini');st.xfers[id]=upd2}
+      if(P.saved){const id=P.saved.id;const upd2={...st.xfers[id],status:'done',doneAt:Date.now(),doneBy:me()};delete upd2.id;await guarded(()=>db.doc('xfers/'+id).set(upd2),'Record updated');st.xfers[id]=upd2}
       else{const r=await saveDoc('done');if(r)st.xfers[r[0]]=r[1]}
-      xPlan=null;xMsg=`✓ ${done.length} SKU dipindah dan lokasi dikemas kini. Rekod disimpan dalam "Cadangan disimpan".`;render()}});
+      xPlan=null;xMsg=`✓ ${done.length} SKUs moved and locations updated. A record is kept in "Saved suggestions".`;render()}});
 }
 
 let cariQ='';
-function renderCari(){main.className='';main.innerHTML=`<section class="card"><h2>Cari SKU atau bin</h2>
-    <div class="row"><input id="cq" class="grow" list="skus" placeholder="SKU, nama produk atau kod bin (cth 1-A1-L1-2)" autocomplete="off"><button class="btn pri" id="cgo">Cari</button></div><div id="cr"></div>${skuOptions()}</section>`;
+function renderCari(){main.className='';main.innerHTML=`<section class="card"><h2>Find an SKU or bin</h2>
+    <div class="row"><input id="cq" class="grow" list="skus" placeholder="SKU, product name or bin code (e.g. 1-A1-L1-2)" autocomplete="off"><button class="btn pri" id="cgo">Find</button></div><div id="cr"></div>${skuOptions()}</section>`;
   const go=()=>{const q=$('#cq').value.trim();const box=$('#cr');cariQ=q;if(!q){box.innerHTML='';return}
     if(BINS.has(q.toUpperCase())){const code=q.toUpperCase();if(mapPicked!==code){mapHL=[code];openOnMap(code,true);ensureMap(false)}const it=binItems(code);const b=BINS.get(code);
-      box.innerHTML=`<div class="item"><div class="row"><span class="code">${esc(code)}</span><span class="pill">Row ${esc(b.row)}</span><span class="pill">${b.floor===2?'Level M':'Ground floor'}</span>${b.plan?`<span class="pill">Rak ${esc(b.plan[0])} ${esc(b.plan[1])}</span>`:''}</div>
-        <div>${fmt(binQty(code))} / ${binCap(code)} helai</div><div class="tbl"><table><thead><tr><th>SKU</th><th>Warna · saiz</th><th class="n">Qty</th></tr></thead><tbody>${it.map(([k,qq])=>`<tr><td>${esc(k)}</td><td>${esc(sku(k)?.col||'')} · ${esc(sku(k)?.size||'')}</td><td class="n">${qq}</td></tr>`).join('')||'<tr><td colspan="3" class="empty">Kosong</td></tr>'}</tbody></table></div></div>`;return}
+      box.innerHTML=`<div class="item"><div class="row"><span class="code">${esc(code)}</span><span class="pill">Row ${esc(b.row)}</span><span class="pill">${b.floor===2?'Level M':'Ground floor'}</span>${b.plan?`<span class="pill">Rack ${esc(b.plan[0])} ${esc(b.plan[1])}</span>`:''}</div>
+        <div>${fmt(binQty(code))} / ${binCap(code)} pcs</div><div class="tbl"><table><thead><tr><th>SKU</th><th>Colour · size</th><th class="n">Qty</th></tr></thead><tbody>${it.map(([k,qq])=>`<tr><td>${esc(k)}</td><td>${esc(sku(k)?.col||'')} · ${esc(sku(k)?.size||'')}</td><td class="n">${qq}</td></tr>`).join('')||'<tr><td colspan="3" class="empty">Empty</td></tr>'}</tbody></table></div></div>`;return}
     const ql=q.toLowerCase();const hits=Object.keys(st.master).filter(k=>k.toLowerCase().includes(ql)||st.master[k][0].toLowerCase().includes(ql)).slice(0,30);
     box.innerHTML=hits.length?`<div class="list">${hits.map(k=>{const s=sku(k),L=skuLocs(k),inBins=L.reduce((a,x)=>a+x.qty,0);
-      return `<div class="item">${skuLine(s)}<div class="row small"><span>Stok sistem: <b>${fmt(s.qty)}</b></span><span>Dalam bin: <b>${fmt(inBins)}</b></span>${inBins!==s.qty?'<span class="pill warn">Tak sama</span>':''}</div><div>${L.map(l=>`<span class="code">${esc(l.code)}</span> (${l.qty})`).join(' ')||'<span class="empty">Belum ada lokasi</span>'}</div>${L.length?`<div><button class="btn" data-map="${esc(L.map(l=>l.code).join(','))}">Tunjuk di peta</button></div>`:''}</div>`}).join('')}</div>`:'<p class="empty">Tiada padanan.</p>'};
+      return `<div class="item">${skuLine(s)}<div class="row small"><span>System stock: <b>${fmt(s.qty)}</b></span><span>In bins: <b>${fmt(inBins)}</b></span>${inBins!==s.qty?'<span class="pill warn">Mismatch</span>':''}</div><div>${L.map(l=>`<span class="code">${esc(l.code)}</span> (${l.qty})`).join(' ')||'<span class="empty">No location yet</span>'}</div>${L.length?`<div><button class="btn" data-map="${esc(L.map(l=>l.code).join(','))}">Show on map</button></div>`:''}</div>`}).join('')}</div>`:'<p class="empty">No match.</p>'};
   $('#cr').onclick=e=>{const b=e.target.closest('[data-map]');if(b){showOnMap(b.dataset.map.split(','));return}const c=e.target.closest('.code');if(c&&BINS.has(c.textContent.trim())){mapHL=[c.textContent.trim()];openOnMap(c.textContent.trim())}};
   $('#cgo').onclick=go;$('#cq').onkeydown=e=>{if(e.key==='Enter')go()};
   if(cariQ){$('#cq').value=cariQ;go()}}
@@ -1396,20 +1396,20 @@ function parseLocReport(rows){const col=(r,names)=>{const k=Object.keys(r).find(
     const add=()=>{if(!master[k]){const p=parseDesc(desc);master[k]=[desc,brand,grp,catOf(grp,desc),p.ser,p.col,p.size,0]}master[k][7]+=q};
     if(m){const code=`${m[1].toUpperCase()}-L${+m[2]}-${+m[3]}`;(loc[code]=loc[code]||{})[k]=(loc[code][k]||0)+q;inRack+=q;add()}
     else if(/receiving/i.test(bin)){queue[k]=(queue[k]||0)+q;rec+=q;add()}
-    else ignored[bin||'(tiada bin)']=(ignored[bin||'(tiada bin)']||0)+q});
+    else ignored[bin||'(no bin)']=(ignored[bin||'(no bin)']||0)+q});
   return {loc,master,queue,ignored,inRack,rec}}
-function locRowOf(code){const b=BINS.get(code);if(b)return b.row;const rk=code.replace(/-L\d+-\d+$/,'');const r=RACKS.find(x=>x.c===rk);if(r)return r.r;return guessRow(rk)||(rk.match(/^(\d-[A-Z]+)/)||[])[1]||'Lain'}
+function locRowOf(code){const b=BINS.get(code);if(b)return b.row;const rk=code.replace(/-L\d+-\d+$/,'');const r=RACKS.find(x=>x.c===rk);if(r)return r.r;return guessRow(rk)||(rk.match(/^(\d-[A-Z]+)/)||[])[1]||'Other'}
 function showLocPreview(ur,P){const curQ=c=>binQty(c);const rackOf=c=>c.replace(/-L\d+-\d+$/,'');
   const codes=new Set([...Object.keys(P.loc),...Object.keys(LOCAT)]);const diff={};let changed=0;
   codes.forEach(c=>{const a=curQ(c),b=Object.values(P.loc[c]||{}).reduce((x,y)=>x+y,0);if(a!==b){changed++;const r=rackOf(c);const o=diff[r]=diff[r]||{a:0,b:0};o.a+=a;o.b+=b}});
   const racks=Object.entries(diff).sort((x,y)=>Math.abs(y[1].b-y[1].a)-Math.abs(x[1].b-x[1].a));
   const ign=Object.entries(P.ignored).sort((a,b)=>b[1]-a[1]);
-  ur.innerHTML=`<div class="stats"><div class="stat"><b>${fmt(P.inRack)}</b><span>Helai dalam bin rak</span></div><div class="stat"><b>${fmt(Object.keys(P.loc).length)}</b><span>Bin berisi</span></div><div class="stat"><b>${fmt(Object.keys(P.master).length)}</b><span>SKU</span></div><div class="stat"><b>${fmt(P.rec)}</b><span>Di Receiving</span></div></div>
-    <p class="small muted">Fail ni ada lajur <b>Bin</b>, jadi sistem akan <b>ganti semua lokasi</b> ikut fail. ${fmt(changed)} bin berubah berbanding data sekarang.</p>
-    ${racks.length?`<div class="tbl"><table><thead><tr><th>Rak</th><th class="n">Sekarang</th><th class="n">Fail</th></tr></thead><tbody>${racks.slice(0,40).map(([r,o])=>`<tr><td><span class="code">${esc(r)}</span></td><td class="n">${fmt(o.a)}</td><td class="n" style="color:var(${o.b>o.a?'--ok':'--bad'})">${fmt(o.b)}</td></tr>`).join('')}</tbody></table></div>${racks.length>40?`<p class="small muted">+ ${racks.length-40} rak lagi</p>`:''}`:'<p class="small">Tiada perubahan lokasi.</p>'}
-    ${ign.length?`<details><summary class="small">Tidak dimasukkan (${fmt(ign.reduce((a,x)=>a+x[1],0))} helai, bukan bin rak)</summary><div class="small muted" style="margin-top:6px">${ign.slice(0,12).map(([b,n])=>`${esc(b)}: ${fmt(n)}`).join('<br>')}</div></details>`:''}
-    <div class="row"><button class="btn pri" id="uok">Sahkan dan ganti lokasi</button></div><div id="umsg" class="small"></div>`;
-  $('#uok').onclick=()=>askInline($('#umsg'),'Ganti semua lokasi bin dengan fail ini? Data lokasi sekarang akan diganti.',applyLocReport)}
+  ur.innerHTML=`<div class="stats"><div class="stat"><b>${fmt(P.inRack)}</b><span>Pcs dalam bin racks</span></div><div class="stat"><b>${fmt(Object.keys(P.loc).length)}</b><span>Bins with stock</span></div><div class="stat"><b>${fmt(Object.keys(P.master).length)}</b><span>SKU</span></div><div class="stat"><b>${fmt(P.rec)}</b><span>At Receiving</span></div></div>
+    <p class="small muted">This file has a <b>Bins</b> column, so the system will <b>replace all locations</b> from the file. ${fmt(changed)} bins differ from the current data.</p>
+    ${racks.length?`<div class="tbl"><table><thead><tr><th>Rack</th><th class="n">Now</th><th class="n">File</th></tr></thead><tbody>${racks.slice(0,40).map(([r,o])=>`<tr><td><span class="code">${esc(r)}</span></td><td class="n">${fmt(o.a)}</td><td class="n" style="color:var(${o.b>o.a?'--ok':'--bad'})">${fmt(o.b)}</td></tr>`).join('')}</tbody></table></div>${racks.length>40?`<p class="small muted">+ ${racks.length-40} more racks</p>`:''}`:'<p class="small">No location changes.</p>'}
+    ${ign.length?`<details><summary class="small">Not included (${fmt(ign.reduce((a,x)=>a+x[1],0))} pcs, not rack bins)</summary><div class="small muted" style="margin-top:6px">${ign.slice(0,12).map(([b,n])=>`${esc(b)}: ${fmt(n)}`).join('<br>')}</div></details>`:''}
+    <div class="row"><button class="btn pri" id="uok">Confirm and replace locations</button></div><div id="umsg" class="small"></div>`;
+  $('#uok').onclick=()=>askInline($('#umsg'),'Replace all bin locations with this file? The current location data will be replaced.',applyLocReport)}
 async function applyLocReport(){const P=pendingLoc;if(!P)return;
   const rows={};Object.entries(P.loc).forEach(([c,m])=>{const r=locRowOf(c);(rows[r]=rows[r]||{})[c]=Object.entries(m)});
   const keys=Object.keys(P.master).sort();const parts=[0,1,2,3].map(i=>{const o={};keys.filter((_,j)=>j%4===i).forEach(k=>o[k]=P.master[k]);return o});
@@ -1417,35 +1417,35 @@ async function applyLocReport(){const P=pendingLoc;if(!P)return;
   try{ok=await guarded(async()=>{for(let i=0;i<4;i++)await db.doc('master/p'+i).set({skus:parts[i]});
     for(const r in rows)await db.doc('loc/'+docId(r)).set({row:r,bins:rows[r]});
     for(const r in st.loc)if(!rows[r])await db.doc('loc/'+docId(r)).delete();
-    await db.doc('queue/pending').set({items:P.queue})},'Lokasi dikemas kini ikut fail')}finally{QUIET--}
+    await db.doc('queue/pending').set({items:P.queue})},'Locations updated from file')}finally{QUIET--}
   if(ok){pendingLoc=null;tab='peta';render()}}
 function renderUpload(){main.className='';const totSku=Object.keys(st.master).length,tot=Object.values(st.master).reduce((a,m)=>a+m[7],0);
-  main.innerHTML=`<section class="card"><h2>Upload stok terkini</h2>
-    <p class="small muted">Upload <b>Inventory Balance Detailed Report</b> (CSV atau Excel). Kalau fail ada lajur <b>Bin</b>, lokasi setiap bin dikemas kini ikut fail. Fail tanpa lajur Bin cuma kemas kini jumlah stok. Sistem tunjuk perubahan dulu sebelum anda sahkan.</p>
-    <div class="stats"><div class="stat"><b>${fmt(totSku)}</b><span>SKU dalam data</span></div><div class="stat"><b>${fmt(tot)}</b><span>Jumlah helai</span></div></div>
+  main.innerHTML=`<section class="card"><h2>Upload latest stock</h2>
+    <p class="small muted">Upload the <b>Inventory Balance Detailed Report</b> (CSV or Excel). If the file has a <b>Bins</b> column, every bin location is updated from the file. A file without a Bin column only updates stock totals. The system shows the changes before you confirm.</p>
+    <div class="stats"><div class="stat"><b>${fmt(totSku)}</b><span>SKUs in data</span></div><div class="stat"><b>${fmt(tot)}</b><span>Total pcs</span></div></div>
     <input id="uf" type="file" accept=".xlsx,.xls,.csv"><div id="ur"></div></section>`;
-  $('#uf').onchange=async e=>{const f=e.target.files[0];if(!f)return;const ur=$('#ur');ur.innerHTML='<p class="empty">Membaca fail…</p>';
+  $('#uf').onchange=async e=>{const f=e.target.files[0];if(!f)return;const ur=$('#ur');ur.innerHTML='<p class="empty">Reading file…</p>';
     try{const wb=XLSX.read(await f.arrayBuffer(),{type:'array',raw:true});const rows=XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]],{defval:'',raw:false});
-      if(rows.length&&Object.keys(rows[0]).some(x=>x.trim().toLowerCase()==='bin')){pendingLoc=parseLocReport(rows);if(!Object.keys(pendingLoc.loc).length){ur.innerHTML='<p class="pill bad">Tiada bin rak dijumpai dalam fail.</p>';return}showLocPreview(ur,pendingLoc);return}
+      if(rows.length&&Object.keys(rows[0]).some(x=>x.trim().toLowerCase()==='bin')){pendingLoc=parseLocReport(rows);if(!Object.keys(pendingLoc.loc).length){ur.innerHTML='<p class="pill bad">No rack bins found in the file.</p>';return}showLocPreview(ur,pendingLoc);return}
       const col=(r,names)=>{const k=Object.keys(r).find(x=>names.includes(x.trim().toLowerCase()));return k?r[k]:''};
       const next={};rows.forEach(r=>{const k=String(col(r,['sku'])).trim();if(!k)return;const desc=String(col(r,['sku description','description','penerangan'])).trim();
         const grp=String(col(r,['item group','group'])).trim(),brand=String(col(r,['item brand','brand'])).trim(),qty=Math.round(+col(r,['total qty','qty','quantity'])||0);
         const p=parseDesc(desc);next[k]=[desc,brand,grp,catOf(grp,desc),p.ser,p.col,p.size,(next[k]?next[k][7]:0)+qty]});
-      if(!Object.keys(next).length){ur.innerHTML='<p class="pill bad">Tiada lajur SKU dijumpai dalam fail.</p>';return}
+      if(!Object.keys(next).length){ur.innerHTML='<p class="pill bad">No SKU column found in the file.</p>';return}
       const ch=[];const all=new Set([...Object.keys(st.master),...Object.keys(next)]);
       all.forEach(k=>{const inB=skuLocs(k).reduce((a,x)=>a+x.qty,0),nq=next[k]?next[k][7]:0;if(nq!==inB)ch.push({k,inB,nq,d:nq-inB})});
       pending={next,ch};const add=ch.filter(x=>x.d>0),sub=ch.filter(x=>x.d<0);
-      ur.innerHTML=`<div class="stats"><div class="stat"><b>${fmt(Object.keys(next).length)}</b><span>SKU dalam fail</span></div><div class="stat"><b>${add.length}</b><span>Perlu disimpan (+${fmt(add.reduce((a,x)=>a+x.d,0))} helai)</span></div><div class="stat"><b>${sub.length}</b><span>Berkurang (−${fmt(-sub.reduce((a,x)=>a+x.d,0))} helai)</span></div></div>
-        <p class="small muted">Bila disahkan: data stok diganti dengan fail ini; SKU bertambah masuk senarai <b>Menunggu disimpan</b>; SKU berkurang ditolak dari bin (bin paling sikit dulu).</p>
-        <div class="tbl"><table><thead><tr><th>SKU</th><th class="n">Dalam bin</th><th class="n">Fail</th><th class="n">Beza</th></tr></thead><tbody>${ch.slice(0,100).map(x=>`<tr><td>${esc(x.k)}</td><td class="n">${x.inB}</td><td class="n">${x.nq}</td><td class="n" style="color:var(${x.d>0?'--ok':'--bad'})">${x.d>0?'+':''}${x.d}</td></tr>`).join('')}</tbody></table></div>
-        ${ch.length>100?`<p class="small muted">+ ${ch.length-100} lagi</p>`:''}<div class="row"><button class="btn pri" id="uok">Sahkan dan kemas kini</button></div>`;
+      ur.innerHTML=`<div class="stats"><div class="stat"><b>${fmt(Object.keys(next).length)}</b><span>SKUs in file</span></div><div class="stat"><b>${add.length}</b><span>To put away (+${fmt(add.reduce((a,x)=>a+x.d,0))} pcs)</span></div><div class="stat"><b>${sub.length}</b><span>Reduced (−${fmt(-sub.reduce((a,x)=>a+x.d,0))} pcs)</span></div></div>
+        <p class="small muted">When confirmed: stock data is replaced with this file; increased SKUs go to the <b>Waiting to put away</b> list; reduced SKUs are taken out of bins (smallest bin first).</p>
+        <div class="tbl"><table><thead><tr><th>SKU</th><th class="n">In bins</th><th class="n">File</th><th class="n">Difference</th></tr></thead><tbody>${ch.slice(0,100).map(x=>`<tr><td>${esc(x.k)}</td><td class="n">${x.inB}</td><td class="n">${x.nq}</td><td class="n" style="color:var(${x.d>0?'--ok':'--bad'})">${x.d>0?'+':''}${x.d}</td></tr>`).join('')}</tbody></table></div>
+        ${ch.length>100?`<p class="small muted">+ ${ch.length-100} more</p>`:''}<div class="row"><button class="btn pri" id="uok">Confirm and update</button></div>`;
       $('#uok').onclick=applyUpload}
-    catch(err){ur.innerHTML='<p class="pill bad">Fail tak dapat dibaca. Pastikan ia fail Excel atau CSV.</p>'}}}
+    catch(err){ur.innerHTML='<p class="pill bad">The file could not be read. Make sure it is an Excel or CSV file.</p>'}}}
 async function applyUpload(){if(!pending)return;const {next,ch}=pending;const changes={},queue={...st.queue};
   ch.forEach(x=>{if(x.d>0){queue[x.k]=x.d}else{delete queue[x.k];let rm=-x.d;skuLocs(x.k).sort((a,b)=>a.qty-b.qty).forEach(l=>{if(rm<=0)return;const t=Math.min(rm,l.qty);addTo(changes,l.code,x.k,-t);rm-=t})}});
   Object.keys(queue).forEach(k=>{if(!next[k])delete queue[k]});
   const ok=await guarded(async()=>{const keys=Object.keys(next).sort();for(let i=0;i<4;i++){const part={};keys.filter((_,j)=>j%4===i).forEach(k=>part[k]=next[k]);await db.doc('master/p'+i).set({skus:part})}
-    await saveBins(changes);await db.doc('queue/pending').set({items:queue});st.master=next;st.queue=queue},'Stok dikemas kini');
+    await saveBins(changes);await db.doc('queue/pending').set({items:queue});st.master=next;st.queue=queue},'Stock updated');
   if(ok){pending=null;tab='peta';render()}}
 
 // ---------- one map for every tab: panels render on the right, the map stays ----------
@@ -1458,13 +1458,13 @@ async function connectDb(){
   for(let i=0;i<50&&!window.claude;i++)await new Promise(r=>setTimeout(r,200));
   for(let t=0;t<2;t++){try{const d=window.claude?await window.claude.use('db'):null;if(d)return d}catch(e){}await new Promise(r=>setTimeout(r,1500))}
   return null}
-async function boot(){render();setStatus('Menyambung ke storan…');
+async function boot(){render();setStatus('Connecting to storage…');
   db=await connectDb();
-  if(!db){const s=$('#status');s.innerHTML='Storan tidak disambung. <button class="linkbtn" id="retrydb" style="color:var(--accent)">Cuba lagi</button>';s.classList.add('bad');
+  if(!db){const s=$('#status');s.innerHTML='Storage not connected. <button class="linkbtn" id="retrydb" style="color:var(--accent)">Try again</button>';s.classList.add('bad');
     $('#retrydb').onclick=()=>location.reload();return}
-  setStatus('✓ Disambung');checkImport(db);
+  setStatus('✓ Connected');checkImport(db);
   const parts={};for(let i=0;i<4;i++)db.doc('master/p'+i).onSnapshot(s=>{parts[i]=(s.exists&&s.data().skus)||{};if(Object.keys(parts).length===4){st.master=Object.assign({},...Object.values(parts));st.ready.m=1;render()}},()=>{});
-  db.collection('loc').onSnapshot(snap=>{const m={};snap.docs.forEach(d=>{const v=d.data();m[v.row||d.id]=v.bins||{}});st.loc=m;indexLoc();{const sy=$('#synct');if(sy)sy.textContent=new Date().toLocaleString('ms-MY',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'})}st.ready.l=1;if(orphanPass()){buildBinsRaw();if(MAP){MAP.dispose();MAP=null}}if(MAP)MAP.paint();if(!busy())render()},()=>setStatus('Sambungan terputus. Muat semula halaman.',true));
+  db.collection('loc').onSnapshot(snap=>{const m={};snap.docs.forEach(d=>{const v=d.data();m[v.row||d.id]=v.bins||{}});st.loc=m;indexLoc();{const sy=$('#synct');if(sy)sy.textContent=new Date().toLocaleString('en-GB',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'})}st.ready.l=1;if(orphanPass()){buildBinsRaw();if(MAP){MAP.dispose();MAP=null}}if(MAP)MAP.paint();if(!busy())render()},()=>setStatus('Connection lost. Reload the page.',true));
   db.doc('queue/pending').onSnapshot(s=>{st.queue=(s.exists&&s.data().items)||{};if(!busy())render()},()=>{});
   db.doc('settings/racks').onSnapshot(s=>{const cfg=s.exists?s.data():{};const key=JSON.stringify([cfg.edit||{},cfg.add||{}]);if(key===JSON.stringify([RACK_CFG.edit,RACK_CFG.add]))return;
     applyRackCfg(cfg);if(MAP){MAP.dispose();MAP=null}if(!busy())render()},()=>{});
