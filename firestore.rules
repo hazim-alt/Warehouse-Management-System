@@ -1,0 +1,17 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // hanya emel yang ada dalam koleksi "staff" boleh guna sistem
+    function isStaff() {
+      return request.auth != null && request.auth.token.email != null &&
+        exists(/databases/$(database)/documents/staff/$(request.auth.token.email.lower()));
+    }
+    match /staff/{email} {
+      allow read: if request.auth != null && request.auth.token.email.lower() == email;
+      allow write: if false;   // tambah staf melalui Firebase Console sahaja
+    }
+    match /{col}/{doc} {
+      allow read, write: if col != 'staff' && isStaff();
+    }
+  }
+}

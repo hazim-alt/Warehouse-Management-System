@@ -1,0 +1,1482 @@
+<!doctype html>
+<html lang="ms">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Sistem Pengurusan Gudang</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&family=Barlow+Condensed:wght@600;700&display=swap">
+<style>
+*{box-sizing:border-box}body{margin:0}
+#login{position:fixed;inset:0;z-index:100;display:grid;place-items:center;background:var(--bg);padding:16px}
+#login[hidden]{display:none}
+.lcard{width:min(420px,100%);display:grid;gap:10px;background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:24px;box-shadow:0 20px 50px rgba(0,0,0,.4)}
+.lcard .brand{margin-bottom:8px}
+.importbox{position:fixed;inset:0;z-index:90;display:grid;place-items:center;background:rgba(5,10,20,.75);padding:16px}
+.importbox .card{width:min(460px,100%)}
+
+/* Layout: one column, phone first; sticky header with tabs, content cards below. Widens to two columns on laptop. */
+:root{
+  --bg:#0a1324; --panel:#111c33; --panel2:#16243f; --fg:#eef3fb; --muted:#9db0ca; --line:#22324f; --chip:#1a2946;
+  --accent:#22d3e0; --accent-ink:#03222a; --ok:#34c38f; --warn:#f5b301; --bad:#ef4444; --hl:#3a3414;
+  --s-empty:#34c38f; --s-low:#3b82f6; --s-mid:#f5b301; --s-full:#ef4444; --s-mark:#a855f7;
+  --display:"Barlow Condensed","Arial Narrow",Arial,sans-serif; --body:"Barlow",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --mono:ui-monospace,Menlo,Consolas,monospace; --scene:#0d1830; --floor:#15233f; --room:#3a4c6d;
+  --radius:14px; color-scheme:dark;
+}
+body{background:var(--bg);color:var(--fg);font:15px/1.45 var(--body)}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--panel)}
+header{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--panel);border-bottom:1px solid var(--line);
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:10px 0}
+.top{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
+h1{font:700 24px/1 var(--display);margin:0;letter-spacing:.01em}
+#status{font-size:12px;color:var(--muted)}
+#status.bad{color:var(--bad);font-weight:600}
+.who{display:flex;align-items:center;gap:6px;font-size:13px;color:var(--muted)}
+.who input{width:120px}
+nav{display:flex;gap:2px;overflow-x:auto;margin-top:8px;scrollbar-width:none}
+nav button{flex:none;font:600 14px var(--body);padding:10px 12px;border:0;border-bottom:3px solid transparent;background:none;color:var(--muted);cursor:pointer;white-space:nowrap}
+nav button[aria-selected="true"]{color:var(--fg);border-bottom-color:var(--accent)}
+nav .badge{display:inline-block;min-width:18px;padding:0 5px;margin-left:4px;border-radius:9px;background:var(--accent);color:var(--accent-ink);font-size:11px;line-height:18px;text-align:center}
+main{padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:14px 40px;max-width:1100px;margin:0 auto;display:grid;gap:12px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:14px;display:grid;gap:10px;min-width:0}
+.card h2{font:700 20px/1.1 var(--display);margin:0}
+.card h3{font:700 16px/1.2 var(--display);margin:0}
+.muted{color:var(--muted)} .small{font-size:13px}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.grow{flex:1 1 160px;min-width:0}
+input,select,textarea{font:inherit;padding:10px 12px;border-radius:8px;border:1px solid var(--line);background:var(--bg);color:var(--fg);min-width:0}
+input[type=number]{width:90px}
+button.btn{font:600 14px var(--body);padding:10px 14px;border-radius:8px;border:1px solid var(--line);background:var(--chip);color:var(--fg);cursor:pointer}
+button.pri{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+button.ok{background:var(--ok);border-color:var(--ok);color:#fff}
+button.btn:disabled{opacity:.5;cursor:default}
+button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.code{font:600 14px var(--mono);background:var(--chip);padding:2px 6px;border-radius:5px;white-space:nowrap}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:8px}
+.stat{background:var(--chip);border-radius:8px;padding:10px}
+.stat b{display:block;font:700 22px var(--display);font-variant-numeric:tabular-nums}
+.stat span{font-size:12px;color:var(--muted)}
+.list{display:grid;gap:8px}
+.item{border:1px solid var(--line);border-radius:8px;padding:10px;display:grid;gap:6px;min-width:0}
+.item .t{font-weight:600;overflow-wrap:anywhere}
+.pill{display:inline-block;font-size:12px;font-weight:600;padding:2px 8px;border-radius:999px;background:var(--chip);color:var(--muted)}
+.pill.ok{color:var(--ok)} .pill.warn{color:var(--warn)} .pill.bad{color:var(--bad)}
+.tbl{overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-size:14px;font-variant-numeric:tabular-nums}
+th,td{text-align:left;padding:6px 8px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-size:12px;color:var(--muted);font-weight:600}
+td.n,th.n{text-align:right}
+tr.diff td{background:var(--hl)}
+.sug{border-left:4px solid var(--accent);padding-left:10px}
+.empty{color:var(--muted);font-size:14px}
+details summary{cursor:pointer;font-weight:600}
+#map{position:relative;height:62vh;min-height:340px;border-radius:10px;overflow:hidden;border:1px solid var(--line);background:var(--scene)}
+#map canvas{display:block;width:100%;height:100%;touch-action:none}
+.goto{display:flex;gap:6px}
+#walkpad{position:absolute;right:10px;bottom:10px;display:flex;flex-direction:column;align-items:flex-end;gap:6px;pointer-events:none}
+#walkpad[hidden]{display:none}
+#walkpad>*{pointer-events:auto}
+.whint{font-size:12px;background:rgba(0,0,0,.55);color:#fff;padding:4px 8px;border-radius:6px;max-width:220px;text-align:right}
+.wgrid{display:grid;grid-template-columns:repeat(3,52px);gap:6px}
+.wgrid button,.wfl{height:52px;border-radius:12px;border:1px solid var(--line);background:var(--panel);color:var(--fg);font:700 20px var(--body);touch-action:none;user-select:none;-webkit-user-select:none;cursor:pointer}
+.wfl{height:40px;font-size:13px;padding:0 12px}
+.legend3{display:flex;gap:12px;flex-wrap:wrap;font-size:13px;margin-top:8px}
+.legend3 i{display:inline-block;width:12px;height:12px;border-radius:3px;margin-right:5px;vertical-align:-1px}
+
+.legend3[hidden],.mtools button[hidden]{display:none}
+.rowlist{display:grid;gap:4px}
+.rowbtn{display:flex;align-items:center;gap:10px;width:100%;text-align:left;padding:6px 8px;border-radius:8px;border:1px solid transparent;background:none;color:var(--fg);cursor:pointer;font:inherit}
+.rowbtn:hover{background:var(--chip)}
+.rowbtn .sw{flex:none;min-width:44px;padding:4px 6px;border-radius:6px;color:#fff;font:700 15px var(--display);text-align:center}
+.rowbtn .meta{margin-left:auto;font-size:12px;color:var(--muted);white-space:nowrap}
+.chips{display:flex;flex-wrap:wrap;gap:4px}
+.chips span{font:600 12px var(--mono);padding:2px 6px;border-radius:6px;background:var(--hl)}
+.fgrid{display:grid;grid-template-columns:auto 1fr;gap:8px 10px;align-items:center;margin-top:10px}
+.fgrid input,.fgrid select{width:100%}
+.fgrid input[type=radio],.fgrid input[type=checkbox]{width:auto}
+.fgrid .row label{display:inline-flex;align-items:center;gap:6px}
+@media (min-width:900px){main.two{grid-template-columns:1fr 1fr;align-items:start}}
+@media (prefers-reduced-motion:no-preference){.card{transition:border-color .2s}}
+/* ---- premium dark dashboard ---- */
+#mapwrap[hidden],nav button[hidden],#gmsg:empty{display:none!important}
+.chips2{display:flex;flex-wrap:wrap;gap:6px;margin-top:4px}
+.chip2{min-height:38px;padding:0 12px;border-radius:10px;border:1px solid var(--line);background:var(--panel2);color:var(--fg);font:600 14px var(--body);cursor:pointer}
+.chip2.clr{background:transparent;color:var(--muted)}
+.card label.row{flex-wrap:nowrap;align-items:flex-start}
+.fgrid{align-items:start}
+.fgrid>label,.fgrid>span{padding-top:10px}
+.card label.row input[type=checkbox],.card label.row input[type=radio]{flex:none;margin-top:3px}
+.chip2[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.card h3{font:700 16px/1.2 var(--display);color:var(--accent)}
+body{font-size:15px;background:radial-gradient(1200px 600px at 80% -10%,#12234a 0%,var(--bg) 55%) fixed,var(--bg)}
+header{background:rgba(10,19,36,.92);backdrop-filter:blur(8px);border-bottom:1px solid var(--line);padding-block:12px 0}
+.top{gap:14px}
+.brand{display:flex;align-items:center;gap:12px;min-width:0}
+.logo{flex:none;width:42px;height:42px;border-radius:12px;display:grid;place-items:center;background:linear-gradient(135deg,#22d3e0,#1d8fb0);color:#03222a}
+.logo svg{width:24px;height:24px}
+h1{font:700 22px/1.05 var(--display);letter-spacing:.01em}
+#subtitle{font-size:13px;color:var(--muted);margin-top:2px}
+.hright{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.sync{display:flex;align-items:center;gap:8px;color:var(--muted);font-size:12px;line-height:1.25}
+.sync svg{width:20px;height:20px;flex:none}
+.sync b{display:block;color:var(--fg);font-size:14px;font-weight:600}
+#status{font-size:12px}
+.who{gap:8px;background:var(--panel2);border:1px solid var(--line);border-radius:12px;padding:4px 6px 4px 10px;color:var(--muted)}
+.who svg{width:20px;height:20px;flex:none;color:var(--accent)}
+.who input{width:130px;background:transparent;border:0;padding:8px 6px;color:var(--fg)}
+nav{gap:4px;margin-top:10px}
+nav button{display:inline-flex;align-items:center;gap:8px;font:600 15px var(--body);padding:12px 14px;border-bottom:3px solid transparent;color:var(--muted)}
+nav button svg{width:18px;height:18px;flex:none}
+nav button:hover{color:var(--fg)}
+nav button[aria-selected="true"]{color:var(--accent);border-bottom-color:var(--accent)}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:16px;box-shadow:0 8px 24px rgba(0,0,0,.18)}
+.card h2{font:700 20px/1.1 var(--display);letter-spacing:.01em}
+input,select,textarea{background:var(--bg);border-color:var(--line);border-radius:10px}
+button.btn{border-radius:10px;min-height:42px;background:var(--panel2);border-color:var(--line)}
+button.btn:hover:not(:disabled){border-color:#33507e}
+button.pri{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+button.pri:hover:not(:disabled){filter:brightness(1.08)}
+.stat{background:var(--panel2);border:1px solid var(--line);border-radius:12px}
+.code{background:var(--panel2)}
+th,td{border-bottom-color:var(--line)}
+/* map card */
+#mapwrap{display:grid;gap:0;padding:0;background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);overflow:hidden;box-shadow:0 8px 24px rgba(0,0,0,.18)}
+.maptb{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:12px;border-bottom:1px solid var(--line)}
+.maptb .sp{flex:1}
+.seg{display:inline-flex;background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:3px;gap:2px}
+.seg button,.tbtn{font:600 14px var(--body);min-height:40px;padding:0 14px;border-radius:9px;border:0;background:transparent;color:var(--muted);cursor:pointer;display:inline-flex;align-items:center;gap:7px;white-space:nowrap}
+.seg button{margin:0!important}
+.seg button[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink)}
+.seg button:hover:not([aria-pressed="true"]){color:var(--fg)}
+.tbtn{border:1px solid var(--line);background:var(--panel2);color:var(--fg)}
+.tbtn[aria-pressed="true"]{border-color:var(--accent);color:var(--accent)}
+.tbtn svg,.seg svg{width:17px;height:17px}
+.maptb button[hidden],.mfloat button[hidden],.seg button[hidden]{display:none}
+#map{height:calc(100vh - var(--hdr,120px) - 150px);min-height:440px;border:0;border-radius:0;background:var(--scene)}
+.mfloat{position:absolute;left:12px;bottom:12px;display:flex;flex-direction:column;gap:6px;z-index:3}
+.mfloat .tbtn{min-width:44px;justify-content:center;background:rgba(17,28,51,.92)}
+.mfloat .grp{display:flex;flex-direction:column;border:1px solid var(--line);border-radius:10px;overflow:hidden}
+.mfloat .grp .tbtn{border:0;border-radius:0;font-size:20px}
+.mfloat .grp .tbtn+.tbtn{border-top:1px solid var(--line)}
+.legend3{margin:0;padding:12px 14px;border-top:1px solid var(--line);gap:18px;font-size:14px;color:var(--muted)}
+.legend3 i{width:11px;height:11px;border-radius:50%;margin-right:7px}
+#legnote{color:var(--muted)}
+.wgrid button,.wfl{background:rgba(17,28,51,.92)}
+.peg{touch-action:none;user-select:none;-webkit-user-select:none}
+.peg svg{color:#f5b301}
+#pegghost{position:fixed;z-index:50;width:46px;height:46px;margin:-40px 0 0 -23px;border-radius:50%;background:#f5b301;color:#1b2229;display:grid;place-items:center;box-shadow:0 6px 18px rgba(0,0,0,.45);pointer-events:none}
+#pegghost svg{width:28px;height:28px}
+#pegghost::after{content:"";position:absolute;bottom:-9px;left:50%;width:14px;height:6px;margin-left:-7px;border-radius:50%;background:rgba(0,0,0,.45)}
+#pegtip{position:absolute;left:50%;top:12px;transform:translateX(-50%);z-index:4;background:rgba(17,28,51,.95);border:1px solid var(--accent);color:var(--fg);padding:8px 14px;border-radius:12px;font-size:14px;display:flex;gap:10px;align-items:center}
+#pegtip[hidden]{display:none}
+#pegtip .linkbtn{padding:0}
+#map.pegging,#map.pegging canvas,#map.pegging svg{cursor:crosshair}
+/* layout: map left, panel right */
+#wrap.side{display:grid;gap:16px;max-width:none;margin:0;padding:16px max(16px,env(safe-area-inset-right,0px)) 32px max(16px,env(safe-area-inset-left,0px))}
+#wrap.side main{padding:0;max-width:none;margin:0;gap:14px}
+@media (min-width:1000px){#wrap.side{grid-template-columns:minmax(0,1fr) 400px;align-items:start}
+  #wrap.side #mapwrap{position:sticky;top:calc(var(--hdr,120px) + 16px)}}
+@media (min-width:1400px){#wrap.side{grid-template-columns:minmax(0,1fr) 440px}}
+@media (min-width:1900px){#wrap.side{grid-template-columns:minmax(0,1fr) 480px}}
+@media (max-width:999px){#map{height:58vh;min-height:380px}#wrap.compact #map{height:42vh;min-height:300px}}
+/* right panel */
+.searchbar{display:flex;gap:8px}
+.sbox{flex:1;display:flex;align-items:center;gap:8px;background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:0 12px;min-width:0}
+.sbox svg{width:18px;height:18px;color:var(--muted);flex:none}
+.sbox input{border:0;background:transparent;padding:12px 0;width:100%}
+.sbox input:focus-visible{outline:none}
+.sbox:focus-within{border-color:var(--accent)}
+.kpis{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.kpi{background:var(--panel2);border:1px solid var(--line);border-radius:14px;padding:14px;display:grid;gap:10px;min-width:0}
+.kpi .ic{width:38px;height:38px;border-radius:10px;display:grid;place-items:center}
+.kpi .ic svg{width:20px;height:20px}
+.kpi .lab{font-size:14px;color:var(--muted)}
+.kpi .num{font:700 30px/1 var(--display);font-variant-numeric:tabular-nums;color:var(--fg)}
+.kpi .pct{font-size:13px;font-weight:600}
+.kpi .hd{display:flex;align-items:center;gap:10px}
+.kpi .ft{display:flex;align-items:baseline;justify-content:space-between;gap:6px}
+.sechd{display:flex;align-items:baseline;justify-content:space-between;gap:8px}
+.sechd .small{color:var(--muted)}
+.bars{display:grid;gap:12px}
+.bar{display:grid;grid-template-columns:110px 1fr 104px;align-items:center;gap:10px;font-size:14px}
+.bar .lb{display:flex;align-items:center;gap:8px;color:var(--fg)}
+.bar .lb i{width:10px;height:10px;border-radius:50%;flex:none}
+.bar .tr{height:8px;border-radius:99px;background:var(--bg);overflow:hidden}
+.bar .tr span{display:block;height:100%;border-radius:99px}
+.bar .vl{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+.bar .vl small{color:var(--muted);margin-left:4px}
+.loc table{font-size:14px}
+.loc th{font-size:12px;text-transform:uppercase;letter-spacing:.04em;padding:10px 8px;background:var(--panel2)}
+.loc td{padding:11px 8px;vertical-align:middle}
+.loc tbody tr{cursor:pointer}
+.loc tbody tr:hover td{background:var(--panel2)}
+.badge2{display:inline-block;padding:3px 10px;border-radius:99px;font-size:12px;font-weight:700;white-space:nowrap}
+.linkbtn{background:none;border:0;color:var(--accent);font:600 14px var(--body);cursor:pointer;padding:6px 0;justify-self:end}
+.pickhd{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.pickhd h2{margin-right:auto}
+
+</style>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script src="config.js"></script>
+<script>
+// ===== Firebase connection (replaces the claude.ai storage) =====
+(function(){
+  const cfg=window.FIREBASE_CONFIG;
+  const fail=t=>{const o=document.getElementById('login');o.hidden=false;document.getElementById('lmsg').textContent=t};
+  if(!cfg||!cfg.apiKey||/ISI_/.test(cfg.apiKey)){window.addEventListener('DOMContentLoaded',()=>fail('Firebase belum disetup. Isi maklumat dalam config.js (lihat README).'));return}
+  firebase.initializeApp(cfg);const fs=firebase.firestore(),auth=firebase.auth();
+  const mapErr=e=>({code:e&&e.code==='permission-denied'?'invalid_argument':e&&e.code==='resource-exhausted'?'quota_exceeded':(e&&e.code)||'unavailable',message:String(e&&e.message||e)});
+  const wrap=p=>p.catch(e=>{throw mapErr(e)});
+  // every document is stored as one JSON string, so nested lists and any shape work in Firestore
+  const enc=d=>({j:JSON.stringify(d),at:firebase.firestore.FieldValue.serverTimestamp()});
+  const dec=s=>{const v=s.data();if(!v)return undefined;if(typeof v.j==='string'){try{return JSON.parse(v.j)}catch(e){return {}}}return v};
+  const snapOf=s=>({exists:s.exists,id:s.id,data:()=>dec(s)});
+  const merge=(a,b)=>{for(const k in b){if(b[k]&&typeof b[k]==='object'&&!Array.isArray(b[k])&&a[k]&&typeof a[k]==='object'&&!Array.isArray(a[k]))merge(a[k],b[k]);else a[k]=b[k]}return a};
+  const doc=path=>{const ref=fs.doc(path);return {
+    get:()=>wrap(ref.get().then(snapOf)),
+    set:b=>wrap(ref.set(enc(b))),
+    update:b=>wrap(ref.get().then(s=>ref.set(enc(merge(s.exists?dec(s):{},b))))),
+    delete:()=>wrap(ref.delete()),
+    onSnapshot:(cb,err)=>ref.onSnapshot(s=>cb(snapOf(s)),e=>err&&err(mapErr(e)))}};
+  const collection=name=>({doc:id=>doc(name+'/'+id),onSnapshot:(cb,err)=>fs.collection(name).onSnapshot(q=>cb({docs:q.docs.map(snapOf)}),e=>err&&err(mapErr(e)))});
+  const fsDb={doc,collection};
+  const downloads={save:async({filename,data})=>{const blob=data instanceof Blob?data:new Blob([data]);const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=filename;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},2000);return {status:'saved'}}};
+  window.FB={auth,fs,fsDb};
+  let started=false;
+  const ready=()=>new Promise(r=>{const chk=()=>document.readyState!=='loading'&&window.__startApp?r():setTimeout(chk,50);chk()});
+  auth.onAuthStateChanged(async u=>{await ready();const o=document.getElementById('login');
+    if(!u){o.hidden=false;return}
+    // only emails listed in the staff collection may use the system
+    try{const s=await fs.doc('staff/'+u.email.toLowerCase()).get();if(!s.exists)throw 0}catch(e){fail('Akaun '+u.email+' belum dibenarkan. Minta admin tambah emel ini dalam senarai staf.');document.getElementById('lout').hidden=false;return}
+    o.hidden=true;document.getElementById('userchip').hidden=false;document.getElementById('useremail').textContent=u.email;
+    const w=document.getElementById('who');if(w&&!w.value)w.value=(u.displayName||u.email.split('@')[0]);
+    window.claude={use:async n=>n==='db'?fsDb:n==='downloads'?downloads:null};
+    if(!started){started=true;window.__startApp()}});
+  window.addEventListener('DOMContentLoaded',()=>{
+    const go=async()=>{const e=document.getElementById('lemail').value.trim(),p=document.getElementById('lpass').value;document.getElementById('lmsg').textContent='Log masuk…';
+      try{await auth.signInWithEmailAndPassword(e,p)}catch(err){document.getElementById('lmsg').textContent=/wrong-password|invalid-credential|user-not-found|invalid-login/.test(err.code||'')?'Emel atau kata laluan salah.':'Tak dapat log masuk ('+(err.code||'ralat')+').'}};
+    document.getElementById('lgo').onclick=go;document.getElementById('lpass').onkeydown=e=>{if(e.key==='Enter')go()};
+    document.getElementById('lreset').onclick=async()=>{const e=document.getElementById('lemail').value.trim();if(!e){document.getElementById('lmsg').textContent='Isi emel dulu.';return}
+      try{await auth.sendPasswordResetEmail(e);document.getElementById('lmsg').textContent='Emel tukar kata laluan dihantar ke '+e+'.'}catch(err){document.getElementById('lmsg').textContent='Tak dapat hantar ('+(err.code||'ralat')+').'}};
+    const out=()=>auth.signOut().then(()=>location.reload());document.getElementById('lout').onclick=out;document.getElementById('logout').onclick=out});
+})();
+// one-time import of data exported from the old system (admin, empty database)
+async function checkImport(db){try{const s=await db.doc('master/p0').get();if(s.exists)return}catch(e){return}
+  const box=document.createElement('div');box.className='importbox';box.innerHTML=`<div class="card"><h2>Data awal belum ada</h2><p class="small muted">Pilih fail <b>data-export.json</b> untuk masukkan data dari sistem lama. Ini dibuat sekali sahaja.</p><input type="file" id="impf" accept=".json"><div id="impmsg" class="small"></div></div>`;
+  document.body.appendChild(box);
+  box.querySelector('#impf').onchange=async e=>{const f=e.target.files[0];if(!f)return;const msg=box.querySelector('#impmsg');
+    try{const all=JSON.parse(await f.text());const keys=Object.keys(all);let n=0;for(const k of keys){await db.doc(k).set(all[k]);n++;msg.textContent=`Memasukkan ${n} / ${keys.length}…`}
+      msg.textContent='✓ Selesai. Memuat semula…';setTimeout(()=>location.reload(),1200)}catch(err){msg.textContent='Gagal: '+(err.message||err.code||err)}}}
+
+</script>
+</head>
+<body>
+
+
+<div id="login" hidden><div class="lcard"><div class="brand"><div class="logo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21V8l9-5 9 5v13"/><path d="M7 21v-8h10v8"/><path d="M7 17h10"/></svg></div><div><h1>Sistem Pengurusan Gudang</h1><div class="small muted">Log masuk untuk teruskan</div></div></div>
+  <label class="small" for="lemail">Emel</label><input id="lemail" type="email" autocomplete="username">
+  <label class="small" for="lpass">Kata laluan</label><input id="lpass" type="password" autocomplete="current-password">
+  <button class="btn pri" id="lgo">Log masuk</button><button class="linkbtn" id="lreset" style="justify-self:start">Lupa kata laluan?</button>
+  <div id="lmsg" class="small" style="color:var(--warn)"></div><button class="btn" id="lout" hidden>Log keluar</button></div></div>
+<header>
+  <div class="top">
+    <div class="brand"><div class="logo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 21V8l9-5 9 5v13"/><path d="M7 21v-8h10v8"/><path d="M7 17h10"/></svg></div><div><h1>Sistem Pengurusan Gudang</h1><div id="subtitle">Peta Gudang · lokasi dan penggunaan bin</div></div></div>
+    <div class="hright">
+      <div class="sync"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg><div>Data disegerakkan<b id="synct">–</b><span id="status">Menyambung…</span></div></div>
+      <div id="userchip" class="sync" hidden><div><span id="useremail"></span><br><button class="linkbtn" id="logout" style="padding:0">Log keluar</button></div></div>
+      <label class="who" for="who"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg><input id="who" type="text" maxlength="24" placeholder="Nama staf" aria-label="Nama staf"></label>
+    </div>
+  </div>
+  <nav role="tablist" aria-label="Menu">
+    <button role="tab" data-tab="peta" aria-selected="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s-7-6.2-7-11a7 7 0 0 1 14 0c0 4.8-7 11-7 11z"/><circle cx="12" cy="10" r="2.5"/></svg>Peta Gudang</button>
+    <button role="tab" data-tab="masuk" hidden>Barang masuk <span class="badge" id="bq" hidden></span></button>
+    <button role="tab" data-tab="pindah" hidden>Cadangan pindah <span class="badge" id="bp" hidden></span></button>
+    <button role="tab" data-tab="check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M9 3v3h6V3"/><path d="m9 13 2 2 4-4"/></svg>Stock Check</button>
+    <button role="tab" data-tab="xfer"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h13l-3-3M20 17H7l3 3"/></svg>Transfer Bin</button>
+    <button role="tab" data-tab="cari"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>Cari Bin</button>
+    <button role="tab" data-tab="upload"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 18a4.5 4.5 0 0 1-.5-9A6 6 0 0 1 18 9a4 4 0 0 1-1 9"/><path d="M12 12v8"/><path d="m9 15 3-3 3 3"/></svg>Upload Stok</button>
+    <button role="tab" data-tab="cap"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><ellipse cx="12" cy="5" rx="7" ry="3"/><path d="M5 5v14c0 1.7 3.1 3 7 3s7-1.3 7-3V5"/><path d="M5 12c0 1.7 3.1 3 7 3s7-1.3 7-3"/></svg>Kapasiti Bin</button>
+    <button role="tab" data-tab="rak"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>Tetapan Rak</button>
+  </nav>
+</header>
+<div id="wrap"><section id="mapwrap" hidden>
+  <div class="maptb mtools">
+    <span class="seg" role="group" aria-label="Tingkat"><button data-t="all" data-3d><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m12 2 10 6-10 6L2 8z"/><path d="m2 16 10 6 10-6"/></svg>Semua tingkat</button><button data-t="lo" aria-pressed="true">Ground Floor</button><button data-t="up">Level M</button></span>
+    <span class="sp"></span>
+    <button id="mclr" class="tbtn" data-fill data-hl><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"/></svg>Buang tanda</button>
+    <button id="mmulti" class="tbtn" data-edit aria-pressed="false">Pilih banyak</button><button id="mcodes" class="tbtn" data-edit data-3d aria-pressed="true">Kod rak</button>
+    <span class="seg" role="group" aria-label="Paparan"><button data-v="3d">3D</button><button data-v="2d">2D</button></span>
+    <button id="mreset" class="tbtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/></svg>Reset View</button>
+  </div>
+  <div id="map" aria-label="Peta gudang"><div id="plan2d" style="position:absolute;inset:0"></div>
+    <div class="mfloat mtools">
+      <div class="grp" data-2d><button id="zin" class="tbtn" data-2d aria-label="Zoom masuk">＋</button><button id="zout" class="tbtn" data-2d aria-label="Zoom keluar">－</button></div>
+      <button id="mwalk" class="tbtn peg" aria-pressed="false" title="Seret ke peta, atau tekan kemudian ketik tempat di peta"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="12" cy="4.5" r="2.6"/><path d="M8.5 8.5h7l-.9 6.2h-1.4L12.6 22h-1.2l-.6-7.3H9.4z"/></svg><span>Letak orang</span></button>
+      <button id="mtop" class="tbtn" data-3d><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>Pandangan atas</button>
+    </div>
+    <div id="pegtip" hidden>Ketik mana-mana tempat di peta untuk letak orang · <button id="pegx" class="linkbtn">Batal</button></div>
+    <div id="walkpad" hidden><div class="whint">Seret untuk pandang sekeliling · komputer: W A S D / anak panah</div>
+      <div class="wgrid"><span></span><button data-w="f" aria-label="Depan">▲</button><span></span><button data-w="l" aria-label="Pusing kiri">⟲</button><button data-w="b" aria-label="Belakang">▼</button><button data-w="r" aria-label="Pusing kanan">⟳</button></div>
+      <button id="wfloor" class="wfl">Naik ke Level M</button></div>
+  </div>
+  <div class="legend3" id="legedit" hidden><span>Klik rak dalam peta untuk pilih. Rak dipilih jadi <b style="color:#ffd43b">kuning</b>. Warna lain ikut row.</span></div>
+  <div class="legend3" id="legfill"><span id="legnote"></span><span><i style="background:var(--s-empty)"></i>Kosong</span><span><i style="background:var(--s-low)"></i>Bawah 50%</span><span><i style="background:var(--s-mid)"></i>50–89%</span><span><i style="background:var(--s-full)"></i>Penuh</span><span><i style="background:var(--s-mark)"></i>Ditanda</span></div>
+</section>
+<main id="main"></main></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+<script>
+// ---------- layout data (snapshot from the 3D plan: rack code, row, floor, levels, bins per level, size plan) ----------
+const RACKS_BASE=[{"id":"0.0.0","c":"1-A14","r":"1-A","f":1,"l":6,"n":6,"p":null},{"id":"0.1.0","c":"1-A13","r":"1-A","f":1,"l":6,"n":6,"p":null},{"id":"0.2.0","c":"1-A12","r":"1-A","f":1,"l":6,"n":6,"p":null},{"id":"0.3.0","c":"1-A11","r":"1-A","f":1,"l":6,"n":6,"p":null},{"id":"0.4.0","c":"1-A10","r":"1-A","f":1,"l":6,"n":4,"p":null},{"id":"1.0.0","c":"1-A9","r":"1-A","f":1,"l":6,"n":6,"p":null},{"id":"1.1.0","c":"1-A8","r":"1-A","f":1,"l":6,"n":6,"p":null},{"id":"1.2.0","c":"1-A7","r":"1-A","f":1,"l":6,"n":6,"p":null},{"id":"1.3.0","c":"1-A6","r":"1-A","f":1,"l":6,"n":6,"p":null},{"id":"2.0.0","c":"1-A1","r":"1-A","f":1,"l":6,"n":8,"p":null},{"id":"2.1.0","c":"1-A2","r":"1-A","f":1,"l":6,"n":8,"p":null},{"id":"3.0.0","c":"1-A3","r":"1-A","f":1,"l":6,"n":4,"p":null},{"id":"5.0.0","c":"1-A4","r":"1-A","f":1,"l":6,"n":8,"p":null},{"id":"6.0.0","c":"1-B5","r":"1-B","f":1,"l":6,"n":8,"p":null},{"id":"6.1.0","c":"1-B4","r":"1-B","f":1,"l":6,"n":8,"p":null},{"id":"7.0.0","c":"1-B3","r":"1-B","f":1,"l":6,"n":4,"p":null},{"id":"9.0.0","c":"1-B2","r":"1-B","f":1,"l":6,"n":8,"p":null},{"id":"9.1.0","c":"1-B1","r":"1-B","f":1,"l":6,"n":8,"p":null},{"id":"10.0.0","c":"1-B6","r":"1-B","f":1,"l":6,"n":8,"p":null},{"id":"10.1.0","c":"1-B7","r":"1-B","f":1,"l":6,"n":8,"p":null},{"id":"10.2.0","c":"1-B8","r":"1-B","f":1,"l":6,"n":8,"p":null},{"id":"11.0.0","c":"1-B9","r":"1-B","f":1,"l":6,"n":8,"p":null},{"id":"12.0.0","c":"1-B10","r":"1-B","f":1,"l":6,"n":8,"p":null},{"id":"12.1.0","c":"1-B11","r":"1-B","f":1,"l":6,"n":8,"p":null},{"id":"12.2.0","c":"1-B12","r":"1-B","f":1,"l":6,"n":8,"p":null},{"id":"13.0.0","c":"1-C7","r":"1-C","f":1,"l":6,"n":8,"p":null},{"id":"13.1.0","c":"1-C6","r":"1-C","f":1,"l":6,"n":8,"p":null},{"id":"13.2.0","c":"1-C5","r":"1-C","f":1,"l":6,"n":8,"p":null},{"id":"14.0.0","c":"1-C4","r":"1-C","f":1,"l":6,"n":4,"p":null},{"id":"15.0.0","c":"1-C3","r":"1-C","f":1,"l":6,"n":8,"p":null},{"id":"15.1.0","c":"1-C2","r":"1-C","f":1,"l":6,"n":8,"p":null},{"id":"15.2.0","c":"1-C1","r":"1-C","f":1,"l":6,"n":8,"p":null},{"id":"16.0.0","c":"1-C8","r":"1-C","f":1,"l":6,"n":8,"p":null},{"id":"16.1.0","c":"1-C9","r":"1-C","f":1,"l":6,"n":8,"p":null},{"id":"16.2.0","c":"1-C10","r":"1-C","f":1,"l":6,"n":8,"p":null},{"id":"17.0.0","c":"1-C11","r":"1-C","f":1,"l":6,"n":4,"p":null},{"id":"18.0.0","c":"1-C12","r":"1-C","f":1,"l":6,"n":8,"p":null},{"id":"18.1.0","c":"1-C13","r":"1-C","f":1,"l":6,"n":8,"p":null},{"id":"18.2.0","c":"1-C14","r":"1-C","f":1,"l":6,"n":8,"p":null},{"id":"19.0.0","c":"1-D7","r":"1-D","f":1,"l":6,"n":8,"p":null},{"id":"19.1.0","c":"1-D6","r":"1-D","f":1,"l":6,"n":8,"p":null},{"id":"19.2.0","c":"1-D5","r":"1-D","f":1,"l":6,"n":8,"p":null},{"id":"20.0.0","c":"1-D4","r":"1-D","f":1,"l":6,"n":4,"p":null},{"id":"21.0.0","c":"1-D3","r":"1-D","f":1,"l":6,"n":8,"p":null},{"id":"21.1.0","c":"1-D2","r":"1-D","f":1,"l":6,"n":8,"p":null},{"id":"21.2.0","c":"1-D1","r":"1-D","f":1,"l":6,"n":8,"p":null},{"id":"22.0.0","c":"1-D8","r":"1-D","f":1,"l":6,"n":8,"p":null},{"id":"22.1.0","c":"1-D9","r":"1-D","f":1,"l":6,"n":8,"p":null},{"id":"22.2.0","c":"1-D10","r":"1-D","f":1,"l":6,"n":8,"p":null},{"id":"23.0.0","c":"1-D11","r":"1-D","f":1,"l":6,"n":4,"p":null},{"id":"24.0.0","c":"1-D12","r":"1-D","f":1,"l":6,"n":8,"p":null},{"id":"24.1.0","c":"1-D13","r":"1-D","f":1,"l":6,"n":8,"p":null},{"id":"24.2.0","c":"1-D14","r":"1-D","f":1,"l":6,"n":8,"p":null},{"id":"25.0.0","c":"1-E7","r":"1-E","f":1,"l":6,"n":8,"p":null},{"id":"25.1.0","c":"1-E6","r":"1-E","f":1,"l":6,"n":8,"p":null},{"id":"25.2.0","c":"1-E5","r":"1-E","f":1,"l":6,"n":8,"p":null},{"id":"26.0.0","c":"1-E4","r":"1-E","f":1,"l":6,"n":4,"p":null},{"id":"27.0.0","c":"1-E3","r":"1-E","f":1,"l":6,"n":8,"p":null},{"id":"27.1.0","c":"1-E2","r":"1-E","f":1,"l":6,"n":8,"p":null},{"id":"27.2.0","c":"1-E1","r":"1-E","f":1,"l":6,"n":8,"p":null},{"id":"28.0.0","c":"1-E8","r":"1-E","f":1,"l":6,"n":8,"p":null},{"id":"29.0.0","c":"1-E9","r":"1-E","f":1,"l":6,"n":8,"p":null},{"id":"29.1.0","c":"1-E10","r":"1-E","f":1,"l":6,"n":4,"p":null},{"id":"29.2.0","c":"1-E11","r":"1-E","f":1,"l":6,"n":8,"p":null},{"id":"29.3.0","c":"1-E12","r":"1-E","f":1,"l":6,"n":8,"p":null},{"id":"29.4.0","c":"1-E13","r":"1-E","f":1,"l":6,"n":8,"p":null},{"id":"30.0.0","c":"1-F6","r":"1-F","f":1,"l":6,"n":8,"p":null},{"id":"31.0.0","c":"1-F5","r":"1-F","f":1,"l":6,"n":8,"p":null},{"id":"31.1.0","c":"1-F4","r":"1-F","f":1,"l":6,"n":4,"p":null},{"id":"31.2.0","c":"1-F3","r":"1-F","f":1,"l":6,"n":8,"p":null},{"id":"31.3.0","c":"1-F2","r":"1-F","f":1,"l":6,"n":8,"p":null},{"id":"31.4.0","c":"1-F1","r":"1-F","f":1,"l":6,"n":8,"p":null},{"id":"35.0.0","c":"1-G1","r":"1-G","f":1,"l":6,"n":4,"p":null},{"id":"35.1.0","c":"1-G2","r":"1-G","f":1,"l":6,"n":6,"p":null},{"id":"35.2.0","c":"1-G3","r":"1-G","f":1,"l":6,"n":6,"p":null},{"id":"36.0.0","c":"1-G4","r":"1-G","f":1,"l":6,"n":4,"p":null},{"id":"36.1.0","c":"1-G5","r":"1-G","f":1,"l":6,"n":4,"p":null},{"id":"36.2.0","c":"1-G6","r":"1-G","f":1,"l":6,"n":6,"p":null},{"id":"37.0.0","c":"1-G7","r":"1-G","f":1,"l":6,"n":4,"p":null},{"id":"37.1.0","c":"1-G8","r":"1-G","f":1,"l":6,"n":4,"p":null},{"id":"37.2.0","c":"1-G9","r":"1-G","f":1,"l":6,"n":4,"p":null},{"id":"38.0.0","c":"1-G10","r":"1-G","f":1,"l":6,"n":4,"p":null},{"id":"38.1.0","c":"1-G11","r":"1-G","f":1,"l":6,"n":4,"p":null},{"id":"38.2.0","c":"1-G12","r":"1-G","f":1,"l":6,"n":6,"p":null},{"id":"39.0.0","c":"1-G13","r":"1-G","f":1,"l":6,"n":6,"p":null},{"id":"39.1.0","c":"1-G14","r":"1-G","f":1,"l":6,"n":6,"p":null},{"id":"39.2.0","c":"1-G15","r":"1-G","f":1,"l":6,"n":6,"p":null},{"id":"40.0.0","c":"1-G16","r":"1-G","f":1,"l":6,"n":6,"p":null},{"id":"40.1.0","c":"1-G17","r":"1-G","f":1,"l":6,"n":6,"p":null},{"id":"40.2.0","c":"1-G18","r":"1-G","f":1,"l":6,"n":4,"p":null},{"id":"41.0.0","c":"1-G19","r":"1-G","f":1,"l":6,"n":4,"p":null},{"id":"41.1.0","c":"1-G20","r":"1-G","f":1,"l":6,"n":4,"p":null},{"id":"41.2.0","c":"1-G21","r":"1-G","f":1,"l":6,"n":4,"p":null},{"id":"42.0.0","c":"1-G22","r":"1-G","f":1,"l":6,"n":6,"p":null},{"id":"42.1.0","c":"1-G23","r":"1-G","f":1,"l":6,"n":4,"p":null},{"id":"42.2.0","c":"1-G24","r":"1-G","f":1,"l":6,"n":4,"p":null},{"id":"32.0.0","c":"1-H9","r":"1-H","f":1,"l":5,"n":6,"p":null},{"id":"32.1.0","c":"1-H8","r":"1-H","f":1,"l":5,"n":6,"p":null},{"id":"33.0.0","c":"1-H1","r":"1-H","f":1,"l":5,"n":6,"p":null},{"id":"34.0.0","c":"1-H2","r":"1-H","f":1,"l":5,"n":6,"p":null},{"id":"34.1.0","c":"1-H3","r":"1-H","f":1,"l":5,"n":6,"p":null},{"id":"34.2.0","c":"1-H4","r":"1-H","f":1,"l":5,"n":6,"p":null},{"id":"34.3.0","c":"1-H5","r":"1-H","f":1,"l":6,"n":6,"p":null},{"id":"34.4.0","c":"1-H6","r":"1-H","f":1,"l":5,"n":6,"p":null},{"id":"34.5.0","c":"1-H7","r":"1-H","f":1,"l":6,"n":6,"p":null},{"id":"44.0.0","c":"1-I1","r":"1-I","f":1,"l":7,"n":6,"p":null},{"id":"44.1.0","c":"1-I2","r":"1-I","f":1,"l":7,"n":6,"p":null},{"id":"44.2.0","c":"1-I3","r":"1-I","f":1,"l":7,"n":6,"p":null},{"id":"46.0.0","c":"1-I4","r":"1-I","f":1,"l":7,"n":6,"p":null},{"id":"46.1.0","c":"1-I5","r":"1-I","f":1,"l":7,"n":6,"p":null},{"id":"46.2.0","c":"1-I6","r":"1-I","f":1,"l":7,"n":6,"p":null},{"id":"47.0.0","c":"1-I7","r":"1-I","f":1,"l":7,"n":6,"p":null},{"id":"47.1.0","c":"1-I8","r":"1-I","f":1,"l":7,"n":6,"p":null},{"id":"47.2.0","c":"1-I9","r":"1-I","f":1,"l":7,"n":6,"p":null},{"id":"49.0.0","c":"1-I10","r":"1-I","f":1,"l":6,"n":6,"p":null},{"id":"49.1.0","c":"1-I11","r":"1-I","f":1,"l":5,"n":6,"p":null},{"id":"50.0.0","c":"1-I12","r":"1-I","f":1,"l":7,"n":6,"p":null},{"id":"50.1.0","c":"1-I13","r":"1-I","f":1,"l":7,"n":6,"p":null},{"id":"50.2.0","c":"1-I14","r":"1-I","f":1,"l":5,"n":6,"p":null},{"id":"50.3.0","c":"1-I15","r":"1-I","f":1,"l":5,"n":6,"p":null},{"id":"51.0.0","c":"1-I16","r":"1-I","f":1,"l":5,"n":6,"p":null},{"id":"51.1.0","c":"1-I17","r":"1-I","f":1,"l":5,"n":6,"p":null},{"id":"51.2.0","c":"1-I18","r":"1-I","f":1,"l":5,"n":6,"p":null},{"id":"51.3.0","c":"1-I19","r":"1-I","f":1,"l":5,"n":6,"p":null},{"id":"2.0.1","c":"2-A1","r":"2-A","f":2,"l":4,"n":8,"p":null},{"id":"2.1.1","c":"2-A2","r":"2-A","f":2,"l":4,"n":8,"p":null},{"id":"4.0.1","c":"2-A3","r":"2-A","f":2,"l":4,"n":4,"p":null},{"id":"5.0.1","c":"2-A4","r":"2-A","f":2,"l":4,"n":8,"p":null},{"id":"6.0.1","c":"2-B5","r":"2-B","f":2,"l":4,"n":8,"p":["Men","M"]},{"id":"6.1.1","c":"2-B4","r":"2-B","f":2,"l":4,"n":8,"p":["Men","S"]},{"id":"8.0.1","c":"2-B3","r":"2-B","f":2,"l":4,"n":4,"p":["Men","2XL"]},{"id":"9.0.1","c":"2-B2","r":"2-B","f":2,"l":4,"n":8,"p":["Men","S"]},{"id":"9.1.1","c":"2-B1","r":"2-B","f":2,"l":4,"n":8,"p":["Men","XS"]},{"id":"10.0.1","c":"2-B6","r":"2-B","f":2,"l":4,"n":8,"p":["Men","M"]},{"id":"10.1.1","c":"2-B7","r":"2-B","f":2,"l":4,"n":8,"p":["Men","M"]},{"id":"10.2.1","c":"2-B8","r":"2-B","f":2,"l":4,"n":8,"p":["Men","L"]},{"id":"12.0.1","c":"2-B9","r":"2-B","f":2,"l":4,"n":8,"p":["Men","L"]},{"id":"12.1.1","c":"2-B10","r":"2-B","f":2,"l":4,"n":8,"p":["Men","L"]},{"id":"12.2.1","c":"2-B11","r":"2-B","f":2,"l":4,"n":8,"p":["Men","XL"]},{"id":"13.0.1","c":"2-C6","r":"2-C","f":2,"l":4,"n":8,"p":["Men","SELUAR"]},{"id":"13.1.1","c":"2-C5","r":"2-C","f":2,"l":4,"n":8,"p":["Men","6XL"]},{"id":"13.2.1","c":"2-C4","r":"2-C","f":2,"l":4,"n":8,"p":["Men","5XL"]},{"id":"15.0.1","c":"2-C3","r":"2-C","f":2,"l":4,"n":8,"p":["Men","4XL"]},{"id":"15.1.1","c":"2-C2","r":"2-C","f":2,"l":4,"n":8,"p":["Men","3XL"]},{"id":"15.2.1","c":"2-C1","r":"2-C","f":2,"l":4,"n":8,"p":["Men","XL"]},{"id":"16.0.1","c":"2-C7","r":"2-C","f":2,"l":4,"n":8,"p":null},{"id":"16.1.1","c":"2-C8","r":"2-C","f":2,"l":4,"n":8,"p":null},{"id":"16.2.1","c":"2-C9","r":"2-C","f":2,"l":4,"n":8,"p":null},{"id":"18.0.1","c":"2-C10","r":"2-C","f":2,"l":4,"n":8,"p":null},{"id":"18.1.1","c":"2-C11","r":"2-C","f":2,"l":4,"n":8,"p":null},{"id":"18.2.1","c":"2-C12","r":"2-C","f":2,"l":4,"n":8,"p":null},{"id":"19.0.1","c":"2-D6","r":"2-D","f":2,"l":4,"n":8,"p":["Kids","12-13 thn"]},{"id":"19.1.1","c":"2-D5","r":"2-D","f":2,"l":4,"n":8,"p":["Kids","10-11 thn"]},{"id":"19.2.1","c":"2-D4","r":"2-D","f":2,"l":4,"n":8,"p":["Kids","8-9 thn"]},{"id":"21.0.1","c":"2-D3","r":"2-D","f":2,"l":4,"n":8,"p":["Kids","6-7 thn"]},{"id":"21.1.1","c":"2-D2","r":"2-D","f":2,"l":4,"n":8,"p":["Kids","4-5 thn"]},{"id":"21.2.1","c":"2-D1","r":"2-D","f":2,"l":4,"n":8,"p":["Kids","2-3 thn"]},{"id":"22.0.1","c":"2-D7","r":"2-D","f":2,"l":4,"n":8,"p":null},{"id":"22.1.1","c":"2-D8","r":"2-D","f":2,"l":4,"n":8,"p":null},{"id":"22.2.1","c":"2-D9","r":"2-D","f":2,"l":4,"n":8,"p":null},{"id":"24.0.1","c":"2-D10","r":"2-D","f":2,"l":4,"n":8,"p":null},{"id":"24.1.1","c":"2-D11","r":"2-D","f":2,"l":4,"n":8,"p":null},{"id":"24.2.1","c":"2-D12","r":"2-D","f":2,"l":4,"n":8,"p":null},{"id":"25.0.1","c":"2-E6","r":"2-E","f":2,"l":4,"n":8,"p":["Women","2XL"]},{"id":"25.1.1","c":"2-E5","r":"2-E","f":2,"l":4,"n":8,"p":["Women","XL"]},{"id":"25.2.1","c":"2-E4","r":"2-E","f":2,"l":4,"n":8,"p":["Women","L"]},{"id":"27.0.1","c":"2-E3","r":"2-E","f":2,"l":4,"n":8,"p":["Women","M"]},{"id":"27.1.1","c":"2-E2","r":"2-E","f":2,"l":4,"n":8,"p":["Women","S"]},{"id":"27.2.1","c":"2-E1","r":"2-E","f":2,"l":4,"n":8,"p":["Women","XS"]},{"id":"29.0.1","c":"2-E7","r":"2-E","f":2,"l":4,"n":8,"p":["Women","3XL"]},{"id":"29.1.1","c":"2-E8","r":"2-E","f":2,"l":4,"n":4,"p":null},{"id":"29.2.1","c":"2-E9","r":"2-E","f":2,"l":4,"n":8,"p":null},{"id":"29.3.1","c":"2-E10","r":"2-E","f":2,"l":4,"n":8,"p":null},{"id":"29.4.1","c":"2-E11","r":"2-E","f":2,"l":4,"n":8,"p":null},{"id":"31.0.1","c":"2-F5","r":"2-F","f":2,"l":4,"n":8,"p":null},{"id":"31.1.1","c":"2-F4","r":"2-F","f":2,"l":4,"n":4,"p":null},{"id":"31.2.1","c":"2-F3","r":"2-F","f":2,"l":4,"n":8,"p":["Baby","TIADA SAIZ"]},{"id":"31.3.1","c":"2-F2","r":"2-F","f":2,"l":4,"n":8,"p":["Baby","18-24 bln"]},{"id":"31.4.1","c":"2-F1","r":"2-F","f":2,"l":4,"n":8,"p":["Baby","12-18 bln"]},{"id":"43.0.0","c":"1-I22","r":"1-I","f":1,"l":7,"n":6,"p":null},{"id":"43.1.0","c":"1-I23","r":"1-I","f":1,"l":7,"n":6,"p":null},{"id":"43.2.0","c":"1-I24","r":"1-I","f":1,"l":7,"n":6,"p":null},{"id":"45.0.0","c":"1-I25","r":"1-I","f":1,"l":7,"n":6,"p":null},{"id":"45.1.0","c":"1-I26","r":"1-I","f":1,"l":7,"n":6,"p":null},{"id":"45.2.0","c":"1-I27","r":"1-I","f":1,"l":7,"n":6,"p":null},{"id":"48.0.0","c":"1-I28","r":"1-I","f":1,"l":7,"n":6,"p":null},{"id":"5.1.0","c":"1-A5","r":"Empty Bin","f":1,"l":6,"n":8,"p":null},{"id":"5.1.1","c":"2-A5","r":"Empty Bin","f":2,"l":4,"n":8,"p":null},{"id":null,"c":"1-A15","r":"1-A","f":1,"l":2,"n":6,"p":null},{"id":null,"c":"1-B13","r":"1-B","f":1,"l":4,"n":8,"p":null},{"id":null,"c":"1-I20","r":"1-I","f":1,"l":7,"n":6,"p":null}];RACKS_BASE.forEach(r=>r.k=r.id||('x:'+r.c));
+const ROWCOL={"2-E": "#2257ae", "1-D": "#52b788", "1-B": "#2c9aa0", "2-D": "#2b6fcc", "2-C": "#3b8be0", "1-I": "#b5e48c", "1-A": "#95d5b2", "1-E": "#1f7a80", "1-F": "#e9c46a", "Empty Bin": "#4a5361", "2-A": "#7cc0f5", "2-B": "#5aa6ee", "1-H": "#1b6f5c", "2-F": "#1d4890", "Defect Bin": "#ff4d4f", "1-C": "#4fd1c5", "1-G": "#2a9d8f"};
+const PALETTE=['#2a9d8f','#e76f51','#457b9d','#8e6c8a','#6a994e','#bc6c25','#3d5a80','#c9184a'];
+function rowColor(n){if(ROWCOL[n])return ROWCOL[n];let h=0;for(const ch of String(n))h=(h*31+ch.charCodeAt(0))>>>0;return PALETTE[h%PALETTE.length]}
+let RACKS=RACKS_BASE.map(r=>({...r}));let RACK_CFG={edit:{},add:{}};
+const $=s=>document.querySelector(s),esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const pad=n=>String(n).padStart(2,'0'),fmt=n=>Number(n||0).toLocaleString('en');
+const docId=s=>String(s).replace(/[^A-Za-z0-9_-]/g,'_');
+// bins
+const BINS=new Map(),BIN_ORDER=[];
+function buildBinsRaw(){BINS.clear();BIN_ORDER.length=0;RACKS.forEach((r,ri)=>{for(let l=1;l<=r.l;l++)for(let b=1;b<=r.n;b++){const code=`${r.c}-L${l}-${b}`;const bn={code,rack:r.c,row:r.r,floor:r.f,level:l,bin:b,plan:r.p,ord:BIN_ORDER.length};BINS.set(code,bn);BIN_ORDER.push(code)}})}
+function guessRow(c){const rows=[...new Set(RACKS.filter(r=>!r.orphan).map(r=>r.r))];return rows.filter(r=>c.startsWith(r)&&/^\d/.test(c.slice(r.length))).sort((a,b)=>b.length-a.length)[0]||null}
+// racks for stock codes that no rack covers (so stock never disappears from counts)
+function orphanPass(){let loc;try{loc=st.loc}catch(e){return false}let ch=false;const need={};
+  for(const row in loc)for(const code in loc[row]){if(BINS.has(code))continue;const m=code.match(/^(.+)-L(\d+)-(\d+)$/);if(!m)continue;
+    const o=need[m[1]]=need[m[1]]||{l:0,n:0,row};o.l=Math.max(o.l,+m[2]);o.n=Math.max(o.n,+m[3])}
+  for(const c in need){const o=need[c];const r=RACKS.find(x=>x.c===c);ch=true;
+    if(r){r.l=Math.max(r.l,o.l);r.n=Math.max(r.n,o.n)}else RACKS.push({k:'o:'+c,id:null,c,r:guessRow(c)||o.row,f:1,l:o.l,n:o.n,p:null,orphan:1})}
+  return ch}
+function buildBins(){buildBinsRaw();if(orphanPass())buildBinsRaw()}
+buildBins();
+function applyRackCfg(cfg){RACK_CFG={edit:{...(cfg&&cfg.edit||{})},add:{...(cfg&&cfg.add||{})}};
+  RACKS=RACKS_BASE.map(r=>{const e=RACK_CFG.edit[r.k]||(!r.id&&RACK_CFG.edit[r.c])||(r.id&&RACK_CFG.edit[r.c]&&!RACK_CFG.edit[r.c].c?RACK_CFG.edit[r.c]:null);
+    if(!e)return {...r};const o={...r};if(e.c)o.c=e.c;if(e.r)o.r=e.r;if(+e.l)o.l=+e.l;if(+e.n)o.n=+e.n;return o});
+  // an off-map rack from the report disappears once a rack on the map carries its code
+  const onMap=new Set(RACKS.filter(r=>r.id).map(r=>r.c));RACKS=RACKS.filter(r=>r.id||!onMap.has(r.c));
+  Object.entries(RACK_CFG.add).forEach(([c,a])=>{if(!RACKS.some(r=>r.c===c))RACKS.push({k:'a:'+c,id:null,c,r:a.r,f:+a.f||1,l:+a.l,n:+a.n,p:null,added:1})});buildBins()}
+function RACK_OV(rid){const r=RACKS.find(x=>x.id===rid);return r?{l:r.l,n:r.n}:null}
+// ---------- product rules ----------
+function catOf(grp,desc){const t=(grp||'')+' '+(desc||'');
+  if(/baby|infant/i.test(t))return 'Baby';if(/boys|girls|kids|junior|\bkid\b|years/i.test(t))return 'Kids';
+  if(/women|ladies|kurung|blouse|dress|muslimah|wanita|skirt|kebaya|tudung|hijab/i.test(t))return 'Women';return 'Men'}
+function normSize(s){s=String(s||'').trim();let m=s.match(/^(\d+)\s*-\s*(\d+)\s*years?$/i);if(m)return `${m[1]}-${m[2]} thn`;m=s.match(/^(\d+)\s*-\s*(\d+)\s*months?$/i);if(m)return `${m[1]}-${m[2]} bln`;return s.toUpperCase()}
+function parseDesc(d){const p=String(d||'').split(' - ').map(x=>x.trim()).filter(Boolean);
+  if(p.length>=3)return {ser:p[0],col:p.slice(1,-1).join(' - '),size:normSize(p[p.length-1])};
+  if(p.length===2)return {ser:p[0],col:p[1],size:'TIADA SAIZ'};return {ser:String(d||''),col:'',size:'TIADA SAIZ'}}
+const isPat=s=>String(s.brand||'').trim().toUpperCase()==='PATAWALI';
+const isCekak=s=>s.cat==='Men'&&/cekak musang/i.test((s.grp||'')+' '+(s.ser||''));
+const DEFAULT_CAPS={def:60,rules:[{kw:'baby',cap:90},{kw:'boys',cap:90},{kw:'girls',cap:90},{kw:'kids',cap:90},{kw:'cekak musang',cap:30},{kw:'top',cap:60}]};
+let CAPS=JSON.parse(JSON.stringify(DEFAULT_CAPS));const _rxc={};
+const kwRx=k=>_rxc[k]||(_rxc[k]=new RegExp('(^|[^a-z0-9])'+k.replace(/[.*+?^${}()|[\]\\]/g,'\\$&').replace(/\s+/g,'\\s+')+'($|[^a-z0-9])','i'));
+function capRule(s){const t=((s.desc||'')+' '+(s.grp||''));for(let i=0;i<CAPS.rules.length;i++){const kws=String(CAPS.rules[i].kw).toLowerCase().split(',').map(x=>x.trim()).filter(Boolean);if(kws.some(k=>kwRx(k).test(t)))return i}return -1}
+const capOf=s=>{const g=CAPS.groups&&CAPS.groups[s.grp||''];if(+g)return +g;const i=capRule(s);return i>=0?(+CAPS.rules[i].cap||60):(+CAPS.def||60)};
+const planSize=s=>s.cat==='Men'&&/^\d+$/.test(s.size)?'SELUAR':s.size;
+const groupOf=s=>`${s.cat}|${planSize(s)}|${isPat(s)?s.ser:'MIX'}|${isCekak(s)?'CM':''}`;
+// ---------- state ----------
+let db=null;const st={master:{},loc:{},queue:{},check:null,checks:{},xfers:{},settings:{checkCount:20},ready:{m:0,l:0}};
+const HIDDEN_TABS=['masuk','pindah'];let tab='peta';try{const t=localStorage.getItem('pg-tab');if(t&&!HIDDEN_TABS.includes(t))tab=t}catch(e){}
+const who=$('#who');try{who.value=localStorage.getItem('pg-who')||''}catch(e){}
+who.oninput=()=>{try{localStorage.setItem('pg-who',who.value.trim())}catch(e){}};
+const me=()=>who.value.trim()||'Tanpa nama';
+const setStatus=(t,bad)=>{const s=$('#status');s.textContent=t;s.classList.toggle('bad',!!bad)};
+const kolOf=k=>{const m=String(k).match(/^[A-Za-z]+?[Xx](\d+)/);return m?'X'+m[1]:''};
+const kolSort=(a,b)=>(parseInt(b.slice(1))||0)-(parseInt(a.slice(1))||0);
+function sku(s){const m=st.master[s];if(!m)return null;return {sku:s,desc:m[0],brand:m[1],grp:m[2],cat:m[3],ser:m[4],col:m[5],size:m[6],qty:m[7],kol:kolOf(s)}}
+// occupancy helpers
+let LOCAT={};function indexLoc(){LOCAT={};for(const row in st.loc)for(const c in st.loc[row])LOCAT[c]=row}
+const binItems=code=>{const r=LOCAT[code];return (r&&st.loc[r]&&st.loc[r][code])||[]};
+const binQty=code=>binItems(code).reduce((a,x)=>a+x[1],0);
+function binCap(code){const it=binItems(code)[0];const s=it&&sku(it[0]);return s?capOf(s):60}
+function binGroup(code){const it=binItems(code)[0];const s=it&&sku(it[0]);return s?groupOf(s):null}
+function skuLocs(s){const out=[];for(const row in st.loc)for(const code in st.loc[row])for(const [k,q] of st.loc[row][code])if(k===s)out.push({code,qty:q});return out.sort((a,b)=>BINS.get(a.code)?.ord-BINS.get(b.code)?.ord)}
+// ---------- writes ----------
+async function saveBins(changes){ // changes: {binCode: [[sku,qty],...]}
+  const byRow={};for(const code in changes){const b=BINS.get(code);const row=LOCAT[code]||(b&&b.row);if(!row)continue;(byRow[row]=byRow[row]||{})[code]=changes[code].filter(x=>x[1]>0)}
+  for(const row in byRow){st.loc[row]=st.loc[row]||{};Object.assign(st.loc[row],byRow[row]);
+    for(const c in byRow[row])if(!byRow[row][c].length)delete st.loc[row][c];
+    const ref=db.doc('loc/'+docId(row));const snap=await ref.get();const body={row,bins:{...((snap.exists&&snap.data().bins)||{})}};
+    for(const c in byRow[row]){if(byRow[row][c].length)body.bins[c]=byRow[row][c];else delete body.bins[c]}
+    await ref.set(body)}
+  indexLoc();
+}
+function addTo(changes,code,s,q){const arr=(changes[code]||binItems(code).map(x=>x.slice())).slice();const i=arr.findIndex(x=>x[0]===s);if(i>=0)arr[i]=[s,arr[i][1]+q];else arr.push([s,q]);changes[code]=arr.filter(x=>x[1]>0);return changes}
+async function guarded(fn,okMsg){if(!db){setStatus('Tak boleh simpan: storan tidak disambung.',true);return false}
+  try{setStatus('Menyimpan…');await fn();setStatus('✓ '+(okMsg||'Disimpan'));return true}
+  catch(e){setStatus(e&&e.code==='invalid_argument'?'Tak dapat disimpan: data terlalu besar, atau anda cuma ada akses lihat.':e&&e.code==='quota_exceeded'?'Tak dapat disimpan: ruang data penuh. Padam rekod lama.':'Gagal simpan ('+(e&&e.code||'?')+'). Cuba lagi.',true);return false}}
+// ---------- putaway suggestion ----------
+function suggestBins(s,qty,exclude){const cap=capOf(s),g=groupOf(s),ps=planSize(s),out=[];let left=qty;const used=new Set(exclude||[]);
+  const take=(code,why)=>{if(left<=0||used.has(code))return;const free=binItems(code).length?binCap(code)-binQty(code):cap;if(free<=0)return;const q=Math.min(free,left);out.push({code,qty:q,why});left-=q;used.add(code)};
+  skuLocs(s.sku).forEach(l=>take(l.code,'SKU sama sudah ada di bin ini'));
+  BIN_ORDER.forEach(c=>{if(left>0&&binItems(c).length&&binGroup(c)===g)take(c,isPat(s)?'Series & saiz sama':'Saiz sama (brand lain, campur series)')});
+  const planned=BIN_ORDER.filter(c=>{const b=BINS.get(c);return b.plan&&b.plan[0]===s.cat&&b.plan[1]===ps});
+  planned.forEach(c=>{if(left>0&&!binItems(c).length)take(c,'Bin kosong dalam rak saiz '+ps)});
+  if(left>0){const racksSame=new Set();BIN_ORDER.forEach(c=>{const it=binItems(c)[0];const k=it&&sku(it[0]);if(k&&k.cat===s.cat&&planSize(k)===ps)racksSame.add(BINS.get(c).rack)});
+    BIN_ORDER.forEach(c=>{if(left>0&&!binItems(c).length&&racksSame.has(BINS.get(c).rack))take(c,'Bin kosong dalam rak yang simpan saiz '+ps)})}
+  if(left>0)BIN_ORDER.forEach(c=>{const b=BINS.get(c);if(left>0&&!binItems(c).length&&b.row==='2-A')take(c,'Bin kosong di row simpanan 2-A')});
+  if(left>0)BIN_ORDER.forEach(c=>{const b=BINS.get(c);if(left>0&&!binItems(c).length&&!b.plan&&!/Defect/i.test(b.row))take(c,'Bin kosong (tiada pelan khas)')});
+  return {out,left}}
+// ---------- relocation suggestions ----------
+function relocations(){const res=[];const allCodes=[];for(const row in st.loc)for(const c in st.loc[row])allCodes.push(c);
+  // 1) wrong rack for the size plan
+  allCodes.forEach(c=>{const b=BINS.get(c);if(!b||!b.plan)return;binItems(c).forEach(([k,q])=>{const s=sku(k);if(!s)return;if(s.cat!==b.plan[0]||planSize(s)!==b.plan[1]){
+    const sg=suggestBins(s,q,[c]);if(sg.out.length)res.push({type:'Salah rak saiz',score:3,sku:k,from:c,to:sg.out,qty:q,why:`Rak ${b.rack} untuk ${b.plan[0]} ${b.plan[1]}, barang ini ${s.cat} ${s.size}`})}})});
+  // 2) overfull
+  allCodes.forEach(c=>{const over=binQty(c)-binCap(c);if(over>0){const [k]=binItems(c).slice().sort((a,b)=>b[1]-a[1])[0];const s=sku(k);if(!s)return;const sg=suggestBins(s,over,[c]);if(sg.out.length)res.push({type:'Bin terlebih penuh',score:3,sku:k,from:c,to:sg.out,qty:over,why:`${fmt(binQty(c))} helai, had ${binCap(c)}`})}});
+  // 3) same SKU split across bins that would fit in one
+  const seen=new Set();allCodes.forEach(c=>binItems(c).forEach(([k])=>{if(seen.has(k))return;seen.add(k);const L=skuLocs(k);if(L.length<2)return;const s=sku(k);if(!s)return;
+    const tot=L.reduce((a,x)=>a+x.qty,0);const main=L.slice().sort((a,b)=>b.qty-a.qty)[0];if(binQty(main.code)-main.qty+tot<=binCap(main.code)){
+      L.filter(x=>x.code!==main.code).forEach(x=>res.push({type:'Satukan SKU',score:2,sku:k,from:x.code,to:[{code:main.code,qty:x.qty,why:'Bin utama SKU ini'}],qty:x.qty,why:`SKU ada di ${L.length} bin, muat dalam satu`}))}}));
+  // 4) two low bins of the same group in the same rack
+  const byG={};allCodes.forEach(c=>{const g=binGroup(c);if(!g)return;const b=BINS.get(c);const key=g+'@'+b.rack;(byG[key]=byG[key]||[]).push(c)});
+  Object.values(byG).forEach(cs=>{const low=cs.filter(c=>binQty(c)<=binCap(c)*0.4).sort((a,b)=>binQty(a)-binQty(b));
+    while(low.length>=2){const a=low.shift(),b=low.pop();if(binQty(a)+binQty(b)<=binCap(b)){binItems(a).forEach(([k,q])=>res.push({type:'Gabung bin separuh kosong',score:1,sku:k,from:a,to:[{code:b,qty:q,why:'Bin sekumpulan dalam rak sama'}],qty:q,why:`${a} (${binQty(a)}) + ${b} (${binQty(b)}) muat satu bin; ${a} jadi kosong`}))}else break}});
+  return res.sort((a,b)=>b.score-a.score)}
+function fillLevel(code){const q=binQty(code);if(!q)return 'empty';const r=q/binCap(code);return r>=0.9?'full':r>=0.5?'mid':'low'}
+let mapPicked=null,mapHL=[];
+function showOnMap(codes){mapHL=codes;if(codes[0])openOnMap(codes[0],true);render();if(PLAN&&VIEW==='2d'){const r0=codes[0]&&rackOfCode(codes[0]);if(r0&&r0.id)PLAN.focus([r0.id])}}
+// ---------- 3D map (same layout as the 3D plan) ----------
+function css(v){return getComputedStyle(document.documentElement).getPropertyValue(v).trim()}
+let MAP=null;
+function init3D(host,onPick){
+let racks=[],rackById=new Map();
+const renderer=new THREE.WebGLRenderer({antialias:true});
+renderer.setPixelRatio(Math.min(devicePixelRatio,2));
+host.appendChild(renderer.domElement);
+const scene=new THREE.Scene();
+const camera=new THREE.PerspectiveCamera(42,1,0.1,400);
+const controls=new THREE.OrbitControls(camera,renderer.domElement);
+controls.enableDamping=true;controls.maxPolarAngle=Math.PI/2.05;controls.minDistance=6;controls.maxDistance=90;
+scene.add(new THREE.HemisphereLight(0xffffff,0x8a8f96,0.85));
+const sun=new THREE.DirectionalLight(0xffffff,0.55);sun.position.set(-12,30,18);scene.add(sun);
+
+const PX=0.05,CX=573,CZ=420;const X=p=>(p-CX)*PX,Z=p=>(p-CZ)*PX;const UX=w=>w/PX+CX,UZ=w=>w/PX+CZ;
+const themed=[];
+function mat(token,op){const m=new THREE.MeshLambertMaterial({color:css(token)||'#999',transparent:op<1,opacity:op??1});themed.push([m,token]);return m}
+function box(x1,y1,x2,y2,h,y0,m){const g=new THREE.BoxGeometry(Math.abs(x2-x1)*PX,h,Math.abs(y2-y1)*PX);const o=new THREE.Mesh(g,m);o.position.set(X((x1+x2)/2),y0+h/2,Z((y1+y2)/2));scene.add(o);return o}
+
+// text sprite sized to its text; h = world height
+function makeSign(t,sub,bg,h){
+  const c=document.createElement('canvas'),x=c.getContext('2d');
+  const F1='700 84px "Barlow Condensed", "Arial Narrow", sans-serif',F2='600 48px "Barlow Condensed", "Arial Narrow", sans-serif';
+  x.font=F1;let w=x.measureText(t).width;if(sub){x.font=F2;w=Math.max(w,x.measureText(sub).width)}
+  const W=Math.ceil(w+64),H=sub?168:112;c.width=W;c.height=H;
+  x.fillStyle=bg;x.beginPath();const r=14;x.moveTo(r,0);x.arcTo(W,0,W,H,r);x.arcTo(W,H,0,H,r);x.arcTo(0,H,0,0,r);x.arcTo(0,0,W,0,r);x.fill();
+  x.fillStyle='#fff';x.textAlign='center';x.textBaseline='middle';
+  x.font=F1;x.fillText(t,W/2,sub?60:58);if(sub){x.font=F2;x.fillText(sub,W/2,128)}
+  const tex=new THREE.CanvasTexture(c);tex.anisotropy=4;
+  const sp=new THREE.Sprite(new THREE.SpriteMaterial({map:tex,transparent:true,depthTest:false}));
+  sp.renderOrder=10;sp.scale.set(h*W/H,h,1);return sp;
+}
+let labelsHidden=false;try{labelsHidden=localStorage.getItem('wh3d-hide')==='1'}catch(e){}
+const fixedSprites=[];
+function fixedLabel(t,bg,px,pz,y,h){const s=makeSign(t,null,bg,h);s.position.set(X(px),y,Z(pz));s.visible=!labelsHidden;scene.add(s);fixedSprites.push(s);return s}
+
+// floor + walls
+box(173,152,973,688,0.05,-0.05,mat('--floor',1));
+const floorHit=new THREE.Mesh(new THREE.PlaneGeometry(800*PX,536*PX),new THREE.MeshBasicMaterial({visible:false}));
+floorHit.rotation.x=-Math.PI/2;floorHit.position.set(X(573),0.01,Z(420));scene.add(floorHit);
+const wall=mat('--room',0.9);
+[[173,150,973,154],[173,686,973,690],[171,152,175,688],[971,152,975,688]].forEach(w=>box(...w,0.9,0,wall));
+const room=mat('--room',0.35);
+[[173,280,388,397,'Inventory office'],[325,397,388,505,'Operation'],[237,183,303,227,'Lift'],[303,152,495,227,'Emergency staircase'],
+ [527,483,612,590,'Cargo lift'],[527,590,612,698,'Cargo lift'],[885,482,973,553,'Toilet'],[885,553,973,615,'Toilet'],[822,625,973,688,'Emergency staircase']]
+ .forEach(r=>{box(r[0],r[1],r[2],r[3],2.6,0,room);fixedLabel(r[4],'#5d6873',(r[0]+r[2])/2,(r[1]+r[3])/2,2.9,0.42)});
+const recv=new THREE.MeshLambertMaterial({color:'#2aa6b8',transparent:true,opacity:0.35});
+// Receiving is now an editable label (see the labels list)
+box(612,640,730,688,0.06,0,mat('--room',0.3));fixedLabel('Pantry','#5d6873',671,664,0.7,0.42);
+const unused=mat('--room',0.55);
+
+const pil=mat('--room',1);
+[[173,227],[373,227],[573,152],[784,164],[573,227],[773,227],[973,227],[173,494],[373,494],[573,494],[773,494],[173,688],[373,688],[573,688],[773,688],[973,688]]
+ .forEach(([x,y])=>box(x-12,y-12,x+12,y+12,4.3,0,pil)); // same height as the top of level M racks
+
+// racks
+const R=[
+ {x1:590,y1:153,x2:768,y2:165,row:'A',ori:'h',n:5,w:[6,6,6,6,4],bpl:[6,6,6,6,4]},{x1:800,y1:153,x2:957,y2:165,row:'A',ori:'h',n:4,bpl:6},
+ {x1:590,y1:215,x2:694,y2:228,row:'A',ori:'h',n:2},{x1:694,y1:215,x2:735,y2:228,row:'A',ori:'h',n:1,lowOnly:true},{x1:735,y1:215,x2:761,y2:228,row:'A',ori:'h',n:1,highOnly:true},{x1:785,y1:215,x2:900,y2:228,row:'A',ori:'h',n:2},
+ {x1:590,y1:228,x2:694,y2:241,row:'B',ori:'h',n:2},{x1:694,y1:228,x2:735,y2:241,row:'B',ori:'h',n:1,lowOnly:true},{x1:735,y1:228,x2:761,y2:241,row:'B',ori:'h',n:1,highOnly:true},{x1:785,y1:228,x2:900,y2:241,row:'B',ori:'h',n:2},
+ {x1:540,y1:267,x2:694,y2:279.5,row:'B',ori:'h',n:3},{x1:694,y1:267,x2:735,y2:279.5,row:'B',ori:'h',n:1,lowOnly:true},{x1:735,y1:267,x2:900,y2:279.5,row:'B',ori:'h',n:3},
+ {x1:540,y1:279.5,x2:694,y2:292,row:'C',ori:'h',n:3},{x1:694,y1:279.5,x2:735,y2:292,row:'C',ori:'h',n:1,lowOnly:true},{x1:735,y1:279.5,x2:900,y2:292,row:'C',ori:'h',n:3},
+ {x1:540,y1:318,x2:694,y2:331,row:'C',ori:'h',n:3},{x1:694,y1:318,x2:735,y2:331,row:'C',ori:'h',n:1,lowOnly:true},{x1:735,y1:318,x2:900,y2:331,row:'C',ori:'h',n:3},
+ {x1:540,y1:331,x2:694,y2:344,row:'D',ori:'h',n:3},{x1:694,y1:331,x2:735,y2:344,row:'D',ori:'h',n:1,lowOnly:true},{x1:735,y1:331,x2:900,y2:344,row:'D',ori:'h',n:3},
+ {x1:540,y1:366,x2:694,y2:378.5,row:'D',ori:'h',n:3},{x1:694,y1:366,x2:735,y2:378.5,row:'D',ori:'h',n:1,lowOnly:true},{x1:735,y1:366,x2:900,y2:378.5,row:'D',ori:'h',n:3},
+ {x1:540,y1:378.5,x2:694,y2:391,row:'E',ori:'h',n:3},{x1:694,y1:378.5,x2:735,y2:391,row:'E',ori:'h',n:1,lowOnly:true},{x1:735,y1:378.5,x2:900,y2:391,row:'E',ori:'h',n:3},
+ {x1:590,y1:416,x2:640,y2:429,row:'E',ori:'h',n:1,lowOnly:true},{x1:640,y1:416,x2:900,y2:429,row:'E',ori:'h',n:5,w:[54,41,55,55,55]},{x1:590,y1:429,x2:640,y2:442,row:'F',ori:'h',n:1,lowOnly:true},{x1:640,y1:429,x2:900,y2:442,row:'F',ori:'h',n:5,w:[54,41,55,55,55]}, // short rack 2 lines up with the cross walkway
+ {x1:885,y1:469,x2:958,y2:482,row:'H',ori:'h',n:2,levels:5,bpl:6}, // against the toilet wall
+ {x1:958,y1:178,x2:971,y2:213,row:'H',ori:'v',n:1,levels:5,bpl:6},{x1:958,y1:241,x2:971,y2:470,row:'H',ori:'v',n:6,levels:5,bpl:6},
+ {x1:612,y1:495,x2:627,y2:600,row:'G',ori:'v',n:3},{x1:653,y1:488,x2:667,y2:605,row:'G',ori:'v',n:3},{x1:667,y1:488,x2:682,y2:605,row:'G',ori:'v',n:3},
+ {x1:705,y1:488,x2:719,y2:605,row:'G',ori:'v',n:3},{x1:719,y1:488,x2:733,y2:605,row:'G',ori:'v',n:3},
+ {x1:755,y1:505,x2:770,y2:620,row:'G',ori:'v',n:3},{x1:770,y1:505,x2:785,y2:620,row:'G',ori:'v',n:3},
+ {x1:612,y1:623,x2:730,y2:637,row:'G',ori:'h',n:3},
+ // Row I: 15 racks in 3 lines (3, 6, 6) beside the operation office, 7 levels
+ {x1:310,y1:397,x2:325,y2:512,row:'I',ori:'v',n:3,levels:7},
+ {x1:267,y1:397,x2:279.5,y2:512,row:'I',ori:'v',n:3,levels:7},{x1:279.5,y1:397,x2:292,y2:512,row:'I',ori:'v',n:3,levels:7},
+ {x1:215,y1:397,x2:227.5,y2:512,row:'I',ori:'v',n:3,levels:7},{x1:227.5,y1:397,x2:240,y2:512,row:'I',ori:'v',n:3,levels:7},
+ {x1:351,y1:505,x2:388,y2:518,row:'I',ori:'h',n:1,levels:7}, // single rack under the operation office
+ // Row J: 2 racks on the left wall above the pillar, 5 levels
+ {x1:175,y1:405,x2:188,y2:482,row:'J',ori:'v',n:2,levels:5},{x1:175,y1:506,x2:188,y2:665,row:'J',ori:'v',n:4,levels:5},{x1:190,y1:675,x2:345,y2:688,row:'J',ori:'h',n:4,levels:5}
+];
+const LEVELS=6,LH=0.4;const cellsT=[[],[]],shelves=[[],[]],posts=[[],[]];const rackNo={};
+// tier 0 = ground (or single-tier rack), tier 1 = upper floor (mezzanine)
+const isT2=r=>r.ori==='h'&&r.y1>=215&&r.y2<=442; // edge racks (back wall, Row H, beside toilet) are ground only
+const DECK=0.06+6*0.4+0.02,UB=DECK+0.08,ULH=0.42; // mezzanine sits on top of 6 ground levels, same level height as the wall racks
+// bins per level: explicit r.bpl, otherwise short racks (< 45px long) hold 4 and full racks 8; Row I and J hold 6
+const binsFor=(r,i,len)=>Array.isArray(r.bpl)?r.bpl[i]:r.bpl?r.bpl:(r.row==='I'||r.row==='J')?6:len<45?4:8;
+const FLIPS=new Set(PLAN_DATA.racks.filter(p=>p.flip).map(p=>p.id));
+function addBins(arr,r,cx,cz,w,d,y,h,nb,base){for(let bi=0;bi<nb;bi++){
+  const f=(bi+0.5)/nb-0.5,px=r.ori==='h'?cx+f*w:cx,pz=r.ori==='h'?cz:cz+f*d;
+  arr.push({...base,p:[px,y,pz],s:[r.ori==='h'?w/nb*0.84:w*0.86,h,r.ori==='h'?d*0.78:d/nb*0.84],bin:FLIPS.has(base.rid)?nb-bi:bi+1})}}
+function newRack(si,i,t,cx,cz,top,levels,nb,floor){const rr=R[si],lk=rr.ori==='h'?'h'+rr.y1+'-'+rr.y2:'v'+rr.x1+'-'+rr.x2;const k={id:si+'.'+i+'.'+t,si,lk,i,t,cx,cz,top,levels,nb,bins:levels*nb,floor,ord:racks.length};racks.push(k);rackById.set(k.id,k);return k.id}
+R.forEach((r,si)=>{const L=r.ori==='h'?r.x2-r.x1:r.y2-r.y1;const ws=r.w||Array(r.n).fill(1);const tot=ws.reduce((a,b)=>a+b,0);let acc=0;
+  for(let i=0;i<r.n;i++){const s=L*ws[i]/tot,o=acc;acc+=s;if(r.skip&&r.skip.includes(i))continue;
+    let a1,b1,a2,b2;if(r.ori==='h'){a1=r.x1+o;a2=a1+s;b1=r.y1;b2=r.y2}else{a1=r.x1;a2=r.x2;b1=r.y1+o;b2=b1+s}
+    const cx=X((a1+a2)/2),cz=Z((b1+b2)/2),w=(a2-a1)*PX,d=(b2-b1)*PX;const corners=[[a1,b1],[a1,b2],[a2,b1],[a2,b2]];
+    if(!isT2(r)){
+      const _o=RACK_OV(si+'.'+i+'.0');const NL=_o?_o.l:(r.levels||LEVELS),SL=LH; // same level spacing everywhere, so more levels = taller rack
+      for(let l=0;l<=NL;l++)shelves[0].push([cx,0.06+l*SL,cz,w,0.03,d]);
+      const nb=_o?_o.n:binsFor(r,i,s);
+      const rid=newRack(si,i,0,cx,cz,0.06+NL*SL,NL,nb,'Ground floor');
+      for(let l=0;l<NL;l++)addBins(cellsT[0],r,cx,cz,w,d,0.06+l*SL+SL*0.37,SL*0.6,nb,{rid,lvl:l+1});
+      corners.forEach(([px,pz])=>posts[0].push([X(px),0,Z(pz),0.06+NL*SL+0.05]));
+    }else{
+      const _g=RACK_OV(si+'.'+i+'.0'),GL=_g?_g.l:6,lh=GL===6?0.4:(DECK-0.08)/GL,nbG=_g?_g.n:binsFor(r,i,s); // ground floor of the two-tier block: levels squeezed under the mezzanine
+      if(!r.highOnly){
+      for(let l=0;l<=GL;l++)shelves[0].push([cx,0.06+l*lh,cz,w,0.03,d]);
+      const ridG=newRack(si,i,0,cx,cz,DECK,GL,nbG,'Ground floor');
+      for(let l=0;l<GL;l++)addBins(cellsT[0],r,cx,cz,w,d,0.06+l*lh+lh*0.37,lh*0.6,nbG,{rid:ridG,lvl:l+1});
+      corners.forEach(([px,pz])=>posts[0].push([X(px),0,Z(pz),DECK]));
+      }
+      if(!r.lowOnly){
+      const _u=RACK_OV(si+'.'+i+'.1'),UL=_u?_u.l:4,nbU=_u?_u.n:binsFor(r,i,s);
+      for(let l=0;l<=UL;l++)shelves[1].push([cx,UB+l*ULH,cz,w,0.03,d]);
+      const ridU=newRack(si,i,1,cx,cz,UB+UL*ULH,UL,nbU,'Upper floor (level M)');
+      for(let l=0;l<UL;l++)addBins(cellsT[1],r,cx,cz,w,d,UB+l*ULH+0.16,0.25,nbU,{rid:ridU,lvl:l+1});
+      corners.forEach(([px,pz])=>posts[1].push([X(px),DECK,Z(pz),UB+UL*ULH+0.05-DECK]));
+      }
+    }
+  }});
+const dummy=new THREE.Object3D();const tierObjs=[[],[]];
+const cellMs=[],shelfGeo=new THREE.BoxGeometry(1,1,1),postGeo=new THREE.BoxGeometry(0.05,1,0.05);
+[0,1].forEach(t=>{
+  const sm=new THREE.InstancedMesh(shelfGeo,mat('--room',1),shelves[t].length);
+  shelves[t].forEach((s,i)=>{dummy.position.set(s[0],s[1],s[2]);dummy.scale.set(s[3],s[4],s[5]);dummy.updateMatrix();sm.setMatrixAt(i,dummy.matrix)});scene.add(sm);
+  const pm=new THREE.InstancedMesh(postGeo,mat('--room',1),posts[t].length);
+  posts[t].forEach((p,i)=>{dummy.position.set(p[0],p[1]+p[3]/2,p[2]);dummy.scale.set(1,p[3],1);dummy.updateMatrix();pm.setMatrixAt(i,dummy.matrix)});scene.add(pm);
+  const cm=new THREE.InstancedMesh(shelfGeo,new THREE.MeshLambertMaterial({color:0xffffff}),cellsT[t].length);
+  cellsT[t].forEach((c,i)=>{dummy.position.set(...c.p);dummy.scale.set(...c.s);dummy.updateMatrix();cm.setMatrixAt(i,dummy.matrix);cm.setColorAt(i,new THREE.Color('#888'))});
+  cm.userData.tier=t;scene.add(cm);cellMs.push(cm);tierObjs[t].push(sm,pm,cm);
+});
+// mezzanine floor over the whole block, with handrails on the open edges
+const deckM=new THREE.MeshLambertMaterial({color:'#7f8c99',transparent:true,opacity:0.7,depthWrite:false}),railM=new THREE.MeshLambertMaterial({color:'#e0761c'}),rpM=new THREE.MeshLambertMaterial({color:'#2f5fa8'});
+// deck only where people walk: aisles, side walkways and the cross walkway
+[[590,195,871,215],[540,241,901,267],[540,292,901,318],[540,344,901,366],[540,391,901,416],[590,442,901,464],[694,195,735,416]].forEach(d=>tierObjs[1].push(box(...d,0.06,DECK,deckM)));
+// free-standing edge rails (not against a rack) get posts up to level 3 of the upper racks; posts at rack ends run full height
+const atRack=(px,pz)=>R.some(r=>isT2(r)&&px>=r.x1-3&&px<=r.x2+3&&pz>=r.y1-3&&pz<=r.y2+3);
+function rail(x1,z1,x2,z2,free){
+  [0.5,0.95].forEach(h=>tierObjs[1].push(box(Math.min(x1,x2)-1,Math.min(z1,z2)-1,Math.max(x1,x2)+1,Math.max(z1,z2)+1,0.05,DECK+h,railM)));
+  const len=Math.hypot(x2-x1,z2-z1),n=Math.max(1,Math.round(len/40));
+  for(let i=0;i<=n;i++){const px=x1+(x2-x1)*i/n,pz=z1+(z2-z1)*i/n;tierObjs[1].push(box(px-1.5,pz-1.5,px+1.5,pz+1.5,atRack(px,pz)?UB+4*ULH+0.05:UB+3*ULH,0,rpM))}
+}
+// rails only on open walkway/aisle edges, never across rack ends
+rail(590,195,871,195,1);rail(590,464,901,464,1);
+rail(540,241,590,241,1);
+[[241,267],[292,318],[344,366]].forEach(([a,b])=>rail(540,a,540,b));rail(540,391,540,416);rail(590,442,590,464,1);
+[[241,267],[292,318],[344,366],[391,416],[442,464]].forEach(([a,b])=>rail(901,a,901,b));
+// staircase at the receiving end of the E/F block: climbs east, lands on a small platform joining the E/F aisle and the Row F walkway
+function stair(x0,x1,z0,z1){
+  const sM=new THREE.MeshLambertMaterial({color:'#2f5fa8'}),tM=new THREE.MeshLambertMaterial({color:'#3d6fbf'});
+  const n=10,run=(x1-x0)/n;
+  for(let i=0;i<n;i++){const y=(i+1)*DECK/n;box(x0+i*run,z0,x0+(i+1)*run+0.6,z1,0.05,y-0.05,tM)}
+  const L=Math.hypot((x1-x0)*PX,DECK),ang=Math.atan2(DECK,(x1-x0)*PX),cx=X((x0+x1)/2);
+  [[z0,0.06,0.14,DECK/2],[z1,0.06,0.14,DECK/2],[z0,0.04,0.04,DECK/2+0.95],[z1,0.04,0.04,DECK/2+0.95]].forEach(([z,w,h,y])=>{
+    const m=new THREE.Mesh(new THREE.BoxGeometry(L,h,w),sM);m.position.set(cx,y,Z(z));m.rotation.z=ang;scene.add(m)});
+  [[x0,z0,0.95],[x0,z1,0.95],[x1,z0,DECK+0.95],[x1,z1,DECK+0.95]].forEach(([x,z,h])=>box(x-0.8,z-0.8,x+0.8,z+0.8,h,0,sM));
+  fixedLabel('Stairs','#2f5fa8',x0+(x1-x0)*0.3,(z0+z1)/2,DECK+1.4,0.38);
+}
+stair(556,590,418,440);box(590,416,640,442,0.06,DECK,deckM);
+rail(540,416,590,416,1); // aisle edge beside the stairs
+// second staircase: Row H (back) end of the Row A walkway, climbing west onto it
+stair(900,871,197,213); // runs alongside half of the last Row A rack
+rail(590,195,590,215,1);
+tierObjs[1].push(fixedLabel('Upper floor (mezzanine)','#2f5fa8',600,452,2.6,0.4));
+
+
+// ---- fill colours on the bins
+const RID2CODE=Object.fromEntries(RACKS.filter(r=>r.id).map(r=>[r.id,r.c]));
+cellsT.forEach(arr=>arr.forEach(c=>{const rc=RID2CODE[c.rid];c.code=rc?`${rc}-L${c.lvl}-${c.bin}`:null}));
+let hl=new Set(),picked=null;const pins=[];
+const RBYID=new Map(RACKS.filter(r=>r.id).map(r=>[r.id,r]));let mode='fill',sel=new Set(),codesOn=true;const codeSprites=[];const rowCols={};
+const SELC=new THREE.Color('#ffd43b');const rc=n=>rowCols[n]||(rowCols[n]=new THREE.Color(rowColor(n)));
+racks.forEach(k=>{const r=RBYID.get(k.id);if(!r)return;const sp=makeSign(r.c,null,rowColor(r.r),0.4);sp.position.set(k.cx,k.top+0.34,k.cz);sp.userData.tier=k.t;sp.userData.y0=k.top+0.34;sp.userData.rid=k.id;sp.visible=false;scene.add(sp);codeSprites.push(sp)});
+const tierOk=t=>tier==='all'||(t===0?tier!=='up':tier!=='lo');
+function visAll(){codeSprites.forEach(s=>s.visible=window.__walkOn?(s.userData.tier===window.__walkFloor&&camera.position.distanceTo(s.position)<7):(mode==='edit'&&codesOn&&tierOk(s.userData.tier)));pins.forEach(p=>p.visible=mode!=='edit'&&tierOk(p.userData.tier))}
+const pinTex=(()=>{const c=document.createElement('canvas');c.width=64;c.height=96;const x=c.getContext('2d');x.fillStyle='#a855f7';x.strokeStyle='#fff';x.lineWidth=5;
+  x.beginPath();x.arc(32,32,24,Math.PI,0);x.lineTo(32,90);x.closePath();x.fill();x.stroke();x.fillStyle='#fff';x.beginPath();x.arc(32,32,9,0,7);x.fill();return new THREE.CanvasTexture(c)})();
+function setPins(){pins.forEach(p=>scene.remove(p));pins.length=0;return;cellsT.forEach((a,t)=>a.forEach(c=>{if(c.code&&hl.has(c.code)){
+  const sp=new THREE.Sprite(new THREE.SpriteMaterial({map:pinTex,depthTest:false,transparent:true}));sp.renderOrder=999;sp.scale.set(0.35,0.52,1);sp.center.set(0.5,0);
+  sp.position.set(c.p[0],c.p[1]+c.s[1]/2,c.p[2]);sp.userData.tier=t;scene.add(sp);pins.push(sp)}}));visAll()}
+const COL={empty:new THREE.Color(STATUS.empty),low:new THREE.Color(STATUS.low),mid:new THREE.Color(STATUS.mid),full:new THREE.Color(STATUS.full),hl:new THREE.Color(STATUS.mark),pick:new THREE.Color('#ffffff')};
+function paint(){cellsT.forEach((arr,t)=>{arr.forEach((c,i)=>{let col;
+  if(mode==='edit'){const r=RBYID.get(c.rid);cellMs[t].setColorAt(i,sel.has(c.rid)?SELC:r?rc(r.r):COL.empty);return}
+  if(c.code&&c.code===picked)col=COL.pick;else if(c.code&&hl.has(c.code))col=COL.hl;
+  else{const f=c.code?fillLevel(c.code):'empty';col=COL[f]}
+  if(hl.size&&!hl.has(c.code)&&c.code!==picked)col=col.clone().lerp(new THREE.Color('#1a2946'),0.65);
+  cellMs[t].setColorAt(i,col)});cellMs[t].instanceColor.needsUpdate=true})}
+const ray=new THREE.Raycaster(),mouse=new THREE.Vector2();let down=null;
+renderer.domElement.addEventListener('pointerdown',e=>down=[e.clientX,e.clientY]);
+renderer.domElement.addEventListener('pointerup',e=>{if(!down||Math.hypot(e.clientX-down[0],e.clientY-down[1])>5)return;
+  const b=renderer.domElement.getBoundingClientRect();mouse.set((e.clientX-b.left)/b.width*2-1,-(e.clientY-b.top)/b.height*2+1);ray.setFromCamera(mouse,camera);
+  const h=ray.intersectObjects(cellMs.filter(m=>m.visible))[0];if(h){const c=cellsT[h.object.userData.tier][h.instanceId];if(mode==='edit'){onPick(null,c.rid);return}if(c.code){picked=c.code;paint();onPick(c.code)}}});
+let tier='all';
+function setTier(m){tier=m;visAll();tierObjs[0].forEach(o=>o.visible=m!=='up');tierObjs[1].forEach(o=>o.visible=m!=='lo')}
+function view(top){if(top)camera.position.set(0,42,0.01);else camera.position.set(-14,26,26);controls.target.set(2,0,-1);controls.update()}
+view(false);
+if(window.LASTVIEW){camera.position.fromArray(LASTVIEW.p);controls.target.fromArray(LASTVIEW.t);controls.update()}
+function theme(){scene.background=new THREE.Color(css('--scene')||'#e4e8ec');themed.forEach(([m,t])=>m.color.set(css(t)||'#999'))}
+theme();try{matchMedia('(prefers-color-scheme: dark)').addEventListener('change',theme)}catch(e){}
+new MutationObserver(theme).observe(document.documentElement,{attributes:true,attributeFilter:['data-theme']});
+function size(){const w=host.clientWidth,h=host.clientHeight;if(!w||!h)return;renderer.setSize(w,h,false);camera.aspect=w/h;camera.updateProjectionMatrix()}
+const ro=new ResizeObserver(size);ro.observe(host);size();let dead=false;
+// ---- walk mode: first-person view at eye height
+const W={on:false,floor:0,yaw:0,pitch:-0.08,keys:{},pad:{},saved:null,last:0};
+const EYE=1.55,RAD=0.2;
+const wr=a=>[X(a[0]),Z(a[1]),X(a[2]),Z(a[3])];
+function obstacles(fl){const o=[];
+  PLAN_DATA.racks.filter(p=>p.t===fl||(fl===0&&p.t===0)).forEach(p=>o.push(wr(p.f)));
+  if(fl===0){PLAN_DATA.rooms.forEach(r=>o.push(wr(r)));PLAN_DATA.pillars.forEach(([x,y])=>o.push(wr([x-12,y-12,x+12,y+12])))}
+  return o}
+let OBS=[obstacles(0),obstacles(1)];const DECKW=PLAN_DATA.deck.map(wr);const BND=wr(PLAN_DATA.bounds);
+function freeAt(x,z,fl){if(x<BND[0]+RAD||x>BND[2]-RAD||z<BND[1]+RAD||z>BND[3]-RAD)return false;
+  if(fl===1&&!DECKW.some(d=>x>=d[0]&&x<=d[2]&&z>=d[1]&&z<=d[3]))return false;
+  return !OBS[fl].some(o=>x>o[0]-RAD&&x<o[2]+RAD&&z>o[1]-RAD&&z<o[3]+RAD)}
+function rackFace(p){const [x1,z1,x2,z2]=wr(p.f);const cx=(x1+x2)/2,cz=(z1+z2)/2,vert=(z2-z1)>(x2-x1);const half=vert?(x2-x1)/2:(z2-z1)/2;
+  const dirs=vert?[[-1,0],[1,0]]:[[0,1],[0,-1]];let best=null;
+  for(const [ux,uz] of dirs){const fx=cx+ux*half,fz=cz+uz*half;if(!freeAt(fx+ux*(RAD+0.08),fz+uz*(RAD+0.08),p.t))continue;let a=null,b=null;
+    for(let d=RAD+0.08;d<=3;d+=0.05){const ok=freeAt(fx+ux*d,fz+uz*d,p.t);if(ok&&a===null)a=d;if(a!==null&&!ok){b=d;break}}
+    if(a!==null){const d=b?Math.min((a+b)/2+RAD/2,1.6):1.3;if(!best||d>best.d)best={d,ux,uz,fx,fz}}}
+  return {cx,cz,half,best}}
+const FACE=new Map();
+function walkApply(){if(window.__walkFloor!==W.floor){window.__walkFloor=W.floor;visAll()}camera.rotation.order='YXZ';camera.rotation.set(W.pitch,W.yaw,0);camera.position.y=(W.floor===1?DECK:0)+EYE}
+function nearestFree(x,z,fl){if(freeAt(x,z,fl))return [x,z];for(let r=0.2;r<12;r+=0.2)for(let a=0;a<6.28;a+=0.4){const nx=x+Math.cos(a)*r,nz=z+Math.sin(a)*r;if(freeAt(nx,nz,fl))return [nx,nz]}return [x,z]}
+function walkStart(){if(W.on)return;W.saved={p:camera.position.toArray(),t:controls.target.toArray(),fov:camera.fov,tier};W.on=true;window.__walkOn=true;controls.enabled=false;
+  camera.fov=80;camera.updateProjectionMatrix();setTier('all');codeSprites.forEach(sp=>{const p=PLAN_DATA.racks.find(q=>q.id===sp.userData.rid);const rf=p&&rackFace(p);const u=rf&&rf.best;sp.userData.walkPos=u?[rf.cx+u.ux*(rf.half+0.1),rf.cz+u.uz*(rf.half+0.1)]:[sp.position.x,sp.position.z];sp.userData.x0=sp.position.x;sp.userData.z0=sp.position.z;
+    sp.position.set(sp.userData.walkPos[0],(sp.userData.tier===1?UB:0)+1.75,sp.userData.walkPos[1]);sp.scale.multiplyScalar(0.5);sp.material.depthTest=true;sp.renderOrder=0});visAll();
+  const t=controls.target;const [x,z]=nearestFree(t.x,t.z,W.floor);camera.position.set(x,0,z);walkApply()}
+function walkStop(){if(!W.on)return;W.on=false;window.__walkOn=false;codeSprites.forEach(sp=>{sp.position.set(sp.userData.x0,sp.userData.y0,sp.userData.z0);sp.scale.multiplyScalar(2);sp.material.depthTest=false;sp.renderOrder=10});visAll();controls.enabled=true;camera.fov=W.saved.fov;camera.updateProjectionMatrix();camera.rotation.order='XYZ';
+  camera.position.fromArray(W.saved.p);controls.target.fromArray(W.saved.t);setTier(W.saved.tier);controls.update()}
+function walkFloor(fl){W.floor=fl;const [x,z]=nearestFree(camera.position.x,camera.position.z,fl);camera.position.x=x;camera.position.z=z;walkApply()}
+function walkTo(rid){const p=PLAN_DATA.racks.find(q=>q.id===rid);if(!p)return false;if(!W.on)walkStart();W.floor=p.t;
+  const [x1,z1,x2,z2]=wr(p.f);const cx=(x1+x2)/2,cz=(z1+z2)/2,vert=(z2-z1)>(x2-x1);const half=vert?(x2-x1)/2:(z2-z1)/2;
+  const rf=rackFace(p);const best=rf.best?{x:rf.best.fx+rf.best.ux*rf.best.d,z:rf.best.fz+rf.best.uz*rf.best.d}:null;
+  const s=best?[best.x,best.z]:nearestFree(cx,cz,p.t);
+  camera.position.set(s[0],0,s[1]);W.yaw=Math.atan2(-(cx-s[0]),-(cz-s[1]));
+  const k=racks.find(q=>q.id===rid);const base=p.t===1?UB:0.06,mid=k?(base+k.top)/2:base+1.2;
+  walkApply();visAll();W.pitch=-0.04;walkApply();visAll();return true}
+function walkStep(dt){const k=W.keys,pd=W.pad;
+  const fwd=(k.KeyW||k.ArrowUp||pd.f?1:0)-(k.KeyS||k.ArrowDown||pd.b?1:0);
+  const turn=(k.KeyA||k.ArrowLeft||pd.l?1:0)-(k.KeyD||k.ArrowRight||pd.r?1:0);
+  const strafe=(k.KeyE?1:0)-(k.KeyQ?1:0);
+  if(turn)W.yaw+=turn*1.7*dt;
+  if(fwd||strafe){const sp=(k.ShiftLeft?4:2.2)*dt;const fx=-Math.sin(W.yaw),fz=-Math.cos(W.yaw);
+    const dx=(fx*fwd+(-fz)*strafe)*sp,dz=(fz*fwd+fx*strafe)*sp;const p=camera.position;
+    if(freeAt(p.x+dx,p.z,W.floor))p.x+=dx;if(freeAt(p.x,p.z+dz,W.floor))p.z+=dz;visAll()}
+  walkApply()}
+let lookDown=null;
+renderer.domElement.addEventListener('pointerdown',e=>{if(W.on)lookDown=[e.clientX,e.clientY,W.yaw,W.pitch]});
+renderer.domElement.addEventListener('pointermove',e=>{if(!W.on||!lookDown)return;W.yaw=lookDown[2]+(e.clientX-lookDown[0])*0.005;W.pitch=Math.max(-1.2,Math.min(1.2,lookDown[3]+(e.clientY-lookDown[1])*0.004))});
+window.addEventListener('pointerup',()=>lookDown=null);
+const kd=e=>{if(!W.on||host.closest('[hidden]')||/INPUT|TEXTAREA|SELECT/.test(document.activeElement&&document.activeElement.tagName))return;
+  if(/^(Key[WASDQE]|Arrow|Shift)/.test(e.code)){W.keys[e.code]=e.type==='keydown';if(e.code.startsWith('Arrow'))e.preventDefault()}};
+window.addEventListener('keydown',kd);window.addEventListener('keyup',kd);
+
+(function loop(ts){if(dead)return;const dt=Math.min(0.1,((ts||0)-W.last)/1000);W.last=ts||0;if(!host.closest('[hidden]')){if(W.on)walkStep(dt);else controls.update();renderer.render(scene,camera)}requestAnimationFrame(loop)})();
+paint();
+const getView=()=>({p:camera.position.toArray(),t:controls.target.toArray()});
+function walkAtWorld(x,z,fl){if(!W.on)walkStart();W.floor=fl;const [nx,nz]=nearestFree(x,z,fl);camera.position.set(nx,0,nz);
+  let best=null;PLAN_DATA.racks.filter(p=>p.t===fl).forEach(p=>{const [x1,z1,x2,z2]=wr(p.f);const qx=Math.max(x1,Math.min(nx,x2)),qz=Math.max(z1,Math.min(nz,z2));const d=Math.hypot(qx-nx,qz-nz);if(!best||d<best.d)best={d,qx,qz}});
+  if(best&&best.d<4&&best.d>0.01)W.yaw=Math.atan2(-(best.qx-nx),-(best.qz-nz));W.pitch=-0.04;walkApply();visAll()}
+function walkAtScreen(cx,cy,fl){const b=renderer.domElement.getBoundingClientRect();if(cx<b.left||cx>b.right||cy<b.top||cy>b.bottom)return false;
+  mouse.set((cx-b.left)/b.width*2-1,-(cy-b.top)/b.height*2+1);ray.setFromCamera(mouse,camera);
+  const v=new THREE.Vector3();if(!ray.ray.intersectPlane(new THREE.Plane(new THREE.Vector3(0,1,0),-(fl===1?DECK:0)),v))return false;walkAtWorld(v.x,v.z,fl);return true}
+return {walk:{atScreen:walkAtScreen,atWorld:walkAtWorld,start:walkStart,stop:walkStop,to:walkTo,floor:walkFloor,on:()=>W.on,getFloor:()=>W.floor,pad:W.pad},dbg:()=>({p:camera.position.toArray(),r:camera.rotation.toArray(),fov:camera.fov,W:{floor:W.floor,yaw:W.yaw,pitch:W.pitch}}),getView,dispose(){if(W.on)walkStop();window.LASTVIEW=getView();dead=true;ro.disconnect();controls.dispose();renderer.dispose();renderer.domElement.remove()},paint,setTier,view,setMode(m){if(mode===m)return;mode=m;visAll();paint()},setSel(keys){sel=new Set(keys);paint()},setCodes(on){codesOn=on;visAll()},highlight(codes){hl=new Set(codes||[]);paint();setPins()},pick(code){picked=code;paint()},
+  focus(code){if(W.on){const b=BINS.get(code);const r=b&&RACKS.find(x=>x.c===b.rack);if(r&&r.id)walkTo(r.id);return}let t=-1,i=-1;cellsT.forEach((a,tt)=>{const k=a.findIndex(x=>x.code===code);if(k>=0){t=tt;i=k}});if(t<0)return;const c=cellsT[t][i];
+    const b=BINS.get(code);if(b){const m=b.floor===2?'up':'lo';setTier(m);document.querySelectorAll('.mtools [data-t]').forEach(x=>x.setAttribute('aria-pressed',x.dataset.t===m))}
+    const T=new THREE.Vector3(...c.p);controls.target.copy(T);
+    const best=[-2.5,5,6];camera.position.copy(T.clone().add(new THREE.Vector3(...best)));controls.update()}};
+}
+
+// ---------- 2D floor plan (flat, no rotating) ----------
+const PLAN_DATA={"racks":[{"id":"0.0.0","t":0,"f":[590,153,628.1,165],"o":"h","flip":false},{"id":"0.1.0","t":0,"f":[628.1,153,666.3,165],"o":"h","flip":false},{"id":"0.2.0","t":0,"f":[666.3,153,704.4,165],"o":"h","flip":false},{"id":"0.3.0","t":0,"f":[704.4,153,742.6,165],"o":"h","flip":false},{"id":"0.4.0","t":0,"f":[742.6,153,768,165],"o":"h","flip":false},{"id":"1.0.0","t":0,"f":[800,153,839.3,165],"o":"h","flip":false},{"id":"1.1.0","t":0,"f":[839.3,153,878.5,165],"o":"h","flip":false},{"id":"1.2.0","t":0,"f":[878.5,153,917.8,165],"o":"h","flip":false},{"id":"1.3.0","t":0,"f":[917.8,153,957,165],"o":"h","flip":false},{"id":"2.0.0","t":0,"f":[590,215,642,228],"o":"h","flip":true},{"id":"2.0.1","t":1,"f":[590,215,642,228],"o":"h","flip":true},{"id":"2.1.0","t":0,"f":[642,215,694,228],"o":"h","flip":true},{"id":"2.1.1","t":1,"f":[642,215,694,228],"o":"h","flip":true},{"id":"3.0.0","t":0,"f":[694,215,735,228],"o":"h","flip":true},{"id":"4.0.1","t":1,"f":[735,215,761,228],"o":"h","flip":true},{"id":"5.0.0","t":0,"f":[785,215,842.5,228],"o":"h","flip":true},{"id":"5.0.1","t":1,"f":[785,215,842.5,228],"o":"h","flip":true},{"id":"5.1.0","t":0,"f":[842.5,215,900,228],"o":"h","flip":true},{"id":"5.1.1","t":1,"f":[842.5,215,900,228],"o":"h","flip":false},{"id":"6.0.0","t":0,"f":[590,228,642,241],"o":"h","flip":false},{"id":"6.0.1","t":1,"f":[590,228,642,241],"o":"h","flip":false},{"id":"6.1.0","t":0,"f":[642,228,694,241],"o":"h","flip":false},{"id":"6.1.1","t":1,"f":[642,228,694,241],"o":"h","flip":false},{"id":"7.0.0","t":0,"f":[694,228,735,241],"o":"h","flip":false},{"id":"8.0.1","t":1,"f":[735,228,761,241],"o":"h","flip":false},{"id":"9.0.0","t":0,"f":[785,228,842.5,241],"o":"h","flip":false},{"id":"9.0.1","t":1,"f":[785,228,842.5,241],"o":"h","flip":false},{"id":"9.1.0","t":0,"f":[842.5,228,900,241],"o":"h","flip":false},{"id":"9.1.1","t":1,"f":[842.5,228,900,241],"o":"h","flip":false},{"id":"10.0.0","t":0,"f":[540,267,591.3,279.5],"o":"h","flip":true},{"id":"10.0.1","t":1,"f":[540,267,591.3,279.5],"o":"h","flip":true},{"id":"10.1.0","t":0,"f":[591.3,267,642.7,279.5],"o":"h","flip":true},{"id":"10.1.1","t":1,"f":[591.3,267,642.7,279.5],"o":"h","flip":true},{"id":"10.2.0","t":0,"f":[642.7,267,694,279.5],"o":"h","flip":true},{"id":"10.2.1","t":1,"f":[642.7,267,694,279.5],"o":"h","flip":true},{"id":"11.0.0","t":0,"f":[694,267,735,279.5],"o":"h","flip":true},{"id":"12.0.0","t":0,"f":[735,267,790,279.5],"o":"h","flip":true},{"id":"12.0.1","t":1,"f":[735,267,790,279.5],"o":"h","flip":true},{"id":"12.1.0","t":0,"f":[790,267,845,279.5],"o":"h","flip":true},{"id":"12.1.1","t":1,"f":[790,267,845,279.5],"o":"h","flip":true},{"id":"12.2.0","t":0,"f":[845,267,900,279.5],"o":"h","flip":true},{"id":"12.2.1","t":1,"f":[845,267,900,279.5],"o":"h","flip":true},{"id":"13.0.0","t":0,"f":[540,279.5,591.3,292],"o":"h","flip":false},{"id":"13.0.1","t":1,"f":[540,279.5,591.3,292],"o":"h","flip":false},{"id":"13.1.0","t":0,"f":[591.3,279.5,642.7,292],"o":"h","flip":false},{"id":"13.1.1","t":1,"f":[591.3,279.5,642.7,292],"o":"h","flip":false},{"id":"13.2.0","t":0,"f":[642.7,279.5,694,292],"o":"h","flip":false},{"id":"13.2.1","t":1,"f":[642.7,279.5,694,292],"o":"h","flip":false},{"id":"14.0.0","t":0,"f":[694,279.5,735,292],"o":"h","flip":false},{"id":"15.0.0","t":0,"f":[735,279.5,790,292],"o":"h","flip":false},{"id":"15.0.1","t":1,"f":[735,279.5,790,292],"o":"h","flip":false},{"id":"15.1.0","t":0,"f":[790,279.5,845,292],"o":"h","flip":false},{"id":"15.1.1","t":1,"f":[790,279.5,845,292],"o":"h","flip":false},{"id":"15.2.0","t":0,"f":[845,279.5,900,292],"o":"h","flip":false},{"id":"15.2.1","t":1,"f":[845,279.5,900,292],"o":"h","flip":false},{"id":"16.0.0","t":0,"f":[540,318,591.3,331],"o":"h","flip":true},{"id":"16.0.1","t":1,"f":[540,318,591.3,331],"o":"h","flip":true},{"id":"16.1.0","t":0,"f":[591.3,318,642.7,331],"o":"h","flip":true},{"id":"16.1.1","t":1,"f":[591.3,318,642.7,331],"o":"h","flip":true},{"id":"16.2.0","t":0,"f":[642.7,318,694,331],"o":"h","flip":true},{"id":"16.2.1","t":1,"f":[642.7,318,694,331],"o":"h","flip":true},{"id":"17.0.0","t":0,"f":[694,318,735,331],"o":"h","flip":true},{"id":"18.0.0","t":0,"f":[735,318,790,331],"o":"h","flip":true},{"id":"18.0.1","t":1,"f":[735,318,790,331],"o":"h","flip":true},{"id":"18.1.0","t":0,"f":[790,318,845,331],"o":"h","flip":true},{"id":"18.1.1","t":1,"f":[790,318,845,331],"o":"h","flip":true},{"id":"18.2.0","t":0,"f":[845,318,900,331],"o":"h","flip":true},{"id":"18.2.1","t":1,"f":[845,318,900,331],"o":"h","flip":true},{"id":"19.0.0","t":0,"f":[540,331,591.3,344],"o":"h","flip":false},{"id":"19.0.1","t":1,"f":[540,331,591.3,344],"o":"h","flip":false},{"id":"19.1.0","t":0,"f":[591.3,331,642.7,344],"o":"h","flip":false},{"id":"19.1.1","t":1,"f":[591.3,331,642.7,344],"o":"h","flip":false},{"id":"19.2.0","t":0,"f":[642.7,331,694,344],"o":"h","flip":false},{"id":"19.2.1","t":1,"f":[642.7,331,694,344],"o":"h","flip":false},{"id":"20.0.0","t":0,"f":[694,331,735,344],"o":"h","flip":false},{"id":"21.0.0","t":0,"f":[735,331,790,344],"o":"h","flip":false},{"id":"21.0.1","t":1,"f":[735,331,790,344],"o":"h","flip":false},{"id":"21.1.0","t":0,"f":[790,331,845,344],"o":"h","flip":false},{"id":"21.1.1","t":1,"f":[790,331,845,344],"o":"h","flip":false},{"id":"21.2.0","t":0,"f":[845,331,900,344],"o":"h","flip":false},{"id":"21.2.1","t":1,"f":[845,331,900,344],"o":"h","flip":false},{"id":"22.0.0","t":0,"f":[540,366,591.3,378.5],"o":"h","flip":true},{"id":"22.0.1","t":1,"f":[540,366,591.3,378.5],"o":"h","flip":true},{"id":"22.1.0","t":0,"f":[591.3,366,642.7,378.5],"o":"h","flip":true},{"id":"22.1.1","t":1,"f":[591.3,366,642.7,378.5],"o":"h","flip":true},{"id":"22.2.0","t":0,"f":[642.7,366,694,378.5],"o":"h","flip":true},{"id":"22.2.1","t":1,"f":[642.7,366,694,378.5],"o":"h","flip":true},{"id":"23.0.0","t":0,"f":[694,366,735,378.5],"o":"h","flip":true},{"id":"24.0.0","t":0,"f":[735,366,790,378.5],"o":"h","flip":true},{"id":"24.0.1","t":1,"f":[735,366,790,378.5],"o":"h","flip":true},{"id":"24.1.0","t":0,"f":[790,366,845,378.5],"o":"h","flip":true},{"id":"24.1.1","t":1,"f":[790,366,845,378.5],"o":"h","flip":true},{"id":"24.2.0","t":0,"f":[845,366,900,378.5],"o":"h","flip":true},{"id":"24.2.1","t":1,"f":[845,366,900,378.5],"o":"h","flip":true},{"id":"25.0.0","t":0,"f":[540,378.5,591.3,391],"o":"h","flip":false},{"id":"25.0.1","t":1,"f":[540,378.5,591.3,391],"o":"h","flip":false},{"id":"25.1.0","t":0,"f":[591.3,378.5,642.7,391],"o":"h","flip":false},{"id":"25.1.1","t":1,"f":[591.3,378.5,642.7,391],"o":"h","flip":false},{"id":"25.2.0","t":0,"f":[642.7,378.5,694,391],"o":"h","flip":false},{"id":"25.2.1","t":1,"f":[642.7,378.5,694,391],"o":"h","flip":false},{"id":"26.0.0","t":0,"f":[694,378.5,735,391],"o":"h","flip":false},{"id":"27.0.0","t":0,"f":[735,378.5,790,391],"o":"h","flip":false},{"id":"27.0.1","t":1,"f":[735,378.5,790,391],"o":"h","flip":false},{"id":"27.1.0","t":0,"f":[790,378.5,845,391],"o":"h","flip":false},{"id":"27.1.1","t":1,"f":[790,378.5,845,391],"o":"h","flip":false},{"id":"27.2.0","t":0,"f":[845,378.5,900,391],"o":"h","flip":false},{"id":"27.2.1","t":1,"f":[845,378.5,900,391],"o":"h","flip":false},{"id":"28.0.0","t":0,"f":[590,416,640,429],"o":"h","flip":true},{"id":"29.0.0","t":0,"f":[640,416,694,429],"o":"h","flip":true},{"id":"29.0.1","t":1,"f":[640,416,694,429],"o":"h","flip":true},{"id":"29.1.0","t":0,"f":[694,416,735,429],"o":"h","flip":true},{"id":"29.1.1","t":1,"f":[694,416,735,429],"o":"h","flip":true},{"id":"29.2.0","t":0,"f":[735,416,790,429],"o":"h","flip":true},{"id":"29.2.1","t":1,"f":[735,416,790,429],"o":"h","flip":true},{"id":"29.3.0","t":0,"f":[790,416,845,429],"o":"h","flip":true},{"id":"29.3.1","t":1,"f":[790,416,845,429],"o":"h","flip":true},{"id":"29.4.0","t":0,"f":[845,416,900,429],"o":"h","flip":true},{"id":"29.4.1","t":1,"f":[845,416,900,429],"o":"h","flip":true},{"id":"30.0.0","t":0,"f":[590,429,640,442],"o":"h","flip":false},{"id":"31.0.0","t":0,"f":[640,429,694,442],"o":"h","flip":false},{"id":"31.0.1","t":1,"f":[640,429,694,442],"o":"h","flip":false},{"id":"31.1.0","t":0,"f":[694,429,735,442],"o":"h","flip":false},{"id":"31.1.1","t":1,"f":[694,429,735,442],"o":"h","flip":false},{"id":"31.2.0","t":0,"f":[735,429,790,442],"o":"h","flip":false},{"id":"31.2.1","t":1,"f":[735,429,790,442],"o":"h","flip":false},{"id":"31.3.0","t":0,"f":[790,429,845,442],"o":"h","flip":false},{"id":"31.3.1","t":1,"f":[790,429,845,442],"o":"h","flip":false},{"id":"31.4.0","t":0,"f":[845,429,900,442],"o":"h","flip":false},{"id":"31.4.1","t":1,"f":[845,429,900,442],"o":"h","flip":false},{"id":"32.0.0","t":0,"f":[885,469,921.5,482],"o":"h","flip":true},{"id":"32.1.0","t":0,"f":[921.5,469,958,482],"o":"h","flip":true},{"id":"33.0.0","t":0,"f":[958,178,971,213],"o":"v","flip":false},{"id":"34.0.0","t":0,"f":[958,241,971,279.2],"o":"v","flip":false},{"id":"34.1.0","t":0,"f":[958,279.2,971,317.3],"o":"v","flip":false},{"id":"34.2.0","t":0,"f":[958,317.3,971,355.5],"o":"v","flip":false},{"id":"34.3.0","t":0,"f":[958,355.5,971,393.7],"o":"v","flip":false},{"id":"34.4.0","t":0,"f":[958,393.7,971,431.8],"o":"v","flip":false},{"id":"34.5.0","t":0,"f":[958,431.8,971,470],"o":"v","flip":false},{"id":"35.0.0","t":0,"f":[612,495,627,530],"o":"v","flip":true},{"id":"35.1.0","t":0,"f":[612,530,627,565],"o":"v","flip":true},{"id":"35.2.0","t":0,"f":[612,565,627,600],"o":"v","flip":true},{"id":"36.0.0","t":0,"f":[653,488,667,527],"o":"v","flip":false},{"id":"36.1.0","t":0,"f":[653,527,667,566],"o":"v","flip":false},{"id":"36.2.0","t":0,"f":[653,566,667,605],"o":"v","flip":false},{"id":"37.0.0","t":0,"f":[667,488,682,527],"o":"v","flip":true},{"id":"37.1.0","t":0,"f":[667,527,682,566],"o":"v","flip":true},{"id":"37.2.0","t":0,"f":[667,566,682,605],"o":"v","flip":true},{"id":"38.0.0","t":0,"f":[705,488,719,527],"o":"v","flip":false},{"id":"38.1.0","t":0,"f":[705,527,719,566],"o":"v","flip":false},{"id":"38.2.0","t":0,"f":[705,566,719,605],"o":"v","flip":false},{"id":"39.0.0","t":0,"f":[719,488,733,527],"o":"v","flip":true},{"id":"39.1.0","t":0,"f":[719,527,733,566],"o":"v","flip":true},{"id":"39.2.0","t":0,"f":[719,566,733,605],"o":"v","flip":true},{"id":"40.0.0","t":0,"f":[755,505,770,543.3],"o":"v","flip":false},{"id":"40.1.0","t":0,"f":[755,543.3,770,581.7],"o":"v","flip":false},{"id":"40.2.0","t":0,"f":[755,581.7,770,620],"o":"v","flip":false},{"id":"41.0.0","t":0,"f":[770,505,785,543.3],"o":"v","flip":true},{"id":"41.1.0","t":0,"f":[770,543.3,785,581.7],"o":"v","flip":true},{"id":"41.2.0","t":0,"f":[770,581.7,785,620],"o":"v","flip":true},{"id":"42.0.0","t":0,"f":[612,623,651.3,637],"o":"h","flip":true},{"id":"42.1.0","t":0,"f":[651.3,623,690.7,637],"o":"h","flip":true},{"id":"42.2.0","t":0,"f":[690.7,623,730,637],"o":"h","flip":true},{"id":"43.0.0","t":0,"f":[310,397,325,435.3],"o":"v","flip":false},{"id":"43.1.0","t":0,"f":[310,435.3,325,473.7],"o":"v","flip":false},{"id":"43.2.0","t":0,"f":[310,473.7,325,512],"o":"v","flip":false},{"id":"44.0.0","t":0,"f":[267,397,279.5,435.3],"o":"v","flip":false},{"id":"44.1.0","t":0,"f":[267,435.3,279.5,473.7],"o":"v","flip":false},{"id":"44.2.0","t":0,"f":[267,473.7,279.5,512],"o":"v","flip":false},{"id":"45.0.0","t":0,"f":[279.5,397,292,435.3],"o":"v","flip":true},{"id":"45.1.0","t":0,"f":[279.5,435.3,292,473.7],"o":"v","flip":true},{"id":"45.2.0","t":0,"f":[279.5,473.7,292,512],"o":"v","flip":true},{"id":"46.0.0","t":0,"f":[215,397,227.5,435.3],"o":"v","flip":false},{"id":"46.1.0","t":0,"f":[215,435.3,227.5,473.7],"o":"v","flip":false},{"id":"46.2.0","t":0,"f":[215,473.7,227.5,512],"o":"v","flip":false},{"id":"47.0.0","t":0,"f":[227.5,397,240,435.3],"o":"v","flip":true},{"id":"47.1.0","t":0,"f":[227.5,435.3,240,473.7],"o":"v","flip":true},{"id":"47.2.0","t":0,"f":[227.5,473.7,240,512],"o":"v","flip":true},{"id":"48.0.0","t":0,"f":[351,505,388,518],"o":"h","flip":false},{"id":"49.0.0","t":0,"f":[175,405,188,443.5],"o":"v","flip":true},{"id":"49.1.0","t":0,"f":[175,443.5,188,482],"o":"v","flip":true},{"id":"50.0.0","t":0,"f":[175,506,188,545.8],"o":"v","flip":true},{"id":"50.1.0","t":0,"f":[175,545.8,188,585.5],"o":"v","flip":true},{"id":"50.2.0","t":0,"f":[175,585.5,188,625.3],"o":"v","flip":true},{"id":"50.3.0","t":0,"f":[175,625.3,188,665],"o":"v","flip":true},{"id":"51.0.0","t":0,"f":[190,675,228.8,688],"o":"h","flip":true},{"id":"51.1.0","t":0,"f":[228.8,675,267.5,688],"o":"h","flip":true},{"id":"51.2.0","t":0,"f":[267.5,675,306.3,688],"o":"h","flip":true},{"id":"51.3.0","t":0,"f":[306.3,675,345,688],"o":"h","flip":true}],"rooms":[[173,280,388,397,"Inventory office"],[325,397,388,505,"Operation"],[237,183,303,227,"Lift"],[303,152,495,227,"Emergency staircase"],[527,483,612,590,"Cargo lift"],[527,590,612,698,"Cargo lift"],[885,482,973,553,"Toilet"],[885,553,973,615,"Toilet"],[822,625,973,688,"Emergency staircase"],[612,640,730,688,"Pantry"]],"pillars":[[173,227],[373,227],[573,152],[784,164],[573,227],[773,227],[973,227],[173,494],[373,494],[573,494],[773,494],[173,688],[373,688],[573,688],[773,688],[973,688]],"deck":[[590,195,871,215],[540,241,901,267],[540,292,901,318],[540,344,901,366],[540,391,901,416],[590,442,901,464],[694,195,735,416],[590,416,640,442]],"stairs":[[556,418,590,440],[871,197,900,213]],"bounds":[173,150,973,690]};
+const ICON={"box": "<svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M21 8 12 3 3 8v8l9 5 9-5z\"/><path d=\"M3 8l9 5 9-5M12 13v8\"/></svg>", "ok": "<svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><circle cx=\"12\" cy=\"12\" r=\"9\"/><path d=\"m8 12 3 3 5-6\"/></svg>", "warn": "<svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M12 3 2 20h20z\"/><path d=\"M12 10v4M12 17h.01\"/></svg>", "alert": "<svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><circle cx=\"12\" cy=\"12\" r=\"9\"/><path d=\"M12 7v6M12 16h.01\"/></svg>", "search": "<svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><circle cx=\"11\" cy=\"11\" r=\"7\"/><path d=\"m20 20-3.5-3.5\"/></svg>"};
+const STATUS={empty:'#34c38f',low:'#3b82f6',mid:'#f5b301',full:'#ef4444',mark:'#a855f7'};
+let VIEW='3d';try{VIEW=localStorage.getItem('pg-view')||'3d'}catch(e){}
+let PLAN=null,mapRack=null;
+const rackOfCode=code=>{const b=BINS.get(code);return b?RACKS.find(r=>r.c===b.rack):null};
+function rackUse(r){let used=0,q=0;const tot=r.l*r.n;for(let l=1;l<=r.l;l++)for(let b=1;b<=r.n;b++){const x=binQty(`${r.c}-L${l}-${b}`);if(x){used++;q+=x}}return {used,tot,q}}
+function useColor(u){if(!u.used)return STATUS.empty;const p=u.used/u.tot;return p>=0.9?STATUS.full:p>=0.5?STATUS.mid:STATUS.low}
+function inkFor(hex){const h=hex.replace('#','');const n=parseInt(h.length===3?h.split('').map(c=>c+c).join(''):h,16);const r=n>>16&255,g=n>>8&255,b=n&255;return (r*299+g*587+b*114)/1000>150?'#1b2229':'#ffffff'}
+function Plan2D(host,onRack){
+  const B=PLAN_DATA.bounds,PAD=14;let floor=0,mode='fill',vb=null,sel=new Set(),hlR=new Set(),cur=null;
+  const fitBox=()=>[B[0]-PAD,B[1]-PAD,B[2]-B[0]+PAD*2,B[3]-B[1]+PAD*2];
+  host.innerHTML='<svg xmlns="http://www.w3.org/2000/svg" style="width:100%;height:100%;display:block;touch-action:none;user-select:none"></svg>';
+  const svg=host.firstChild;
+  function fitAspect(b){const w=host.clientWidth||800,h=host.clientHeight||500;let [x,y,bw,bh]=b;const a=w/h;
+    if(bw/bh>a){const nh=bw/a;y-=(nh-bh)/2;bh=nh}else{const nw=bh*a;x-=(nw-bw)/2;bw=nw}return [x,y,bw,bh]}
+  function apply(){svg.setAttribute('viewBox',vb.map(v=>v.toFixed(2)).join(' '))}
+  function fit(){vb=fitAspect(fitBox());apply()}
+  function zoomTo(x1,y1,x2,y2){const m=Math.max(18,(x2-x1)*0.15,(y2-y1)*0.15);vb=fitAspect([x1-m,y1-m,x2-x1+m*2,y2-y1+m*2]);apply()}
+  function zoom(f,cx,cy){if(cx==null){cx=vb[0]+vb[2]/2;cy=vb[1]+vb[3]/2}const nw=Math.min(Math.max(vb[2]*f,60),(B[2]-B[0])*2.5);const k=nw/vb[2];
+    vb=[cx-(cx-vb[0])*k,cy-(cy-vb[1])*k,vb[2]*k,vb[3]*k];apply()}
+  function draw(){
+    const rb=new Map(RACKS.filter(r=>r.id).map(r=>[r.id,r]));const parts=[];
+    parts.push(`<rect x="${B[0]}" y="${B[1]}" width="${B[2]-B[0]}" height="${B[3]-B[1]}" fill="var(--floor)" stroke="var(--room)" stroke-width="3"/>`);
+    if(floor===1)PLAN_DATA.deck.forEach(d=>parts.push(`<rect x="${d[0]}" y="${d[1]}" width="${d[2]-d[0]}" height="${d[3]-d[1]}" fill="var(--chip)" stroke="none"/>`));
+    PLAN_DATA.rooms.forEach(r=>parts.push(`<g opacity="${floor===1?0.45:1}"><rect x="${r[0]}" y="${r[1]}" width="${r[2]-r[0]}" height="${r[3]-r[1]}" fill="var(--chip)" stroke="var(--line)" stroke-width="1.5"/><text x="${(r[0]+r[2])/2}" y="${(r[1]+r[3])/2}" font-size="${Math.min(10,(r[2]-r[0])/8)}" fill="var(--muted)" text-anchor="middle" dominant-baseline="middle" font-weight="600">${esc(r[4])}</text></g>`));
+    PLAN_DATA.stairs.forEach(s=>parts.push(`<rect x="${Math.min(s[0],s[2])}" y="${s[1]}" width="${Math.abs(s[2]-s[0])}" height="${s[3]-s[1]}" fill="#2f5fa8" opacity=".7"/><text x="${(s[0]+s[2])/2}" y="${(s[1]+s[3])/2}" font-size="7" fill="#fff" text-anchor="middle" dominant-baseline="middle">Tangga</text>`));
+    PLAN_DATA.pillars.forEach(([x,y])=>parts.push(`<rect x="${x-9}" y="${y-9}" width="18" height="18" fill="var(--room)"/>`));
+    PLAN_DATA.racks.filter(p=>p.t===floor).forEach(p=>{const r=rb.get(p.id);if(!r)return;const [x1,y1,x2,y2]=p.f;const w=x2-x1,h=y2-y1;
+      let fill,tip;
+      if(mode==='edit'){fill=sel.has(p.id)?'#ffd43b':rowColor(r.r);tip=`${r.c} · row ${r.r} · ${r.l} tingkat × ${r.n} bin`}
+      else{const u=rackUse(r);fill=useColor(u);tip=`${r.c} · ${u.used}/${u.tot} bin diguna · ${fmt(u.q)} helai`}
+      const isCur=mode!=='edit'&&cur===p.id,isHl=mode!=='edit'&&hlR.has(p.id);const strong=isCur||isHl;
+      const stroke=isCur?'#ffffff':isHl?STATUS.mark:'rgba(0,0,0,.35)';
+      const vert=h>w,len=vert?h:w,dep=vert?w:h;const fs=Math.max(3,Math.min(dep*0.62,len/(r.c.length*0.62)));
+      const cx=(x1+x2)/2,cy=(y1+y2)/2;
+      parts.push(`<g data-rid="${p.id}" style="cursor:pointer"><title>${esc(tip)}</title><rect x="${x1+0.4}" y="${y1+0.4}" width="${w-0.8}" height="${h-0.8}" rx="1" fill="${fill}" stroke="${stroke}" stroke-width="${strong?2.4:0.6}"/>`+
+        `<text x="${cx}" y="${cy}" font-size="${fs.toFixed(1)}" font-weight="700" fill="${inkFor(fill)}" text-anchor="middle" dominant-baseline="central"${vert?` transform="rotate(-90 ${cx} ${cy})"`:''} style="pointer-events:none;font-family:var(--display)">${esc(r.c)}</text></g>`)});
+    svg.innerHTML=parts.join('')}
+  // pan / pinch / wheel
+  const pts=new Map();let moved=0,start=null,pinch=null;
+  const toSvg=(cx,cy)=>{const b=svg.getBoundingClientRect();return [vb[0]+(cx-b.left)/b.width*vb[2],vb[1]+(cy-b.top)/b.height*vb[3]]};
+  svg.addEventListener('pointerdown',e=>{svg.setPointerCapture(e.pointerId);pts.set(e.pointerId,[e.clientX,e.clientY]);moved=0;start={x:e.clientX,y:e.clientY,vb:[...vb],t:e.target};
+    if(pts.size===2){const [a,b]=[...pts.values()];pinch={d:Math.hypot(a[0]-b[0],a[1]-b[1]),vb:[...vb],c:toSvg((a[0]+b[0])/2,(a[1]+b[1])/2)}}});
+  svg.addEventListener('pointermove',e=>{if(!pts.has(e.pointerId))return;pts.set(e.pointerId,[e.clientX,e.clientY]);const bb=svg.getBoundingClientRect();
+    if(pts.size===2&&pinch){const [a,b]=[...pts.values()];const d=Math.hypot(a[0]-b[0],a[1]-b[1]);const k=pinch.d/d;vb=[...pinch.vb];zoom(k,pinch.c[0],pinch.c[1]);moved=99;return}
+    if(pts.size===1&&start){const dx=e.clientX-start.x,dy=e.clientY-start.y;moved=Math.max(moved,Math.hypot(dx,dy));if(moved>4){vb=[start.vb[0]-dx/bb.width*start.vb[2],start.vb[1]-dy/bb.height*start.vb[3],start.vb[2],start.vb[3]];apply()}}});
+  const up=e=>{if(!pts.has(e.pointerId))return;pts.delete(e.pointerId);if(pts.size<2)pinch=null;
+    if(!pts.size&&moved<=4&&start){const g=start.t.closest&&start.t.closest('[data-rid]');if(g)onRack(g.dataset.rid)}if(!pts.size)start=null};
+  svg.addEventListener('pointerup',up);svg.addEventListener('pointercancel',e=>{pts.delete(e.pointerId);pinch=null;start=null});
+  svg.addEventListener('wheel',e=>{e.preventDefault();const [x,y]=toSvg(e.clientX,e.clientY);zoom(e.deltaY>0?1.15:1/1.15,x,y)},{passive:false});
+  const ro=new ResizeObserver(()=>{if(vb){const c=[vb[0]+vb[2]/2,vb[1]+vb[3]/2];const nb=fitAspect([c[0]-vb[2]/2,c[1]-vb[3]/2,vb[2],vb[3]]);vb=nb;apply()}});ro.observe(host);
+  fit();draw();
+  const bboxOf=ids=>{const ps=PLAN_DATA.racks.filter(p=>ids.includes(p.id)&&p.t===floor);if(!ps.length)return null;
+    return [Math.min(...ps.map(p=>p.f[0])),Math.min(...ps.map(p=>p.f[1])),Math.max(...ps.map(p=>p.f[2])),Math.max(...ps.map(p=>p.f[3]))]};
+  return {toWorld:(cx,cy)=>{const b=svg.getBoundingClientRect();if(cx<b.left||cx>b.right||cy<b.top||cy>b.bottom)return null;const [px,py]=toSvg(cx,cy);return [(px-573)*0.05,(py-420)*0.05]},draw,fit,zoom,setFloor(f){if(floor!==f){floor=f;draw()}},getFloor:()=>floor,setMode(m){mode=m;draw()},setSel(keys){sel=new Set(keys);draw()},
+    setHL(ids,c){hlR=new Set(ids||[]);cur=c||null;draw()},
+    focus(ids){const fl=PLAN_DATA.racks.find(p=>ids.includes(p.id));if(!fl)return;if(fl.t!==floor){floor=fl.t;draw()}const b=bboxOf(ids);if(b)zoomTo(...b)},
+    floorOf:id=>{const p=PLAN_DATA.racks.find(x=>x.id===id);return p?p.t:null},
+    dispose(){ro.disconnect();host.innerHTML=''}}
+}
+// front view of one rack: levels top to bottom, bins left to right
+function rackGrid(r,{pick,hl}={}){
+  let h=`<div style="display:grid;grid-template-columns:auto repeat(${r.n},minmax(0,1fr));gap:3px;font-size:12px">`;
+  for(let l=r.l;l>=1;l--){h+=`<div class="muted" style="align-self:center;padding-right:4px;font-weight:600">L${l}</div>`;
+    for(let b=1;b<=r.n;b++){const code=`${r.c}-L${l}-${b}`;const q=binQty(code);const f=fillLevel(code);
+      const bg={empty:'color-mix(in srgb,var(--s-empty) 22%,var(--panel2))',low:STATUS.low,mid:STATUS.mid,full:STATUS.full}[f];const ink=f==='empty'?'var(--s-empty)':(f==='mid'?'#1b2229':'#fff');
+      const ring=code===pick?'outline:3px solid var(--fg);outline-offset:1px;':(hl&&hl.includes(code)?'outline:3px solid #a855f7;outline-offset:1px;':'');
+      h+=`<button data-bin="${esc(code)}" title="${esc(code)}" style="${ring}background:${bg};color:${ink};border:0;border-radius:5px;padding:6px 0;min-height:38px;font:600 12px var(--body);cursor:pointer;line-height:1.1">${b}<br><span style="font-weight:700">${q||''}</span></button>`}}
+  return h+`</div><div class="small muted" style="margin-top:6px">Nombor atas = bin, nombor bawah = helai. Tingkat paling atas di atas.</div>`}
+
+// ---------- rack settings (visual) ----------
+function askInline(el,text,yes){el.innerHTML=`<div class="card" style="margin:6px 0 0;border-color:var(--warn)"><div style="white-space:pre-line">${esc(text)}</div><div class="row" style="margin-top:8px"><button class="btn pri" data-y>Ya, teruskan</button><button class="btn" data-n>Batal</button></div></div>`;
+  el.querySelector('[data-y]').onclick=()=>{el.innerHTML='';yes()};el.querySelector('[data-n]').onclick=()=>{el.innerHTML=''}}
+let rakSelK=[],rakMulti=false,rakMsg='';
+const RK=k=>RACKS.find(r=>r.k===k);
+const rackQty=r=>{let q=0;for(let l=1;l<=r.l;l++)for(let b=1;b<=r.n;b++)q+=binQty(`${r.c}-L${l}-${b}`);return q};
+function rackStock(c,l,n){const r=RACKS.find(x=>x.c===c);if(!r)return [];const out=[];for(let lv=1;lv<=r.l;lv++)for(let b=1;b<=r.n;b++){if(lv<=l&&b<=n)continue;const code=`${c}-L${lv}-${b}`;const q=binQty(code);if(q)out.push(`${code} (${q})`)}return out}
+const codeOk=c=>/^[A-Z0-9][A-Z0-9-]{0,14}$/.test(c);
+const natSort=(a,b)=>String(a).localeCompare(String(b),undefined,{numeric:true});
+function rakToggle(k){rakMsg='';if(rakMulti){const i=rakSelK.indexOf(k);if(i>=0)rakSelK.splice(i,1);else rakSelK.push(k)}
+  else rakSelK=(rakSelK.length===1&&rakSelK[0]===k)?[]:[k];
+  if(MAP)MAP.setSel(rakSelK.filter(x=>!x.includes(':')));renderRak()}
+function cfgClone(){return {edit:JSON.parse(JSON.stringify(RACK_CFG.edit)),add:JSON.parse(JSON.stringify(RACK_CFG.add))}}
+// write the target racks' final state into cfg (diff against the original layout)
+function putRack(cfg,oldR,newR){
+  if(oldR.added){delete cfg.add[oldR.c];cfg.add[newR.c]={r:newR.r,f:newR.f,l:newR.l,n:newR.n};return}
+  const base=RACKS_BASE.find(x=>x.k===oldR.k);if(!base)return;const d={};
+  ['c','r','l','n'].forEach(f=>{if(newR[f]!==base[f])d[f]=newR[f]});delete cfg.edit[base.c];
+  if(Object.keys(d).length)cfg.edit[oldR.k]=d;else delete cfg.edit[oldR.k]}
+async function saveRackCfg(cfg,msg){const ok=await guarded(()=>db.doc('settings/racks').set({...cfg,by:who.value.trim()||'Tanpa nama',at:Date.now()}),msg);
+  if(ok){applyRackCfg(cfg);rakSelK=rakSelK.filter(k=>RK(k));if(MAP){MAP.dispose();MAP=null}rakMsg='✓ '+msg;render()}return ok}
+function renderRak(){main.className='';ensureMap(true);
+  const rows=[...new Set(RACKS.map(r=>r.r))].sort(natSort);
+  const T=rakSelK.map(RK).filter(Boolean);const one=T.length===1?T[0]:null;
+  const same=f=>T.length&&T.every(r=>r[f]===T[0][f])?T[0][f]:'';
+  const off=RACKS.filter(r=>!r.id).sort((a,b)=>natSort(a.c,b.c));
+  const nEdit=Object.keys(RACK_CFG.edit).length,nAdd=Object.keys(RACK_CFG.add).length;
+  const tq=T.reduce((a,r)=>a+rackQty(r),0);
+  main.innerHTML=`<section class="card"><h2>Rak dipilih${T.length?` (${T.length})`:''}</h2>
+    ${!T.length?`<p class="small muted">Klik rak dalam peta untuk pilih. Tekan <b>Pilih banyak</b> di atas peta untuk pilih beberapa rak, atau klik nama row di bawah untuk pilih satu row.</p>`:`
+    <div class="chips">${T.map(r=>`<span>${esc(r.c)}</span>`).join('')}</div>
+    <p class="small muted" style="margin:6px 0 0">${T.map(r=>r.f===2?'Level M':'Ground floor').filter((v,i,a)=>a.indexOf(v)===i).join(' / ')} · ${fmt(tq)} helai dalam rak ini${T.some(r=>!r.id)?' · ada rak tiada dalam peta 3D':''}</p>
+    <div class="fgrid">
+      ${one?`<label for="ec">Kod rak</label><input id="ec" value="${esc(one.c)}" autocomplete="off">`:
+      `<span>Kod rak</span><label class="row small"><input type="checkbox" id="eren"> Tukar kod ikut urutan klik</label>
+       <span></span><div class="row" id="erenw" hidden><input id="epre" value="${esc(same('r')||T[0].r)}" style="width:90px" aria-label="Awalan kod"><input id="estart" type="number" min="0" value="1" style="width:80px" aria-label="Nombor mula"><span class="small muted" id="eprev"></span></div>`}
+      <label for="er">Row</label><div class="row"><select id="er" class="grow">${one?'':'<option value="">(kekal)</option>'}${rows.map(r=>`<option${(one&&one.r===r)||(!one&&same('r')===r&&false)?' selected':''}>${esc(r)}</option>`).join('')}<option value="__new">Row baru…</option></select><input id="ern" placeholder="Nama row" hidden style="width:120px"></div>
+      <label for="el">Tingkat</label><input id="el" type="number" min="1" max="12" value="${same('l')}" placeholder="${T.length>1?'(kekal – berbeza)':''}">
+      <label for="en">Bin / tingkat</label><input id="en" type="number" min="1" max="20" value="${same('n')}" placeholder="${T.length>1?'(kekal – berbeza)':''}">
+    </div>
+    <div class="row" style="margin-top:10px"><button class="btn pri" id="esave">Simpan</button><button class="btn" id="eclr">Kosongkan pilihan</button>
+      ${T.some(r=>!r.added&&RACK_CFG.edit[r.k])?'<button class="btn" id="ereset">Kembali asal</button>':''}${T.every(r=>r.added)?'<button class="btn" id="edel">Padam rak</button>':''}</div>`}
+    <div id="emsg" class="small" style="margin-top:6px">${rakMsg?esc(rakMsg):''}</div>
+  </section>
+  <section class="card"><h2>Row</h2><p class="small muted" style="margin:0 0 6px">Klik row untuk pilih semua rak dalam row tu.</p><div class="rowlist">
+    ${rows.map(row=>{const rs=RACKS.filter(r=>r.r===row);return `<button class="rowbtn" data-row="${esc(row)}"><span class="sw" style="background:${esc(rowColor(row))}">${esc(row)}</span><span>${rs.length} rak</span><span class="meta">${fmt(rs.reduce((a,r)=>a+r.l*r.n,0))} bin</span></button>`}).join('')}
+  </div></section>
+  <section class="card"><h2>Rak tiada dalam peta 3D</h2>
+    ${off.length?`<div class="tbl"><table><thead><tr><th>Rak</th><th>Row</th><th class="n">Tingkat × bin</th><th class="n">Helai</th></tr></thead><tbody>
+      ${off.map(r=>`<tr><td><a href="#" data-k="${esc(r.k)}">${esc(r.c)}</a>${r.added?' <span class="pill">baru</span>':''}</td><td>${esc(r.r)}</td><td class="n">${r.l} × ${r.n}</td><td class="n">${fmt(rackQty(r))}</td></tr>`).join('')}</tbody></table></div>
+      <p class="small muted">Rak ini ada dalam report atau ditambah sendiri, tapi belum ada kedudukan dalam peta. Kalau satu rak dalam peta sebenarnya rak ini, klik rak tu dalam peta dan tukar kodnya. Stok akan terus nampak di situ.</p>`:'<p class="small muted">Tiada.</p>'}
+    <h3 style="margin:14px 0 6px;font-size:15px">Tambah rak baru</h3>
+    <div class="row"><input id="ac" placeholder="Kod rak (cth 1-E14)" style="width:150px" autocomplete="off">
+      <select id="ar">${rows.map(r=>`<option>${esc(r)}</option>`).join('')}<option value="__new">Row baru…</option></select>
+      <input id="arn" placeholder="Nama row baru" hidden style="width:130px">
+      <select id="af"><option value="1">Ground floor</option><option value="2">Level M</option></select></div>
+    <div class="row" style="margin-top:8px"><label>Tingkat <input id="al" type="number" min="1" max="12" value="6" style="width:72px"></label>
+      <label>Bin <input id="an" type="number" min="1" max="20" value="8" style="width:72px"></label><button class="btn pri" id="ago">Tambah</button></div>
+    <div id="amsg" class="small"></div>
+    <p class="small muted">Rak baru terus boleh guna untuk simpan barang, cari dan stock check. Beritahu Claude di mana rak tu supaya dilukis dalam peta.</p>
+  </section>
+  ${nEdit||nAdd?`<p class="small muted">${nEdit} rak diubah dan ${nAdd} rak ditambah sejak susun atur asal.</p>`:''}`;
+  // events
+  main.querySelectorAll('[data-row]').forEach(b=>b.onclick=()=>{rakMsg='';rakSelK=RACKS.filter(r=>r.r===b.dataset.row).sort((a,b2)=>natSort(a.c,b2.c)).map(r=>r.k);{const rs=RACKS.filter(r=>r.r===b.dataset.row&&r.id);if(rs.length){const fl=rs.some(x=>x.f===1)?1:2;setTierBtn(fl===2?'up':'lo');if(MAP)MAP.setTier(fl===2?'up':'lo');if(PLAN)PLAN.focus(rs.filter(x=>x.f===fl).map(x=>x.id))}}if(MAP)MAP.setSel(rakSelK.filter(k=>!k.includes(':')));renderRak()});
+  main.querySelectorAll('[data-k]').forEach(a=>a.onclick=e=>{e.preventDefault();rakToggle(a.dataset.k)});
+  const ar=$('#ar');ar.onchange=()=>{$('#arn').hidden=ar.value!=='__new'};
+  $('#ac').oninput=()=>{const v=$('#ac').value.trim().toUpperCase();const m=rows.filter(r=>v.startsWith(r)&&/^\d/.test(v.slice(r.length))).sort((x,y)=>y.length-x.length)[0];if(m){ar.value=m;$('#arn').hidden=true}};
+  $('#ago').onclick=async()=>{const c=$('#ac').value.trim().toUpperCase().replace(/\s+/g,'');const row=ar.value==='__new'?$('#arn').value.trim():ar.value;
+    const f=+$('#af').value,l=+$('#al').value,n=+$('#an').value;const msg=t=>$('#amsg').innerHTML=`<span style="color:var(--bad)">${esc(t)}</span>`;
+    if(!codeOk(c))return msg('Kod rak tak sah. Guna huruf, nombor dan "-" sahaja (cth 1-E14).');
+    if(RACKS.some(r=>r.c===c&&!r.orphan))return msg(`Kod ${c} sudah ada.`);if(!row)return msg('Isi nama row.');if(!(l>=1&&l<=12&&n>=1&&n<=20))return msg('Tingkat mesti 1–12 dan bin 1–20.');
+    const cfg=cfgClone();cfg.add[c]={r:row,f,l,n};rakSelK=['a:'+c];await saveRackCfg(cfg,`Rak ${c} ditambah`)};
+  if(!T.length)return;
+  const er=$('#er');er.onchange=()=>{$('#ern').hidden=er.value!=='__new'};
+  const eren=$('#eren');
+  const prev=()=>{const p=$('#epre').value.trim().toUpperCase(),s0=+$('#estart').value||0;$('#eprev').textContent=`${p}${s0} … ${p}${s0+T.length-1}`};
+  if(eren){eren.onchange=()=>{$('#erenw').hidden=!eren.checked;prev()};$('#epre').oninput=prev;$('#estart').oninput=prev}
+  $('#eclr').onclick=()=>{rakSelK=[];rakMsg='';if(MAP)MAP.setSel([]);renderRak()};
+  const err=t=>{rakMsg='';$('#emsg').innerHTML=`<span style="color:var(--bad)">${esc(t)}</span>`};
+  $('#esave').onclick=async()=>{
+    const lv=$('#el').value.trim(),nv=$('#en').value.trim();const l=lv?+lv:null,n=nv?+nv:null;
+    if(l!==null&&!(l>=1&&l<=12))return err('Tingkat mesti 1–12.');if(n!==null&&!(n>=1&&n<=20))return err('Bin mesti 1–20.');
+    let row=er.value==='__new'?$('#ern').value.trim():er.value;if(er.value==='__new'&&!row)return err('Isi nama row baru.');
+    const newC={};
+    if(one){const c=$('#ec').value.trim().toUpperCase().replace(/\s+/g,'');if(!codeOk(c))return err('Kod rak tak sah. Guna huruf, nombor dan "-" (cth 1-A3).');if(c!==one.c)newC[one.k]=c}
+    else if(eren&&eren.checked){const p=$('#epre').value.trim().toUpperCase(),s0=+$('#estart').value||0;T.forEach((r,i)=>newC[r.k]=p+(s0+i));if(Object.values(newC).some(c=>!codeOk(c)))return err('Awalan kod tak sah.')}
+    // proposed state
+    const prop=T.map(r=>({o:r,n:{...r,c:newC[r.k]||r.c,r:row||r.r,l:l??r.l,n:n??r.n}}));
+    const tk=new Set(T.map(r=>r.k));let swap=null;
+    const others=RACKS.filter(r=>!tk.has(r.k)&&!r.orphan&&(r.id||r.added));
+    if(one&&newC[one.k]){const y=others.find(r=>r.c===newC[one.k]);if(y){swap={o:y,n:{...y,c:one.c}}}}
+    else{const clash=others.filter(r=>Object.values(newC).includes(r.c)).map(r=>r.c);if(clash.length)return err(`Kod ini sudah digunakan rak lain: ${clash.join(', ')}. Tukar kod rak tu dulu.`)}
+    const finals=[...prop,...(swap?[swap]:[])];
+    const all=RACKS.filter(r=>!r.orphan&&(r.id||r.added)&&!finals.some(f=>f.o.k===r.k)).map(r=>r.c).concat(finals.map(f=>f.n.c));
+    const dup=all.filter((c,i)=>all.indexOf(c)!==i);if(dup.length)return err(`Kod berulang: ${[...new Set(dup)].join(', ')}.`);
+    // stock safety
+    const lost=prop.filter(p=>p.n.c===p.o.c).flatMap(p=>rackStock(p.o.c,p.n.l,p.n.n));
+    if(lost.length)return err(`Tak boleh simpan. Bin ini masih ada barang dan akan hilang: ${lost.slice(0,10).join(', ')}${lost.length>10?' …':''}. Pindahkan barang dulu.`);
+    const moved=finals.filter(f=>f.n.c!==f.o.c&&rackQty(f.o)>0);
+    const commit=async()=>{
+    const cfg=cfgClone();finals.forEach(f=>putRack(cfg,f.o,f.n));
+    rakSelK=finals.filter(f=>tk.has(f.o.k)).map(f=>f.o.added?'a:'+f.n.c:f.o.k);
+    await saveRackCfg(cfg,(T.length>1?`${T.length} rak dikemas kini`:`Rak ${prop[0].n.c} dikemas kini`)+(swap?`. Rak yang dulu berkod ${swap.o.c} sekarang ${swap.n.c}`:''))};
+    if(moved.length)askInline($('#emsg'),`Barang ikut kod bin, bukan kedudukan dalam peta.\n\n${moved.map(f=>`Stok ${f.o.c} (${fmt(rackQty(f.o))} helai) kekal dengan kod ${f.o.c}, tak ikut rak yang ditukar kod`).join('\n')}\n\nTeruskan?`.replace('\n\nTeruskan?',''),commit);else commit()};
+  const rr=$('#ereset');if(rr)rr.onclick=async()=>{const cfg=cfgClone();const tgt=T.filter(r=>!r.added);
+    const lost=tgt.flatMap(r=>{const b=RACKS_BASE.find(x=>x.k===r.k);return b&&b.c===r.c?rackStock(r.c,b.l,b.n):[]});
+    if(lost.length)return err(`Bin ini masih ada barang: ${lost.slice(0,10).join(', ')}. Pindahkan dulu.`);
+    tgt.forEach(r=>{delete cfg.edit[r.k]});
+    const test=RACKS.filter(r=>!r.orphan&&(r.id||r.added)).map(r=>{if(!tgt.some(t=>t.k===r.k))return r.c;return RACKS_BASE.find(x=>x.k===r.k).c});
+    const dup=test.filter((c,i)=>test.indexOf(c)!==i);if(dup.length)return err(`Tak boleh kembali asal: kod ${[...new Set(dup)].join(', ')} sedang digunakan rak lain.`);
+    await saveRackCfg(cfg,`${tgt.length} rak kembali asal`)};
+  const ed=$('#edel');if(ed)ed.onclick=async()=>{const st2=T.filter(r=>rackQty(r)>0);if(st2.length)return err(`Rak ini masih ada barang: ${st2.map(r=>r.c).join(', ')}. Pindahkan dulu.`);
+    askInline($('#emsg'),`Padam ${T.map(r=>r.c).join(', ')}?`,async()=>{const cfg=cfgClone();T.forEach(r=>delete cfg.add[r.c]);rakSelK=[];await saveRackCfg(cfg,`${T.length} rak dipadam`)})};
+}
+
+// ---------- weekly random check ----------
+function weekId(d=new Date()){const t=new Date(Date.UTC(d.getFullYear(),d.getMonth(),d.getDate()));const day=t.getUTCDay()||7;t.setUTCDate(t.getUTCDate()+4-day);const y=new Date(Date.UTC(t.getUTCFullYear(),0,1));return t.getUTCFullYear()+'-W'+pad(Math.ceil(((t-y)/864e5+1)/7))}
+function seeded(seed){let h=2166136261;for(const ch of seed)h=Math.imul(h^ch.charCodeAt(0),16777619);return()=>{h+=0x6D2B79F5;let t=h;t=Math.imul(t^t>>>15,t|1);t^=t+Math.imul(t^t>>>7,t|61);return((t^t>>>14)>>>0)/4294967296}}
+// ---------- rendering ----------
+const main=$('#main');
+function render(){document.querySelectorAll('nav button').forEach(b=>b.setAttribute('aria-selected',b.dataset.tab===tab));
+  const q=Object.keys(st.queue).length;$('#bq').hidden=!q;$('#bq').textContent=q;
+  if(!st.ready.m){main.className='';main.innerHTML='<div class="card"><p class="empty">Memuatkan data stok…</p></div>';return}
+  const SUB={peta:'Peta Gudang · lokasi dan penggunaan bin',check:'Stock Check · kiraan stok',cari:'Cari Bin · cari SKU atau lokasi',xfer:'Transfer Bin · cadangan susunan untuk senang pick',upload:'Upload Stok · kemas kini data',cap:'Kapasiti Bin · helai setiap bin',rak:'Tetapan Rak · susun atur dan kod rak',masuk:'Barang masuk',pindah:'Cadangan pindah'};$('#subtitle').textContent=SUB[tab]||'';
+  $('#mapwrap').hidden=false;$('#wrap').classList.add('side');$('#wrap').classList.toggle('compact',tab!=='peta'&&tab!=='rak');
+  document.documentElement.style.setProperty('--hdr',document.querySelector('header').offsetHeight+'px');
+  ({xfer:window.renderXfer,cap:window.renderCap,rak:renderRak,peta:renderPeta,masuk:renderMasuk,pindah:renderPindah,check:window.renderCheck,cari:window.renderCari,upload:window.renderUpload}[tab])()}
+document.querySelectorAll('nav button').forEach(b=>b.onclick=()=>{if(tab!==b.dataset.tab){mapRack=null;mapPicked=null;mapHL=[];locQuiet=false;window.scrollTo(0,0)}tab=b.dataset.tab;try{localStorage.setItem('pg-tab',tab)}catch(e){}render()});
+const skuOptions=()=>`<datalist id="skus">${Object.keys(st.master).slice(0,4000).map(k=>`<option value="${esc(k)}">`).join('')}</datalist>`;
+function sugHTML(s,qty,sg){return `<div class="list">${sg.out.map(o=>`<div class="sug"><span class="code">${esc(o.code)}</span> · <b>${fmt(o.qty)}</b> helai<div class="small muted">${esc(o.why)} · ${binItems(o.code).length?`ada ${fmt(binQty(o.code))}/${binCap(o.code)}`:'kosong'}</div></div>`).join('')}${sg.left>0?`<div class="pill bad">Tiada bin untuk ${fmt(sg.left)} helai lagi</div>`:''}</div>`}
+function skuLine(s){return `<div class="t">${esc(s.sku)}</div><div class="small muted">${esc(s.desc)}</div><div class="row small"><span class="pill">${esc(s.cat)}</span><span class="pill">${esc(s.size)}</span><span class="pill">${esc(s.brand)}</span>${s.kol?`<span class="pill">Koleksi ${esc(s.kol)}</span>`:''}${isCekak(s)?'<span class="pill">Cekak Musang · maks 30</span>':''}</div>`}
+
+let _hlKey='',locQuiet=false;
+function tabHL(){if(tab==='check'&&chkSel&&st.checks[chkSel])return st.checks[chkSel].bins;if(tab==='xfer'&&xPlan)return xPlan.used;return mapHL}
+function curTier(){return (document.querySelector('.mtools [aria-pressed="true"][data-t]')||{}).dataset?.t||'lo'}
+function setTierBtn(t){document.querySelectorAll('.mtools [data-t]').forEach(x=>x.setAttribute('aria-pressed',x.dataset.t===t))}
+function mapClickRack(rid){locQuiet=false;if(tab==='rak'){rakToggle(rid);return}const r=RACKS.find(x=>x.id===rid);if(!r)return;mapRack=r.c;mapPicked=null;render()}
+function openOnMap(code,noRender){const r=rackOfCode(code);if(!r)return;mapRack=r.c;mapPicked=code;if(r.id){setTierBtn(r.f===2?'up':'lo');if(PLAN&&VIEW==='2d')PLAN.focus([r.id]);if(MAP&&VIEW==='3d'){MAP.setTier(r.f===2?'up':'lo');MAP.pick(code);MAP.focus(code)}}if(!noRender)render()}
+// selected rack / bin card, shown on top of whichever panel is open
+function locCardsHTML(){let pick='';const SC={empty:'var(--s-empty)',low:'var(--s-low)',mid:'var(--s-mid)',full:'var(--s-full)'},SL={empty:'Kosong',low:'Bawah 50%',mid:'50–89%',full:'Penuh'};
+  const badge=(c,q,cap)=>{const f=fillLevel(c);return `<span class="badge2" style="background:color-mix(in srgb,${SC[f]} 22%,transparent);color:${SC[f]}">${q>cap?'Lebih kapasiti':SL[f]}</span>`};
+  if(mapPicked&&BINS.get(mapPicked)){const b=BINS.get(mapPicked),it=binItems(mapPicked),q=binQty(mapPicked),cap=binCap(mapPicked);
+    pick=`<section class="card"><div class="pickhd"><h2>${esc(mapPicked)}</h2>${badge(mapPicked,q,cap)}</div>
+      <div class="small muted">Row ${esc(b.row)} · ${b.floor===2?'Level M':'Ground floor'} · <b style="color:var(--fg)">${fmt(q)} / ${cap}</b> helai${it.length?' · '+Math.round(q/cap*100)+'% penuh':''}</div>
+      <div class="tbl"><table><thead><tr><th>SKU</th><th>Warna · saiz</th><th class="n">Qty</th></tr></thead><tbody>${it.map(([k,n])=>`<tr><td><span class="code">${esc(k)}</span></td><td>${esc(sku(k)?.col||'')} · ${esc(sku(k)?.size||'')}</td><td class="n">${n}</td></tr>`).join('')||'<tr><td colspan="3" class="empty">Bin kosong</td></tr>'}</tbody></table></div></section>`}
+  const rk=mapRack&&RACKS.find(r=>r.c===mapRack);if(!rk)return pick;const u=rackUse(rk);
+  return `<section class="card"><div class="pickhd"><h2>Rak ${esc(rk.c)}</h2><span class="pill">Row ${esc(rk.r)}</span><span class="pill">${rk.f===2?'Level M':'Ground floor'}</span><button class="btn" data-rkclose>Tutup</button></div>
+    <div class="small muted">${u.used} / ${u.tot} bin diguna · ${u.tot-u.used} kosong · ${fmt(u.q)} helai${rk.id?'':' · tiada dalam peta'}</div>${rackGrid(rk,{pick:mapPicked,hl:tabHL()})}</section>${pick}`}
+function bindLocCards(root){root.querySelectorAll('[data-rkclose]').forEach(b=>b.onclick=()=>{mapRack=null;mapPicked=null;render()});
+  root.querySelectorAll('[data-bin]').forEach(b=>b.onclick=()=>{mapPicked=b.dataset.bin;if(MAP)MAP.pick(mapPicked);render()})}
+function walkUI(){const on=!!(MAP&&MAP.walk.on())&&VIEW==='3d';$('#walkpad').hidden=!on;$('#mwalk').setAttribute('aria-pressed',on);$('#mwalk').querySelector('span').textContent=on?'Keluar mod jalan':'Letak orang';
+  $('#mtop').hidden=on||VIEW!=='3d';if(on)$('#wfloor').textContent=MAP.walk.getFloor()===1?'Turun ke Ground floor':'Naik ke Level M'}
+function ensureMap(edit){
+  const v=VIEW;
+  document.querySelectorAll('.mtools [data-v]').forEach(b=>b.setAttribute('aria-pressed',b.dataset.v===v));
+  document.querySelectorAll('.mtools button,.mtools .grp').forEach(b=>{const d=b.dataset;b.hidden=(d['3d']!==undefined&&v!=='3d')||(d['2d']!==undefined&&v!=='2d')||(d.edit!==undefined&&!edit)||(d.fill!==undefined&&edit)||(d.hl!==undefined&&(!mapHL.length||tab==='check'||tab==='xfer'))});
+  if(v==='2d'&&curTier()==='all')setTierBtn('lo');
+  $('#legedit').hidden=!edit;$('#legfill').hidden=edit;
+  $('#legnote').textContent=v==='2d'?'Warna rak ikut bin diguna:':'';
+  $('#plan2d').hidden=v!=='2d';
+  // wire the toolbar once
+  if(!ensureMap.wired){ensureMap.wired=true;
+    document.querySelectorAll('.mtools [data-v]').forEach(b=>b.onclick=()=>{VIEW=b.dataset.v;try{localStorage.setItem('pg-view',VIEW)}catch(e){}
+      if(VIEW==='2d'&&MAP){MAP.dispose();MAP=null}render()});
+    document.querySelectorAll('.mtools [data-t]').forEach(b=>b.onclick=()=>{setTierBtn(b.dataset.t);if(MAP)MAP.setTier(b.dataset.t);if(PLAN)PLAN.setFloor(b.dataset.t==='up'?1:0);(tab==='rak'?renderRak:renderPeta)()});
+    $('#zin').onclick=()=>PLAN&&PLAN.zoom(1/1.4);$('#zout').onclick=()=>PLAN&&PLAN.zoom(1.4);$('#mreset').onclick=()=>{if(VIEW==='2d'){if(PLAN)PLAN.fit()}else if(MAP){if(MAP.walk.on()){MAP.walk.stop();walkUI()}MAP.view(false)}};
+    // "drop a person" like a street map: drag the person onto the map, or tap it then tap the map
+    const peg=$('#mwalk');let drag=null,ghost=null,pegging=false;
+    const setPegging=on=>{pegging=on;$('#pegtip').hidden=!on;$('#map').classList.toggle('pegging',on)};
+    const dropAt=(cx,cy)=>{const fl=curTier()==='up'?1:0;
+      if(VIEW==='2d'){const w=PLAN&&PLAN.toWorld(cx,cy);if(!w)return false;VIEW='3d';try{localStorage.setItem('pg-view','3d')}catch(e){}render();if(!MAP)return false;MAP.walk.atWorld(w[0],w[1],fl);walkUI();return true}
+      if(!MAP)return false;const ok=MAP.walk.atScreen(cx,cy,fl);walkUI();return ok};
+    peg.addEventListener('pointerdown',e=>{if(MAP&&MAP.walk.on())return;drag={x:e.clientX,y:e.clientY,moved:false};peg.setPointerCapture(e.pointerId)});
+    peg.addEventListener('pointermove',e=>{if(!drag)return;if(!drag.moved&&Math.hypot(e.clientX-drag.x,e.clientY-drag.y)>6){drag.moved=true;ghost=document.createElement('div');ghost.id='pegghost';ghost.innerHTML=peg.querySelector('svg').outerHTML;document.body.appendChild(ghost)}
+      if(ghost){ghost.style.left=e.clientX+'px';ghost.style.top=e.clientY+'px'}});
+    peg.addEventListener('pointerup',e=>{const d=drag;drag=null;if(ghost){ghost.remove();ghost=null}if(!d)return;if(d.moved){peg._skip=true;setPegging(false);dropAt(e.clientX,e.clientY)}});
+    peg.addEventListener('pointercancel',()=>{drag=null;if(ghost){ghost.remove();ghost=null}});
+    peg.onclick=()=>{if(peg._skip){peg._skip=false;return}if(MAP&&MAP.walk.on()){MAP.walk.stop();walkUI();return}setPegging(!pegging)};
+    $('#pegx').onclick=()=>setPegging(false);
+    $('#map').addEventListener('pointerdown',e=>{if(!pegging||e.target.closest('.mfloat,#pegtip,#walkpad'))return;e.stopPropagation();e.preventDefault();setPegging(false);dropAt(e.clientX,e.clientY)},true);
+    window.addEventListener('keydown',e=>{if(e.key==='Escape'&&pegging)setPegging(false)});
+    document.querySelectorAll('#walkpad [data-w]').forEach(b=>{const k=b.dataset.w;const on=e=>{e.preventDefault();if(MAP)MAP.walk.pad[k]=true};const off=()=>{if(MAP)MAP.walk.pad[k]=false};
+      b.addEventListener('pointerdown',on);b.addEventListener('pointerup',off);b.addEventListener('pointerleave',off);b.addEventListener('pointercancel',off);b.addEventListener('contextmenu',e=>e.preventDefault())});
+    $('#wfloor').onclick=()=>{if(!MAP)return;MAP.walk.floor(MAP.walk.getFloor()===1?0:1);walkUI()};
+    $('#mtop').onclick=()=>MAP&&MAP.view(true);
+    $('#mclr').onclick=()=>{mapHL=[];if(MAP)MAP.highlight([]);if(PLAN)PLAN.setHL([],null);render()};
+    $('#mmulti').onclick=()=>{rakMulti=!rakMulti;$('#mmulti').setAttribute('aria-pressed',rakMulti)};
+    $('#mcodes').onclick=()=>{const on=$('#mcodes').getAttribute('aria-pressed')!=='true';$('#mcodes').setAttribute('aria-pressed',on);if(MAP)MAP.setCodes(on)}}
+  const selIds=rakSelK.filter(k=>!k.includes(':'));
+  const HL=tabHL();const hlIds=[...new Set(HL.map(c=>rackOfCode(c)).filter(Boolean).map(r=>r.id).filter(Boolean))];
+  const curId=(RACKS.find(r=>r.c===mapRack)||{}).id||null;
+  if(v==='2d'){walkUI();
+    if(!PLAN)PLAN=Plan2D($('#plan2d'),mapClickRack);
+    PLAN.setFloor(curTier()==='up'?1:0);PLAN.setMode(edit?'edit':'fill');
+    if(edit)PLAN.setSel(selIds);else PLAN.setHL(hlIds,curId);
+    return}
+  if(!MAP&&window.THREE){MAP=init3D($('#map'),(code,rid)=>{if(tab==='rak'){if(rid)rakToggle(rid)}else{locQuiet=false;mapPicked=code;const r=rackOfCode(code);mapRack=r?r.c:null;render()}});
+    const cur=curTier();if(cur!=='all')MAP.setTier(cur);
+    MAP.setCodes($('#mcodes').getAttribute('aria-pressed')==='true');
+    _hlKey='';if(HL.length&&tab!=='check'){MAP.focus(HL[0])}}
+  if(MAP){const k=HL.join(',');if(k!==_hlKey){_hlKey=k;MAP.highlight(HL)}MAP.setMode(edit?'edit':'fill');if(edit)MAP.setSel(selIds);else MAP.paint()}
+  walkUI()}
+function renderPeta(){main.className='';ensureMap(false);
+  const t=curTier();const tierLabel=t==='all'?'Semua tingkat':t==='up'?'Level M':'Ground floor';
+  const codes=BIN_ORDER.filter(c=>t==='all'||(t==='lo'?BINS.get(c).floor===1:BINS.get(c).floor===2));
+  const cnt={empty:0,low:0,mid:0,full:0};let near=0,over=0;const hot=[];
+  codes.forEach(c=>{const f=fillLevel(c);cnt[f]++;if(f==='full'){const q=binQty(c),cap=binCap(c);if(q>cap)over++;else near++;hot.push([c,q,cap])}else if(f==='mid'){hot.push([c,binQty(c),binCap(c)])}});
+  const tot=codes.length||1,pc=n=>(n/tot*100).toFixed(1)+'%';
+  const markN=mapHL.filter(c=>codes.includes(c)).length;
+  hot.sort((a,b)=>b[1]/b[2]-a[1]/a[2]);
+  const byRow={};codes.forEach(c=>{const r=BINS.get(c).row;const o=byRow[r]=byRow[r]||{n:0,e:0};o.n++;if(!binItems(c).length)o.e++});
+  const SC={empty:'var(--s-empty)',low:'var(--s-low)',mid:'var(--s-mid)',full:'var(--s-full)'};
+  const SL={empty:'Kosong',low:'Bawah 50%',mid:'50–89%',full:'Penuh'};
+  const badge=(c,q,cap)=>{const f=fillLevel(c);const ov=q>cap;return `<span class="badge2" style="background:color-mix(in srgb,${SC[f]} 22%,transparent);color:${SC[f]}">${ov?'Lebih kapasiti':SL[f]}</span>`};
+  const kpi=(icon,col,lab,num,pct,tip)=>`<div class="kpi" title="${esc(tip)}"><div class="hd"><span class="ic" style="background:color-mix(in srgb,${col} 20%,transparent);color:${col}">${ICON[icon]}</span><span class="lab">${lab}</span></div><div class="ft"><span class="num">${fmt(num)}</span>${pct?`<span class="pct" style="color:${col}">${pct}</span>`:''}</div></div>`;
+  const showN=renderPeta.all?40:6;
+  main.innerHTML=`<section class="card"><div class="searchbar"><label class="sbox">${ICON.search}<input id="gq" list="gl" placeholder="Cari rak, row atau bin (cth 1-G16)" autocomplete="off" aria-label="Cari lokasi"></label><button class="btn pri" id="ggo">Cari</button></div>
+      <datalist id="gl">${[...new Set(RACKS.map(r=>r.r))].map(r=>`<option value="${esc(r)}">`).join('')}${RACKS.map(r=>`<option value="${esc(r.c)}">`).join('')}</datalist><div id="gmsg" class="small" style="color:var(--warn)"></div></section>
+    ${locCardsHTML()}
+    <section class="card"><div class="sechd"><h2>Ringkasan bin</h2><span class="small">${tierLabel}</span></div>
+      <div class="kpis">
+        ${kpi('box','var(--accent)','Jumlah Bin',codes.length,'','Semua bin di '+tierLabel)}
+        ${kpi('ok','var(--s-empty)','Kosong',cnt.empty,pc(cnt.empty),'Bin tanpa barang')}
+        ${kpi('warn','var(--s-mid)','Hampir Penuh',near,pc(near),'Bin 90–100% daripada kapasiti')}
+        ${kpi('alert','var(--s-full)','Perlu Perhatian',over,pc(over),'Bin melebihi kapasiti — perlu dipindah sebahagian')}
+      </div>
+      <p class="small muted" style="margin:0">Hampir Penuh = 90–100% kapasiti. Perlu Perhatian = melebihi kapasiti bin.</p></section>
+    <section class="card"><h2>Status bin</h2><div class="bars">
+      ${[['empty',cnt.empty],['low',cnt.low],['mid',cnt.mid],['full',cnt.full]].map(([k,n])=>`<div class="bar"><span class="lb"><i style="background:${SC[k]}"></i>${SL[k]}</span><span class="tr"><span style="width:${(n/tot*100).toFixed(2)}%;background:${SC[k]}"></span></span><span class="vl">${fmt(n)}<small>${pc(n)}</small></span></div>`).join('')}
+      <div class="bar"><span class="lb"><i style="background:var(--s-mark)"></i>Ditanda</span><span class="tr"><span style="width:${(markN/tot*100).toFixed(2)}%;background:var(--s-mark);min-width:${markN?'4px':'0'}"></span></span><span class="vl">${fmt(markN)}<small>${pc(markN)}</small></span></div>
+    </div></section>
+    <section class="card loc"><div class="sechd"><h2>Lokasi paling padat</h2><span class="small">${fmt(hot.length)} bin 50% ke atas</span></div>
+      ${hot.length?`<div class="tbl"><table><thead><tr><th>Lokasi</th><th class="n">Kapasiti</th><th class="n">Diguna</th><th>Status</th></tr></thead><tbody>
+      ${hot.slice(0,showN).map(([c,q,cap])=>`<tr data-loc="${esc(c)}"><td><span class="code">${esc(c)}</span></td><td class="n">${cap}</td><td class="n">${fmt(q)}</td><td>${badge(c,q,cap)}</td></tr>`).join('')}</tbody></table></div>
+      ${hot.length>6?`<button class="linkbtn" id="locall">${renderPeta.all?'Tunjuk sikit':'Lihat lebih banyak →'}</button>`:''}`:'<p class="empty">Tiada bin 50% ke atas di '+tierLabel+'.</p>'}</section>
+    <section class="card"><details><summary>Ikut row</summary><div class="tbl" style="margin-top:8px"><table><thead><tr><th>Row</th><th class="n">Bin</th><th class="n">Kosong</th><th class="n">Diguna</th></tr></thead><tbody>${Object.entries(byRow).sort((a,b)=>a[0].localeCompare(b[0],undefined,{numeric:true})).map(([r,o])=>`<tr><td><a href="#" data-prow="${esc(r)}" style="color:var(--accent)">${esc(r)}</a></td><td class="n">${fmt(o.n)}</td><td class="n">${fmt(o.e)}</td><td class="n">${fmt(o.n-o.e)}</td></tr>`).join('')}</tbody></table></div></details></section>`;
+  const openBin=code=>openOnMap(code);
+  const go=()=>{const v=$('#gq').value.trim().toUpperCase();if(!v)return;
+    if(BINS.has(v)){openBin(v);return}
+    const r=RACKS.find(x=>x.c===v);
+    if(r){mapRack=r.c;mapPicked=null;if(r.id){setTierBtn(r.f===2?'up':'lo');if(PLAN)PLAN.focus([r.id]);if(MAP&&VIEW==='3d'){if(MAP.walk.on())MAP.walk.to(r.id);else MAP.setTier(r.f===2?'up':'lo')}}renderPeta();return}
+    const rows=RACKS.filter(x=>x.r.toUpperCase()===v&&x.id);if(rows.length){const fl=rows.some(x=>x.f===1)?1:2;const ids=rows.filter(x=>x.f===fl).map(x=>x.id);setTierBtn(fl===2?'up':'lo');if(PLAN)PLAN.focus(ids);renderPeta();return}
+    $('#gmsg').textContent='Tak jumpa lokasi '+v};
+  $('#ggo').onclick=go;$('#gq').onkeydown=e=>{if(e.key==='Enter')go()};
+  bindLocCards(main);
+  const la=$('#locall');if(la)la.onclick=()=>{renderPeta.all=!renderPeta.all;renderPeta()};
+  main.querySelectorAll('[data-loc]').forEach(tr=>tr.onclick=()=>openBin(tr.dataset.loc));
+  main.querySelectorAll('[data-prow]').forEach(a=>a.onclick=e=>{e.preventDefault();const row=a.dataset.prow;const rs=RACKS.filter(x=>x.r===row&&x.id);if(!rs.length)return;const fl=rs.some(x=>x.f===1)?1:2;setTierBtn(fl===2?'up':'lo');if(PLAN)PLAN.focus(rs.filter(x=>x.f===fl).map(x=>x.id));if(MAP)MAP.setTier(fl===2?'up':'lo');renderPeta()});
+}
+function renderMasuk(){main.className='two';
+  const q=Object.entries(st.queue);
+  main.innerHTML=`<section class="card"><h2>Simpan barang baru</h2>
+    <p class="small muted">Imbas atau taip SKU dan kuantiti. Sistem cadangkan bin ikut saiz, series dan ruang kosong.</p>
+    <div class="row"><input id="ms" class="grow" list="skus" placeholder="SKU" autocomplete="off"><input id="mq" type="number" min="1" value="1" aria-label="Kuantiti"><button class="btn pri" id="mgo">Cadang bin</button></div>
+    <div id="mres"></div>${skuOptions()}</section>
+  <section class="card"><h2>Menunggu disimpan <span class="pill">${q.length} SKU</span></h2>
+    <p class="small muted">Dari upload stok terkini: kuantiti yang belum ada di mana-mana bin.</p>
+    <div class="list" id="qlist">${q.length?'':'<p class="empty">Tiada barang menunggu.</p>'}</div></section>`;
+  const show=(code,qty,box)=>{const s=sku(code);if(!s){box.innerHTML='<p class="pill bad">SKU tak dijumpai dalam data stok. Upload stok terkini dulu.</p>';return}
+    const sg=suggestBins(s,qty);box.innerHTML=`<div class="item">${skuLine(s)}${sugHTML(s,qty,sg)}<div class="row"><button class="btn ok" data-done>Dah letak di bin ini</button><button class="btn" data-map>Tunjuk di peta</button></div></div>`;
+    box.querySelector('[data-map]').onclick=()=>showOnMap(sg.out.map(o=>o.code));
+    box.querySelector('[data-done]').onclick=async()=>{const ch={};sg.out.forEach(o=>addTo(ch,o.code,s.sku,o.qty));
+      if(await guarded(async()=>{await saveBins(ch);if(st.queue[s.sku]){const left=st.queue[s.sku]-sg.out.reduce((a,o)=>a+o.qty,0);const nq={...st.queue};if(left>0)nq[s.sku]=left;else delete nq[s.sku];st.queue=nq;await db.doc('queue/pending').set({items:nq})}},`${s.sku} disimpan`))render()}};
+  $('#mgo').onclick=()=>show($('#ms').value.trim(),Math.max(1,+$('#mq').value||1),$('#mres'));
+  $('#ms').onkeydown=e=>{if(e.key==='Enter')$('#mgo').click()};
+  const ql=$('#qlist');q.slice(0,60).forEach(([k,qty])=>{const s=sku(k);const d=document.createElement('div');d.className='item';
+    d.innerHTML=`${s?skuLine(s):`<div class="t">${esc(k)}</div>`}<div class="row"><b>${fmt(qty)} helai</b><button class="btn" data-k>Cadang bin</button></div><div data-box></div>`;
+    d.querySelector('[data-k]').onclick=()=>show(k,qty,d.querySelector('[data-box]'));ql.appendChild(d)});
+  if(q.length>60)ql.insertAdjacentHTML('beforeend',`<p class="small muted">+ ${q.length-60} SKU lagi. Simpan yang di atas dulu.</p>`)}
+
+function renderPindah(){main.className='';const rs=relocations();$('#bp').hidden=!rs.length;$('#bp').textContent=rs.length;
+  const types=[...new Set(rs.map(r=>r.type))];
+  main.innerHTML=`<section class="card"><h2>Cadangan pindah bin</h2>
+    <p class="small muted">Dikira daripada lokasi semasa. Tekan <b>Dah pindah</b> selepas barang dialih supaya lokasi dikemas kini.</p>
+    <div class="stats">${types.map(t=>`<div class="stat"><b>${rs.filter(r=>r.type===t).length}</b><span>${esc(t)}</span></div>`).join('')||'<div class="stat"><b>0</b><span>Tiada cadangan</span></div>'}</div>
+    <div class="list" id="rl"></div></section>`;
+  const rl=$('#rl');rs.slice(0,80).forEach(r=>{const s=sku(r.sku);const d=document.createElement('div');d.className='item';
+    d.innerHTML=`<div class="row"><span class="pill warn">${esc(r.type)}</span><span class="small muted">${esc(r.why)}</span></div>${s?skuLine(s):''}
+      <div>Dari <span class="code">${esc(r.from)}</span> ke ${r.to.map(o=>`<span class="code">${esc(o.code)}</span> (${fmt(o.qty)})`).join(', ')} · <b>${fmt(r.qty)}</b> helai</div>
+      <div class="row"><button class="btn ok" data-m>Dah pindah</button><button class="btn" data-map>Tunjuk di peta</button></div>`;
+    d.querySelector('[data-map]').onclick=()=>showOnMap([r.from,...r.to.map(o=>o.code)]);
+    d.querySelector('[data-m]').onclick=async()=>{const ch={};let moved=0;r.to.forEach(o=>{addTo(ch,o.code,r.sku,o.qty);moved+=o.qty});addTo(ch,r.from,r.sku,-moved);
+      if(await guarded(()=>saveBins(ch),'Lokasi dikemas kini'))render()};rl.appendChild(d)});
+  if(!rs.length)rl.innerHTML='<p class="empty">Susunan sekarang dah kemas. Tiada cadangan pindah.</p>';
+  if(rs.length>80)rl.insertAdjacentHTML('beforeend',`<p class="small muted">Menunjuk 80 daripada ${rs.length}. Selesaikan yang di atas dulu.</p>`)}
+
+// ---------- stock check: lists built from filters ----------
+let chkSel=null,chkNew=false,chkF={sku:'',size:[],brand:[],kol:[],grp:[],cat:[],row:'',col:'',mode:'all',n:20,only:true};
+try{chkSel=localStorage.getItem('pg-chk')}catch(e){}
+const SZ_ORDER=['XS','S','M','L','XL','2XL','3XL','4XL','5XL','6XL'];
+const szKey=z=>{const i=SZ_ORDER.indexOf(z);if(i>=0)return [0,i];const m=String(z).match(/^(\d+)/);return m?[1,+m[1]]:[2,0]};
+const szSort=(a,b)=>{const x=szKey(a),y=szKey(b);return x[0]-y[0]||x[1]-y[1]||String(a).localeCompare(String(b))};
+const fArr=v=>Array.isArray(v)?v:(v?[v]:[]);const fHas=(fv,v)=>{const a=fArr(fv);return !a.length||a.includes(v)};
+function chkMatchSku(s,f){if(!s)return false;
+  if(f.sku){const q=f.sku.toLowerCase();if(!s.sku.toLowerCase().includes(q)&&!(s.desc||'').toLowerCase().includes(q))return false}
+  if(!fHas(f.size,s.size)||!fHas(f.brand,s.brand)||!fHas(f.kol,s.kol)||!fHas(f.grp,s.grp||'')||!fHas(f.cat,s.cat))return false;
+  if(f.col&&!(s.col||'').toLowerCase().includes(f.col.toLowerCase()))return false;return true}
+// multi-select controls: chips for short lists, add-from-list for long ones
+function multiChips(key,opts,sel){const a=fArr(sel);return `<div class="chips2" data-mkey="${key}">${opts.map(o=>`<button type="button" class="chip2" data-mv="${esc(o)}" aria-pressed="${a.includes(o)}">${esc(o)}</button>`).join('')}${a.length?`<button type="button" class="chip2 clr" data-mclr>Semua</button>`:''}</div>`}
+function multiPick(key,opts,sel,ph){const a=fArr(sel);return `<div data-mkey="${key}"><div class="chips2">${a.map(o=>`<button type="button" class="chip2" aria-pressed="true" data-mv="${esc(o)}" title="Buang">${esc(o)} ✕</button>`).join('')}</div>
+  <select data-madd style="width:100%;margin-top:${a.length?6:0}px"><option value="">${a.length?'+ Tambah lagi…':ph}</option>${opts.filter(o=>!a.includes(o)).map(o=>`<option>${esc(o)}</option>`).join('')}</select></div>`}
+function bindMulti(root,f,after){root.querySelectorAll('[data-mkey]').forEach(box=>{const k=box.dataset.mkey;
+  box.querySelectorAll('[data-mv]').forEach(b=>b.onclick=()=>{const a=fArr(f[k]);const v=b.dataset.mv;f[k]=a.includes(v)?a.filter(x=>x!==v):[...a,v];if(k==='brand')f.kol=fArr(f.kol).filter(x=>kols(f.brand).includes(x));after()});
+  const c=box.querySelector('[data-mclr]');if(c)c.onclick=()=>{f[k]=[];after()};
+  const s=box.querySelector('[data-madd]');if(s)s.onchange=()=>{if(s.value){f[k]=[...fArr(f[k]),s.value];after()}}})}
+const skuFilterOn=f=>!!(f.sku||f.col||['size','brand','kol','grp','cat'].some(k=>fArr(f[k]).length));
+function chkMatches(f){const out=[];let skus=new Set(),q=0;
+  BIN_ORDER.forEach(code=>{const b=BINS.get(code);if(f.row&&b.row!==f.row)return;const it=binItems(code);if(!it.length)return;
+    const hit=skuFilterOn(f)?it.filter(([k])=>chkMatchSku(sku(k),f)):it;if(!hit.length)return;out.push(code);hit.forEach(([k,n])=>{skus.add(k);q+=n})});
+  return {bins:out,skus:skus.size,qty:q}}
+function chkName(f){const p=[];if(f.sku)p.push('SKU "'+f.sku+'"');const J=v=>fArr(v).join('/');if(J(f.brand))p.push(J(f.brand));if(J(f.kol))p.push('Koleksi '+J(f.kol));if(J(f.grp))p.push(J(f.grp));if(J(f.cat))p.push(J(f.cat));if(J(f.size))p.push('Saiz '+J(f.size));if(f.col)p.push('Warna "'+f.col+'"');if(f.row)p.push('Row '+f.row);
+  return (p.join(' · ')||'Semua bin')+(f.mode==='rand'?` (rawak ${f.n})`:'')}
+const kols=brand=>[...new Set(Object.keys(st.master).map(sku).filter(s=>fHas(brand,s.brand)).map(s=>s.kol).filter(Boolean))].sort(kolSort);
+const chkList=()=>Object.entries(st.checks||{}).map(([id,c])=>({id,...c})).sort((a,b)=>(b.created||0)-(a.created||0));
+function chkRows(c,code){const it=binItems(code);return c.only&&c.filter&&skuFilterOn(c.filter)?it.filter(([k])=>chkMatchSku(sku(k),c.filter)):it}
+function renderCheck(){main.className='';
+  const lists=chkList();if(chkSel&&!st.checks[chkSel])chkSel=null;if(!chkSel&&lists.length&&!chkNew)chkSel=lists[0].id;
+  const c=chkSel?st.checks[chkSel]:null;const building=chkNew||!lists.length;
+  const opt=(arr,v,ph)=>`<option value="">${ph}</option>`+arr.map(x=>`<option${x===v?' selected':''}>${esc(x)}</option>`).join('');
+  const M=Object.keys(st.master).map(sku);
+  const sizes=[...new Set(M.map(s=>s.size).filter(Boolean))].sort(szSort),brands=[...new Set(M.map(s=>s.brand).filter(Boolean))].sort(),
+    grps=[...new Set(M.map(s=>s.grp).filter(Boolean))].sort(),rows=[...new Set(RACKS.map(r=>r.r))].sort(natSort);
+  const f=chkF;const m=building?chkMatches(f):null;
+  let h=`<section class="card"><div class="row"><h2 style="margin-right:auto">Stock check</h2>${building&&lists.length?'<button class="btn" id="cxback">Kembali ke senarai</button>':'<button class="btn pri" id="cxnew">+ Buat senarai baru</button>'}</div>
+    ${lists.length?`<div class="row" style="margin-top:6px"><label for="cxsel" class="small">Senarai</label><select id="cxsel" class="grow">${lists.map(l=>{const d=Object.keys(l.results||{}).length;return `<option value="${esc(l.id)}"${l.id===chkSel&&!building?' selected':''}>${esc(l.name||('Rawak minggu '+(l.week||'')))} · ${d}/${l.bins.length} dikira · ${new Date(l.created||0).toLocaleDateString('ms-MY')}</option>`}).join('')}</select></div>`:''}</section>`;
+  if(building){
+    h+=`<section class="card"><h2>Buat senarai baru</h2><p class="small muted">Pilih apa yang nak dikira. Kosongkan mana-mana kotak untuk "semua".</p>
+      <div class="fgrid">
+        <label for="fs">SKU / nama</label><input id="fs" list="skus" value="${esc(f.sku)}" placeholder="cth PTX2TBD atau Teluk Belanga" autocomplete="off">
+        <span>Brand</span>${multiPick('brand',brands,f.brand,'Semua brand')}
+        <span>Koleksi</span>${multiChips('kol',kols(f.brand),f.kol)}
+        <span>Item group</span>${multiPick('grp',grps,f.grp,'Semua item group')}
+        <span>Kategori</span>${multiChips('cat',['Men','Women','Kids','Baby'],f.cat)}
+        <span>Saiz</span>${multiChips('size',sizes,f.size)}
+        <label for="fw">Warna</label><input id="fw" value="${esc(f.col)}" placeholder="cth Brick Red" autocomplete="off">
+        <label for="fr">Row</label><select id="fr">${opt(rows,f.row,'Semua row')}</select>
+        <span>Bin</span><div class="row"><label class="row small"><input type="radio" name="fm" value="all"${f.mode==='all'?' checked':''}> Semua bin sepadan</label>
+          <label class="row small"><input type="radio" name="fm" value="rand"${f.mode==='rand'?' checked':''}> Rawak <input id="fn" type="number" min="1" max="500" value="${f.n}" style="width:72px"> bin</label></div>
+      </div>
+      ${skuFilterOn(f)?`<label class="row small" style="margin-top:8px"><input type="checkbox" id="fo"${f.only?' checked':''}> Kira SKU yang dipilih sahaja (SKU lain dalam bin tu tak perlu dikira)</label>`:''}
+      <div class="stats" style="margin-top:10px"><div class="stat"><b>${fmt(m.bins.length)}</b><span>Bin sepadan</span></div><div class="stat"><b>${fmt(m.skus)}</b><span>SKU</span></div><div class="stat"><b>${fmt(m.qty)}</b><span>Helai</span></div></div>
+      <div class="row" style="margin-top:10px"><button class="btn pri" id="fgo"${m.bins.length?'':' disabled'}>Buat senarai (${fmt(f.mode==='rand'?Math.min(f.n,m.bins.length):m.bins.length)} bin)</button><button class="btn" id="fclr">Kosongkan pilihan</button></div>
+      ${m.bins.length>200&&f.mode==='all'?'<p class="small" style="color:var(--warn)">Senarai ni panjang. Pertimbang pilih "Rawak" atau tapis lagi.</p>':''}</section>`;
+  }else if(c){
+    const done=Object.keys(c.results||{}).length,diffBins=Object.values(c.results||{}).filter(r=>r.diff).length;
+    h+=`<section class="card"><div class="row"><h2 style="margin-right:auto">${esc(c.name||('Rawak minggu '+(c.week||'')))}</h2><button class="btn" id="cxdel">Padam senarai</button></div>
+      <p class="small muted" style="margin:2px 0 8px">Dibuat oleh ${esc(c.by||'-')} · ${new Date(c.created||0).toLocaleString('ms-MY')}${c.only&&c.filter&&skuFilterOn(c.filter)?' · kira SKU dipilih sahaja':''}</p>
+      <div class="stats"><div class="stat"><b>${done}/${c.bins.length}</b><span>Bin dikira</span></div><div class="stat"><b>${diffBins}</b><span>Bin ada beza</span></div>
+      <div class="stat"><b>${done?Math.round((done-diffBins)/done*100):0}%</b><span>Ketepatan</span></div></div>
+      <div id="cxmsg" class="small"></div>
+      <p class="small muted">Kira setiap bin, isi kuantiti sebenar, kemudian tekan Simpan kiraan.</p><div class="list" id="cl"></div></section>`}
+  main.innerHTML=h+skuOptions();
+  // events
+  const nb=$('#cxnew');if(nb)nb.onclick=()=>{chkNew=true;renderCheck()};
+  const bb=$('#cxback');if(bb)bb.onclick=()=>{chkNew=false;renderCheck()};
+  const sel=$('#cxsel');if(sel)sel.onchange=()=>{chkSel=sel.value;chkNew=false;try{localStorage.setItem('pg-chk',chkSel)}catch(e){}renderCheck()};
+  if(building){
+    const upd=(k,v)=>{chkF[k]=v;renderCheck()};
+    bindMulti(main,chkF,()=>renderCheck());
+    [['fr','row']].forEach(([id,k])=>$('#'+id).onchange=e=>upd(k,e.target.value));
+    [['fs','sku'],['fw','col']].forEach(([id,k])=>$('#'+id).onchange=e=>upd(k,e.target.value.trim()));
+    main.querySelectorAll('[name=fm]').forEach(r=>r.onchange=()=>upd('mode',r.value));$('#fn').onchange=e=>upd('n',Math.max(1,Math.min(500,+e.target.value||20)));
+    const fo=$('#fo');if(fo)fo.onchange=()=>upd('only',fo.checked);
+    $('#fclr').onclick=()=>{chkF={sku:'',size:[],brand:[],kol:[],grp:[],cat:[],row:'',col:'',mode:'all',n:20,only:true};renderCheck()};
+    $('#fgo').onclick=async()=>{let bins=[...m.bins];if(f.mode==='rand'){for(let i=bins.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[bins[i],bins[j]]=[bins[j],bins[i]]}bins=bins.slice(0,f.n).sort((a,b)=>BINS.get(a).ord-BINS.get(b).ord)}
+      const id='c'+Date.now().toString(36);const body={name:chkName(f),filter:{...f},only:skuFilterOn(f)&&f.only,bins,results:{},created:Date.now(),by:me()};
+      if(await guarded(()=>db.doc('checks/'+id).set(body),'Senarai dibuat')){st.checks[id]=body;chkSel=id;chkNew=false;try{localStorage.setItem('pg-chk',id)}catch(e){}renderCheck()}};
+    return}
+  if(!c)return;
+  $('#cxdel').onclick=()=>askInline($('#cxmsg'),'Padam senarai ini? Kiraan yang dah disimpan dalam senarai ni pun hilang.',async()=>{if(await guarded(()=>db.doc('checks/'+chkSel).delete(),'Senarai dipadam')){delete st.checks[chkSel];chkSel=null;renderCheck()}});
+  const cl=$('#cl');c.bins.forEach(code=>{const r=(c.results||{})[code];const exp=chkRows(c,code);const d=document.createElement('div');d.className='item';
+    const rowsH=exp.map(([k,q])=>{const got=r&&r.c&&k in r.c?r.c[k]:'';return `<tr class="${r&&got!==''&&+got!==q?'diff':''}"><td><span class="code">${esc(k)}</span><div class="small muted">${esc(sku(k)?.col||'')} ${esc(sku(k)?.size||'')}</div></td><td class="n">${q}</td><td class="n"><input type="number" min="0" data-k="${esc(k)}" value="${got}" aria-label="Kiraan ${esc(k)}"></td></tr>`}).join('');
+    d.innerHTML=`<div class="row"><span class="code">${esc(code)}</span>${r?(r.diff?'<span class="pill bad">Ada beza</span>':'<span class="pill ok">Tepat</span>'):'<span class="pill">Belum dikira</span>'}${r?`<span class="small muted">oleh ${esc(r.by)}</span>`:''}</div>
+      <div class="tbl"><table><thead><tr><th>SKU</th><th class="n">Sistem</th><th class="n">Kiraan</th></tr></thead><tbody>${rowsH||'<tr><td colspan="3" class="empty">Tiada SKU dipilih dalam bin ini sekarang</td></tr>'}</tbody></table></div>
+      ${c.only?'':`<details><summary class="small">SKU lain dijumpai dalam bin ini</summary><div class="row" style="margin-top:6px"><input class="grow" data-xs list="skus" placeholder="SKU"><input type="number" min="1" data-xq placeholder="Qty"></div></details>`}
+      <div class="row"><button class="btn pri" data-save>Simpan kiraan</button>${r&&r.diff?'<button class="btn" data-apply>Kemas kini lokasi ikut kiraan</button>':''}</div>`;
+    d.querySelector('[data-save]').onclick=async()=>{const cnt={};let miss=false;d.querySelectorAll('input[data-k]').forEach(i=>{if(i.value==='')miss=true;cnt[i.dataset.k]=Math.max(0,+i.value||0)});
+      const xsI=d.querySelector('[data-xs]');if(xsI){const xs=xsI.value.trim(),xq=+d.querySelector('[data-xq]').value||0;if(xs&&xq>0)cnt[xs]=(cnt[xs]||0)+xq}
+      if(miss){setStatus('Isi kiraan untuk semua SKU dalam bin (isi 0 jika tiada).',true);return}
+      const diff=exp.some(([k,q])=>cnt[k]!==q)||Object.keys(cnt).some(k=>!exp.find(x=>x[0]===k));
+      const res={c:cnt,diff,by:me(),at:Date.now()};const id=chkSel;
+      if(await guarded(async()=>{const ref=db.doc('checks/'+id);const snap=await ref.get();const cur=snap.exists?snap.data():c;await ref.set({...cur,results:{...(cur.results||{}),[code]:res}})},`${code} disimpan`)){st.checks[id]={...st.checks[id],results:{...(st.checks[id].results||{}),[code]:res}};renderCheck()}};
+    const ap=d.querySelector('[data-apply]');if(ap)ap.onclick=async()=>{
+      // replace only the counted SKUs; keep other SKUs in the bin as they are
+      const counted=new Set(Object.keys(r.c));const keep=binItems(code).filter(([k])=>!counted.has(k));
+      const arr=[...keep,...Object.entries(r.c).filter(([,q])=>q>0)];
+      if(await guarded(()=>saveBins({[code]:arr}),'Lokasi ikut kiraan'))renderCheck()};
+    d.querySelector('.row .code').style.cursor='pointer';d.querySelector('.row .code').title='Tunjuk di peta';d.querySelector('.row .code').onclick=()=>{locQuiet=true;openOnMap(code)};
+    cl.appendChild(d)});
+}
+
+// ---------- bin capacity: one number per item group ----------
+let capDraft=null,capMsg='',capFilter='';
+function groupList(){const g={};Object.keys(st.master).forEach(k=>{const s=sku(k);const n=s.grp||'';const o=g[n]=g[n]||{n:0,ex:s,brands:new Set(),blob:n.toLowerCase()};o.n++;if(s.brand)o.brands.add(s.brand);const tx=((s.desc||'')+' '+(s.brand||'')+' '+n).toLowerCase();(o.txt=o.txt||[]).push(tx);o.blob+=' '+tx});return Object.entries(g).sort((a,b)=>b[1].n-a[1].n)}
+function capTest(q){q=q.trim();if(!q)return '';const s=sku(q)||sku(q.toUpperCase());if(!s)return 'SKU tak jumpa.';
+  const g=s.grp||'';const viaG=CAPS.groups&&CAPS.groups[g];return `<b>${esc(s.sku)} – ${esc(s.desc)}</b><br>Jenis: ${esc(g||'(tiada)')} · Kapasiti: <b>${capOf(s)} helai/bin</b>${viaG?'':' (kapasiti lalai)'}`}
+function renderCap(){main.className='';
+  const groups=groupList();
+  if(!capDraft){capDraft={def:CAPS.def,groups:{}};groups.forEach(([g,o])=>{capDraft.groups[g]=capOf(o.ex)})}
+  const d=capDraft;const savedJson=JSON.stringify({def:CAPS.def,groups:CAPS.groups||{}});
+  const dirty=JSON.stringify({def:d.def,groups:d.groups})!==savedJson||!CAPS.groups;
+  const f=capFilter.trim().toLowerCase();const shown=groups.filter(([g,o])=>!f||o.blob.includes(f));const hits={};if(f)shown.forEach(([g,o])=>hits[g]=o.txt.filter(t=>t.includes(f)).length);
+  main.innerHTML=`<section class="card"><h2>Kapasiti bin</h2>
+    <p class="small muted">Satu baris untuk setiap jenis barang (item group). Isi berapa helai muat <b>satu bin</b>. Itu sahaja.</p>
+    <div class="row" style="margin-top:8px"><input id="cf" class="grow" placeholder="Cari (cth samping, cekak musang, boys, top)" value="${esc(capFilter)}" autocomplete="off">
+      ${f?`<span class="small">Tukar yang ditanda ✓ jadi</span><input id="cbulk" type="number" min="1" max="999" style="width:80px;text-align:right" placeholder="60"><button class="btn" id="cbgo">Guna</button>`:''}</div>
+    <div class="tbl" style="margin-top:8px"><table><thead><tr>${f?'<th style="width:30px">✓</th>':''}<th>Jenis barang</th><th class="n">SKU</th><th class="n" style="width:110px">Helai / bin</th></tr></thead><tbody>
+    ${shown.map(([g,o])=>`<tr>${f?`<td><input type="checkbox" data-pick="${esc(g)}"${hits[g]*2>=o.n?' checked':''} aria-label="Pilih"></td>`:''}<td>${esc(g||'(tiada jenis)')}${f&&hits[g]<o.n?` <span class="pill">${hits[g]} / ${o.n} SKU sepadan</span>`:''}<div class="small muted">${esc([...o.brands].slice(0,3).join(', '))} · cth ${esc(o.ex.desc)}</div></td><td class="n">${fmt(o.n)}</td><td class="n"><input data-g="${esc(g)}" type="number" min="1" max="999" value="${d.groups[g]??d.def}" style="width:90px;text-align:right"></td></tr>`).join('')||'<tr><td colspan="4" class="empty">Tiada jenis sepadan</td></tr>'}
+    </tbody></table></div>
+    <div class="row" style="margin-top:10px"><label>SKU jenis baru (belum ada dalam senarai) guna <input id="cdef" type="number" min="1" max="999" value="${d.def}" style="width:80px;text-align:right"> helai / bin</label></div>
+    <div class="row" style="margin-top:12px"><button class="btn pri" id="csave"${dirty?'':' disabled'}>Simpan</button>${dirty&&CAPS.groups?'<button class="btn" id="cundo">Batal perubahan</button><span class="small" style="color:var(--warn)">Belum disimpan</span>':''}<span class="small">${esc(capMsg)}</span></div>
+    ${CAPS.groups?'':'<p class="small muted">Nombor di atas ialah tetapan semasa sistem. Semak dan tukar mana yang tak betul, kemudian tekan Simpan.</p>'}
+  </section>
+  <section class="card"><h2>Uji satu SKU</h2><input id="ctq" list="skus" placeholder="Taip kod SKU" autocomplete="off" style="width:100%"><div id="ctr" class="small" style="margin-top:8px"></div></section>`;
+  const cf=$('#cf');cf.oninput=()=>{capFilter=cf.value;const pos=cf.selectionStart;renderCap();const n=$('#cf');n.focus();n.setSelectionRange(pos,pos)};
+  main.querySelectorAll('[data-g]').forEach(x=>x.onchange=()=>{d.groups[x.dataset.g]=+x.value||d.def;capMsg='';renderCap()});
+  $('#cdef').onchange=()=>{d.def=+$('#cdef').value||60;renderCap()};
+  const bg=$('#cbgo');if(bg)bg.onclick=()=>{const v=+$('#cbulk').value;if(!(v>0))return;main.querySelectorAll('[data-pick]:checked').forEach(c=>d.groups[c.dataset.pick]=v);capMsg='';renderCap()};
+  const cu=$('#cundo');if(cu)cu.onclick=()=>{capDraft=null;capMsg='';renderCap()};
+  $('#csave').onclick=async()=>{const body={def:+d.def||60,groups:{...d.groups},rules:[]};
+    if(await guarded(()=>db.doc('settings/caps').set({...body,by:who.value.trim()||'Tanpa nama',at:Date.now()}),'Kapasiti bin disimpan')){CAPS=body;capDraft=null;capMsg='✓ Disimpan. Warna bin kini ikut kapasiti baru.';if(MAP)MAP.paint();renderCap()}};
+  const ct=$('#ctq');ct.oninput=()=>{$('#ctr').innerHTML=capTest(ct.value)};
+}
+
+// ---------- transfer bin suggestion ----------
+let xSel='';
+let xf={sku:'',size:[],brand:[],kol:[],sepKol:true,grp:[],cat:[],col:'',from:'',rows:[],levels:[],racks:'',order:'size',newRack:true,mix:false,auto:true},xPlan=null,xMsg='';
+function xferPlan(f){
+  // 1. stock to move: selected SKUs and where they sit now
+  const want={};
+  for(const row in st.loc)for(const code in st.loc[row]){const b=BINS.get(code);if(!b)continue;if(f.from&&b.row!==f.from)continue;
+    for(const [k,q] of st.loc[row][code]){const s=sku(k);if(!s||!chkMatchSku(s,f))continue;const w=want[k]=want[k]||{sku:k,s,qty:0,from:[]};w.qty+=q;w.from.push([code,q])}}
+  const items=Object.values(want).filter(w=>w.qty>0);
+  const kk=s=>f.sepKol?[-(parseInt((s.kol||'X0').slice(1))||0)]:[];
+  const key=w=>{const s=w.s;const z=szKey(s.size);return [...kk(s),...(f.order==='size'?[z[0],z[1],s.size,s.ser||'',s.col||'',s.sku]:[s.ser||'',s.col||'',z[0],z[1],s.size,s.sku])]};
+  items.sort((a,b)=>{const x=key(a),y=key(b);for(let i=0;i<x.length;i++){if(x[i]<y[i])return -1;if(x[i]>y[i])return 1}return 0});
+  // 2. destination bins: chosen rows/levels/racks, empty or holding only stock that is moving anyway
+  const moving=new Set(items.map(w=>w.sku));const rackList=f.racks.split(',').map(x=>x.trim().toUpperCase()).filter(Boolean);
+  const dest=BIN_ORDER.filter(c=>{const b=BINS.get(c);if(f.rows.length&&!f.rows.includes(b.row))return false;if(f.levels.length&&!f.levels.includes(b.level))return false;
+    if(rackList.length&&!rackList.includes(b.rack))return false;return binItems(c).every(([k])=>moving.has(k))})
+    .sort((a,b)=>{const x=BINS.get(a),y=BINS.get(b);return natSort(x.rack,y.rack)||x.level-y.level||x.bin-y.bin});
+  // 3. fill in order, one SKU per bin (optionally share a bin with the same size)
+  const groupOfItem=w=>(f.sepKol?(w.s.kol||'')+'|':'')+(f.order==='size'?w.s.size:(w.s.ser||'')+'|'+(w.s.col||''));
+  const out={},plan=[];let di=0,lastGroup=null,lastRack=null,short=0;const binUse={};
+  const nextBin=()=>dest[di++];
+  for(const w of items){const cap=capOf(w.s);let left=w.qty;const to=[];const g=groupOfItem(w);
+    if(f.newRack&&lastGroup!==null&&g!==lastGroup&&di<dest.length){const r=BINS.get(dest[di-1]||dest[di]).rack;while(di<dest.length&&BINS.get(dest[di]).rack===r&&lastRack===r)di++}
+    // share the last partly used bin with the same group
+    if(f.mix&&plan.length){const lp=plan[plan.length-1];const lb=lp.to[lp.to.length-1];if(lb&&groupOfItem(lp)===g){const room=cap-binUse[lb[0]];if(room>0){const t=Math.min(room,left);to.push([lb[0],t]);binUse[lb[0]]+=t;left-=t}}}
+    while(left>0){const c=nextBin();if(!c){short+=left;break}const t=Math.min(cap,left);to.push([c,t]);binUse[c]=t;left-=t;lastRack=BINS.get(c).rack}
+    lastGroup=g;plan.push({...w,cap,to,placed:to.reduce((a,x)=>a+x[1],0)})}
+  const used=Object.keys(binUse);
+  return {plan,dest,used,short,qty:items.reduce((a,w)=>a+w.qty,0),moves:plan.reduce((a,p)=>a+p.from.filter(([c])=>!p.to.some(t=>t[0]===c)).length,0)}}
+async function xferExcel(P,f,msgEl){
+  const dl=window.claude?await window.claude.use('downloads'):null;
+  if(!dl||!window.XLSX){msgEl.textContent='Muat turun tak tersedia.';return}
+  const now=new Date(),stamp=now.toLocaleString('ms-MY');
+  const J=v=>fArr(v).join(', ');const crit=[f.sku&&'SKU/nama: '+f.sku,J(f.brand)&&'Brand: '+J(f.brand),J(f.kol)&&'Koleksi: '+J(f.kol),J(f.grp)&&'Item group: '+J(f.grp),J(f.cat)&&'Kategori: '+J(f.cat),J(f.size)&&'Saiz: '+J(f.size),f.col&&'Warna: '+f.col,f.from&&'Dari row: '+f.from].filter(Boolean).join(' · ')||'-';
+  const dest=[f.rows.length&&'Row: '+f.rows.join(', ')+(P.added&&P.added.length?' + sambung ke '+P.added.join(', '):''),f.levels.length&&'Tingkat: '+f.levels.map(l=>'L'+l).join(', '),f.racks&&'Rak: '+f.racks].filter(Boolean).join(' · ');
+  const head=[['Transfer Bin – senarai pindah'],['Dicetak',stamp],['Stok',crit],['Tujuan',dest],['Asingkan koleksi',f.sepKol?'Ya':'Tidak'],['Susun ikut',f.order==='size'?'Saiz, kemudian siri dan warna':'Siri dan warna, kemudian saiz'],['Jumlah',`${P.plan.length} SKU · ${P.qty} helai · ${P.used.length} bin`],[]];
+  // one row per movement: split each SKU's source bins across its destination bins
+  const ord=c=>{const b=BINS.get(c);return b?[b.rack,b.level,b.bin]:[c,0,0]};const cmp=(a,b)=>{const x=ord(a),y=ord(b);return natSort(x[0],y[0])||x[1]-y[1]||x[2]-y[2]};
+  const moves=[];P.plan.filter(p=>p.placed).forEach(p=>{const src=p.from.map(([c,q])=>[c,q]).sort((a,b)=>cmp(a[0],b[0]));let si=0;
+    p.to.forEach(([dc,dq])=>{let need=dq;while(need>0&&si<src.length){const t=Math.min(need,src[si][1]);moves.push({p,from:src[si][0],to:dc,q:t});src[si][1]-=t;need-=t;if(!src[si][1])si++}})});
+  const s1=[...head,['No','Ke bin','SKU','Koleksi','Produk','Warna','Saiz','Qty','Ambil dari bin','Siap ✓']];
+  [...moves].sort((a,b)=>cmp(a.to,b.to)||cmp(a.from,b.from)).forEach((m,i)=>s1.push([i+1,m.to,m.p.sku,m.p.s.kol||'',m.p.s.ser||m.p.s.desc,m.p.s.col||'',m.p.s.size||'',m.q,m.from,'']));
+  const s2=[...head,['No','Ambil dari bin','SKU','Koleksi','Warna','Saiz','Qty','Hantar ke bin','Siap ✓']];
+  [...moves].sort((a,b)=>cmp(a.from,b.from)||cmp(a.to,b.to)).forEach((m,i)=>s2.push([i+1,m.from,m.p.sku,m.p.s.kol||'',m.p.s.col||'',m.p.s.size||'',m.q,m.to,'']));
+  const short=P.plan.filter(p=>p.placed<p.qty);
+  const wb=XLSX.utils.book_new();
+  const mk=(aoa,cols)=>{const ws=XLSX.utils.aoa_to_sheet(aoa);ws['!cols']=cols.map(w=>({wch:w}));return ws};
+  XLSX.utils.book_append_sheet(wb,mk(s1,[5,14,18,8,34,16,8,7,14,8]),'Ikut bin tujuan');
+  XLSX.utils.book_append_sheet(wb,mk(s2,[5,16,18,8,16,8,7,14,8]),'Ikut bin asal');
+  if(short.length)XLSX.utils.book_append_sheet(wb,mk([['SKU','Warna','Saiz','Jumlah helai','Dapat diletak','Tak dapat diletak'],...short.map(p=>[p.sku,p.s.col||'',p.s.size||'',p.qty,p.placed,p.qty-p.placed])],[18,16,8,12,12,16]),'Tak cukup bin');
+  const buf=XLSX.write(wb,{type:'array',bookType:'xlsx'});
+  const fn=`Transfer_Bin_${now.getFullYear()}${String(now.getMonth()+1).padStart(2,'0')}${String(now.getDate()).padStart(2,'0')}_${String(now.getHours()).padStart(2,'0')}${String(now.getMinutes()).padStart(2,'0')}.xlsx`;
+  try{await dl.save({filename:fn,data:buf});msgEl.textContent='✓ Fail '+fn+' dimuat turun. Buka dalam Excel untuk cetak.'}
+  catch(e){msgEl.textContent=e&&e.code==='declined'?'Muat turun dibatalkan.':e&&e.code==='rate_limited'?'Tunggu sekejap dan cuba lagi.':'Muat turun tak dapat dibuat di paparan ini.'}}
+// saved transfer plans (collection xfers)
+// a database document holds at most 256 KiB, so the plan is stored in parts (xferparts/<id>_<n>)
+function xferToDoc(P,f,name,status){const items=P.plan.map(p=>({k:p.sku,q:p.qty,p:p.placed,f:p.from,t:p.to}));const parts=[];let cur=[],size=0;
+  items.forEach(it=>{const n=JSON.stringify(it).length+1;if(size+n>180000&&cur.length){parts.push(cur);cur=[];size=0}cur.push(it);size+=n});if(cur.length)parts.push(cur);
+  return {meta:{name,filter:JSON.parse(JSON.stringify(f)),created:Date.now(),by:me(),status,qty:P.qty,short:P.short,added:P.added||[],destN:P.dest.length,skuN:P.plan.length,binN:P.used.length,parts:parts.length},parts}}
+function xferFromDoc(id,d,items){const plan=(items||d.plan||[]).map(x=>({sku:x.k,qty:x.q,placed:x.p,from:x.f||[],to:x.t||[],s:sku(x.k)||{sku:x.k,size:'',col:'',kol:kolOf(x.k),desc:''}}));
+  const used=d.used||[...new Set(plan.flatMap(p=>p.to.map(t=>t[0])))];
+  return {plan,used,short:d.short||0,qty:d.qty||0,added:d.added||[],dest:{length:d.destN||0},saved:{id,...d}}}
+async function xferLoad(id){const d=st.xfers[id];if(!d)return null;if(d.plan)return xferFromDoc(id,d);const items=[];
+  for(let i=0;i<(d.parts||0);i++){const sn=await db.doc('xferparts/'+id+'_'+i).get();if(sn.exists)items.push(...(sn.data().plan||[]))}
+  return xferFromDoc(id,d,items)}
+function xferName(f,P){const rows=[...f.rows,...(P.added||[])].join(', ')||f.racks;return chkName({...f,mode:'all'})+' → '+rows}
+// when the chosen rows are not enough, carry on into the next rows on the same floor
+function xferPlanAuto(f){let p=xferPlan(f);p.added=[];if(!p.short||!f.auto||!f.rows.length||f.racks.trim())return p;
+  const floorOf=r=>(RACKS.find(x=>x.r===r)||{}).f;const fl=new Set(f.rows.map(floorOf));
+  const all=[...new Set(RACKS.filter(r=>r.id&&fl.has(r.f)&&/^\d-[A-Z]+$/.test(r.r)).map(r=>r.r))].sort(natSort);
+  const idx=f.rows.map(r=>all.indexOf(r)).filter(i=>i>=0);if(!idx.length)return p;
+  const hi=Math.max(...idx),lo=Math.min(...idx);const cand=[...all.slice(hi+1),...all.slice(0,lo).reverse()].filter(r=>!f.rows.includes(r));
+  let rows=[...f.rows];
+  for(const r of cand){rows.push(r);p=xferPlan({...f,rows});p.added=rows.slice(f.rows.length);if(!p.short)break}
+  return p}
+function renderXfer(){main.className='';
+  const M=Object.keys(st.master).map(sku);const opt=(arr,v,ph)=>`<option value="">${ph}</option>`+arr.map(x=>`<option${x===v?' selected':''}>${esc(x)}</option>`).join('');
+  const sizes=[...new Set(M.map(s=>s.size).filter(Boolean))].sort(szSort),brands=[...new Set(M.map(s=>s.brand).filter(Boolean))].sort(),grps=[...new Set(M.map(s=>s.grp).filter(Boolean))].sort();
+  const rows=[...new Set(RACKS.map(r=>r.r))].sort(natSort);const maxL=Math.max(...RACKS.filter(r=>!xf.rows.length||xf.rows.includes(r.r)).map(r=>r.l),1);
+  const f=xf;const P=xPlan;
+  const saved=Object.entries(st.xfers||{}).sort((a,b)=>(b[1].created||0)-(a[1].created||0));
+  const viewing=P&&P.saved;
+  let h=saved.length?`<section class="card"><div class="row"><h2 style="margin-right:auto">Cadangan disimpan</h2>${viewing?'<button class="btn pri" id="xnew">+ Cadangan baru</button>':''}</div>
+    <select id="xsel"><option value="">${viewing?'— pilih —':'Pilih untuk rujuk balik ('+saved.length+')'}</option>${saved.map(([id,d])=>`<option value="${esc(id)}"${viewing&&viewing.id===id?' selected':''}>${d.status==='done'?'✓ ':'• '}${esc(d.name)} · ${new Date(d.created||0).toLocaleDateString('ms-MY')}</option>`).join('')}</select>
+    <p class="small muted" style="margin:0">✓ = dah dipindah · • = belum dipindah</p></section>`:'';
+  if(!viewing)h+=`<section class="card"><h2>Transfer Bin Suggestion</h2><p class="small muted">Pilih stok yang nak disusun semula, kemudian pilih row dan tingkat tujuan. Sistem cadang susunan yang senang dipick.</p>
+    <h3 style="margin:6px 0 0">1. Stok yang nak dipindah</h3>
+    <div class="fgrid">
+      <label for="xs">SKU / nama</label><input id="xs" list="skus" value="${esc(f.sku)}" placeholder="cth PTX2TBD atau Teluk Belanga" autocomplete="off">
+      <span>Brand</span>${multiPick('brand',brands,f.brand,'Semua brand')}
+      <span>Koleksi</span>${multiChips('kol',kols(f.brand),f.kol)}
+      <span>Item group</span>${multiPick('grp',grps,f.grp,'Semua item group')}
+      <span>Kategori</span>${multiChips('cat',['Men','Women','Kids','Baby'],f.cat)}
+      <span>Saiz</span>${multiChips('size',sizes,f.size)}
+      <label for="xw">Warna</label><input id="xw" value="${esc(f.col)}" placeholder="cth Brick Red" autocomplete="off">
+      <label for="xfr">Sekarang di row</label><select id="xfr">${opt(rows,f.from,'Semua row')}</select>
+    </div>
+    <h3 style="margin:10px 0 0">2. Tujuan</h3>
+    <div class="small muted">Row (boleh pilih lebih dari satu)</div>
+    <div class="chips2">${rows.map(r=>`<button class="chip2" data-xrow="${esc(r)}" aria-pressed="${f.rows.includes(r)}">${esc(r)}</button>`).join('')}</div>
+    <div class="small muted" style="margin-top:6px">Tingkat (kosongkan untuk semua)</div>
+    <div class="chips2">${Array.from({length:maxL},(_,i)=>i+1).map(l=>`<button class="chip2" data-xlv="${l}" aria-pressed="${f.levels.includes(l)}">L${l}</button>`).join('')}</div>
+    <div class="fgrid"><label for="xr">Rak tertentu</label><input id="xr" value="${esc(f.racks)}" placeholder="pilihan, cth 1-G1, 1-G2" autocomplete="off"></div>
+    <h3 style="margin:10px 0 0">3. Cara susun</h3>
+    <div class="fgrid"><label for="xo">Susun ikut</label><select id="xo"><option value="size"${f.order==='size'?' selected':''}>Saiz dahulu, kemudian siri dan warna</option><option value="ser"${f.order==='ser'?' selected':''}>Siri dan warna dahulu, kemudian saiz</option></select></div>
+    <label class="row small"><input type="checkbox" id="xk2"${f.sepKol?' checked':''}> Asingkan ikut koleksi (koleksi terbaru dahulu, cth X4 → X3 → X2)</label>
+    <label class="row small"><input type="checkbox" id="xn"${f.newRack?' checked':''}> Mula ${f.order==='size'?'setiap saiz':'setiap siri/warna'} pada rak baru</label>
+    <label class="row small"><input type="checkbox" id="xa"${f.auto?' checked':''}> Kalau bin tak cukup, sambung ke row sebelah secara automatik</label>
+    <label class="row small"><input type="checkbox" id="xm"${f.mix?' checked':''}> Benarkan SKU ${f.order==='size'?'saiz sama':'siri/warna sama'} berkongsi bin yang belum penuh</label>
+    <div class="row"><button class="btn pri" id="xgo">Cadang susunan</button>${P?'<button class="btn" id="xclr">Kosongkan</button>':''}</div>
+    <div id="xmsg" class="small">${esc(xMsg)}</div></section>`;
+  else if(xMsg)h+=`<section class="card"><div class="small">${esc(xMsg)}</div></section>`;
+  if(P){const placedAll=P.plan.every(p=>p.placed===p.qty);
+    const sv=P.saved;
+    h+=`<section class="card"><div class="pickhd"><h2>${sv?esc(sv.name):'Cadangan'}</h2>${sv?(sv.status==='done'?'<span class="badge2" style="background:color-mix(in srgb,var(--ok) 22%,transparent);color:var(--ok)">Dah dipindah</span>':'<span class="badge2" style="background:color-mix(in srgb,var(--warn) 22%,transparent);color:var(--warn)">Belum dipindah</span>'):''}</div>
+      ${sv?`<p class="small muted" style="margin:0">Disimpan oleh ${esc(sv.by||'-')} · ${new Date(sv.created||0).toLocaleString('ms-MY')}${sv.status==='done'?` · dipindah oleh ${esc(sv.doneBy||'-')} · ${new Date(sv.doneAt||0).toLocaleString('ms-MY')}`:''}</p>`:''}
+      <div class="stats"><div class="stat"><b>${fmt(P.plan.length)}</b><span>SKU</span></div><div class="stat"><b>${fmt(P.qty)}</b><span>Helai</span></div><div class="stat"><b>${fmt(P.used.length)}</b><span>Bin diperlukan</span></div><div class="stat"><b>${fmt(P.dest.length)}</b><span>Bin tujuan tersedia</span></div></div>
+      ${P.added&&P.added.length?`<p class="small" style="color:var(--warn)">Row dipilih tak cukup, jadi sistem sambung ke row sebelah: <b>${P.added.map(esc).join(', ')}</b>.</p>`:''}
+      ${P.short?`<p class="small" style="color:var(--bad)">Tak cukup bin: ${fmt(P.short)} helai tak dapat diletak. Tambah row atau tingkat tujuan.</p>`:''}
+      <p class="small muted">Bin tujuan ditanda ungu di peta. Klik kod bin untuk tengok di peta.</p>
+      <div class="tbl"><table><thead><tr><th>SKU</th><th>Dari</th><th>Ke</th></tr></thead><tbody>
+      ${P.plan.map(p=>`<tr><td><span class="code">${esc(p.sku)}</span><div class="small muted">${p.s.kol?esc(p.s.kol)+' · ':''}${esc(p.s.size)} · ${esc(p.s.col||'')} · ${fmt(p.qty)} helai</div></td>
+        <td class="small">${p.from.map(([c,q])=>`<a href="#" data-xbin="${esc(c)}" style="color:var(--fg)">${esc(c)}</a> (${q})`).join('<br>')}</td>
+        <td class="small">${p.to.map(([c,q])=>`<a href="#" data-xbin="${esc(c)}" style="color:var(--accent)">${esc(c)}</a> (${q})`).join('<br>')||'<span style="color:var(--bad)">tiada bin</span>'}</td></tr>`).join('')}
+      </tbody></table></div>
+      <div class="row">${sv?'':'<button class="btn pri" id="xsave">Simpan cadangan</button>'}<button class="btn${sv?' pri':''}" id="xxls">Muat turun Excel untuk cetak</button></div><div id="xxmsg" class="small"></div>
+      <div class="row">${sv&&sv.status==='done'?'':`<button class="btn ok" id="xapply"${P.plan.some(p=>p.placed)?'':' disabled'}>Dah pindah semua – kemas kini lokasi</button>`}${sv?'<button class="btn" id="xdel">Padam cadangan</button>':''}</div><div id="xamsg" class="small"></div>
+      ${placedAll?'':'<p class="small muted">SKU tanpa bin tujuan tak akan diubah.</p>'}</section>`}
+  main.innerHTML=h+skuOptions();
+  const xs=$('#xsel');if(xs)xs.onchange=async()=>{const id=xs.value;if(!id){xPlan=null;render();return}setStatus('Memuatkan cadangan…');let p=null;try{p=await xferLoad(id)}catch(e){}if(!p){setStatus('Cadangan tak dapat dibuka.',true);return}setStatus('✓ Cadangan dibuka');xPlan=p;xMsg='';locQuiet=true;const first=xPlan.used[0];if(first)openOnMap(first,true);render()};
+  const xn=$('#xnew');if(xn)xn.onclick=()=>{xPlan=null;xMsg='';render()};
+  if(!viewing){
+  const upd=(k,v)=>{xf[k]=v;xPlan=null;xMsg='';renderXfer()};
+  bindMulti(main,xf,()=>{xPlan=null;xMsg='';renderXfer()});
+  [['xfr','from'],['xo','order']].forEach(([id,k])=>$('#'+id).onchange=e=>upd(k,e.target.value));
+  [['xs','sku'],['xw','col'],['xr','racks']].forEach(([id,k])=>$('#'+id).onchange=e=>upd(k,e.target.value.trim()));
+  $('#xn').onchange=e=>upd('newRack',e.target.checked);$('#xa').onchange=e=>upd('auto',e.target.checked);$('#xk2').onchange=e=>upd('sepKol',e.target.checked);$('#xm').onchange=e=>upd('mix',e.target.checked);
+  main.querySelectorAll('[data-xrow]').forEach(b=>b.onclick=()=>{const r=b.dataset.xrow;upd('rows',f.rows.includes(r)?f.rows.filter(x=>x!==r):[...f.rows,r])});
+  main.querySelectorAll('[data-xlv]').forEach(b=>b.onclick=()=>{const l=+b.dataset.xlv;upd('levels',f.levels.includes(l)?f.levels.filter(x=>x!==l):[...f.levels,l].sort((a,b)=>a-b))});
+  $('#xgo').onclick=()=>{if(!skuFilterOn(f)&&!f.from){xMsg='Pilih sekurang-kurangnya satu: SKU, brand, item group, kategori, saiz, warna atau row asal.';renderXfer();return}
+    if(!f.rows.length&&!f.racks){xMsg='Pilih row tujuan atau rak tertentu.';renderXfer();return}
+    const p=xferPlanAuto(f);if(!p.plan.length){xMsg='Tiada stok dalam bin yang sepadan dengan pilihan.';xPlan=null;renderXfer();return}
+    xPlan=p;xMsg='';mapHL=[];locQuiet=true;const first=p.used[0];if(first)openOnMap(first,true);render()};
+  const xc=$('#xclr');if(xc)xc.onclick=()=>{xPlan=null;xMsg='';render()};
+  }
+  main.querySelectorAll('[data-xbin]').forEach(a=>a.onclick=e=>{e.preventDefault();locQuiet=true;openOnMap(a.dataset.xbin)});
+  const xx=$('#xxls');if(xx)xx.onclick=()=>xferExcel(P,P.saved?P.saved.filter:f,$('#xxmsg'));
+  const saveDoc=async(status)=>{const {meta,parts}=xferToDoc(P,f,xferName(f,P),status);if(status==='done'){meta.doneAt=Date.now();meta.doneBy=me()}
+    const id='x'+Date.now().toString(36);
+    const ok=await guarded(async()=>{for(let i=0;i<parts.length;i++)await db.doc('xferparts/'+id+'_'+i).set({plan:parts[i]});await db.doc('xfers/'+id).set(meta)},status==='done'?'Cadangan disimpan sebagai rekod':'Cadangan disimpan');
+    return ok?[id,meta,parts.flat()]:null};
+  const xsv=$('#xsave');if(xsv)xsv.onclick=async()=>{const r=await saveDoc('draft');if(r){st.xfers[r[0]]=r[1];xPlan=xferFromDoc(r[0],r[1],r[2]);render()}};
+  const xd=$('#xdel');if(xd)xd.onclick=()=>askInline($('#xamsg'),'Padam cadangan ini? Lokasi stok tak berubah.',async()=>{const id=P.saved.id;const n=P.saved.parts||0;if(await guarded(async()=>{await db.doc('xfers/'+id).delete();for(let i=0;i<n;i++)await db.doc('xferparts/'+id+'_'+i).delete()},'Cadangan dipadam')){delete st.xfers[id];xPlan=null;render()}});
+  const stale=!P?0:P.plan.filter(p=>p.placed===p.qty).reduce((n,p)=>n+p.from.filter(([c,q])=>{const e=binItems(c).find(x=>x[0]===p.sku);return !e||e[1]<q}).length,0);
+  const ap=$('#xapply');if(ap)ap.onclick=()=>askInline($('#xamsg'),`Kemas kini lokasi untuk ${P.plan.filter(p=>p.placed===p.qty).length} SKU? Pastikan barang dah betul-betul dialih.${stale?`\n\nPerhatian: ${stale} bin asal dah tak sama dengan stok semasa (mungkin dah berubah sejak cadangan dibuat).`:''}`,async()=>{
+    const changes={};const cur=c=>changes[c]||(changes[c]=binItems(c).map(x=>[...x]));
+    const done=P.plan.filter(p=>p.placed===p.qty);
+    done.forEach(p=>p.from.forEach(([c])=>{changes[c]=cur(c).filter(([k])=>k!==p.sku)}));
+    done.forEach(p=>p.to.forEach(([c,q])=>{const arr=cur(c);const e=arr.find(x=>x[0]===p.sku);if(e)e[1]+=q;else arr.push([p.sku,q])}));
+    QUIET++;let okA=false;try{okA=await guarded(()=>saveBins(changes),'Lokasi dikemas kini')}finally{QUIET--}
+    if(okA){
+      if(P.saved){const id=P.saved.id;const upd2={...st.xfers[id],status:'done',doneAt:Date.now(),doneBy:me()};delete upd2.id;await guarded(()=>db.doc('xfers/'+id).set(upd2),'Rekod dikemas kini');st.xfers[id]=upd2}
+      else{const r=await saveDoc('done');if(r)st.xfers[r[0]]=r[1]}
+      xPlan=null;xMsg=`✓ ${done.length} SKU dipindah dan lokasi dikemas kini. Rekod disimpan dalam "Cadangan disimpan".`;render()}});
+}
+
+let cariQ='';
+function renderCari(){main.className='';main.innerHTML=`<section class="card"><h2>Cari SKU atau bin</h2>
+    <div class="row"><input id="cq" class="grow" list="skus" placeholder="SKU, nama produk atau kod bin (cth 1-A1-L1-2)" autocomplete="off"><button class="btn pri" id="cgo">Cari</button></div><div id="cr"></div>${skuOptions()}</section>`;
+  const go=()=>{const q=$('#cq').value.trim();const box=$('#cr');cariQ=q;if(!q){box.innerHTML='';return}
+    if(BINS.has(q.toUpperCase())){const code=q.toUpperCase();if(mapPicked!==code){mapHL=[code];openOnMap(code,true);ensureMap(false)}const it=binItems(code);const b=BINS.get(code);
+      box.innerHTML=`<div class="item"><div class="row"><span class="code">${esc(code)}</span><span class="pill">Row ${esc(b.row)}</span><span class="pill">${b.floor===2?'Level M':'Ground floor'}</span>${b.plan?`<span class="pill">Rak ${esc(b.plan[0])} ${esc(b.plan[1])}</span>`:''}</div>
+        <div>${fmt(binQty(code))} / ${binCap(code)} helai</div><div class="tbl"><table><thead><tr><th>SKU</th><th>Warna · saiz</th><th class="n">Qty</th></tr></thead><tbody>${it.map(([k,qq])=>`<tr><td>${esc(k)}</td><td>${esc(sku(k)?.col||'')} · ${esc(sku(k)?.size||'')}</td><td class="n">${qq}</td></tr>`).join('')||'<tr><td colspan="3" class="empty">Kosong</td></tr>'}</tbody></table></div></div>`;return}
+    const ql=q.toLowerCase();const hits=Object.keys(st.master).filter(k=>k.toLowerCase().includes(ql)||st.master[k][0].toLowerCase().includes(ql)).slice(0,30);
+    box.innerHTML=hits.length?`<div class="list">${hits.map(k=>{const s=sku(k),L=skuLocs(k),inBins=L.reduce((a,x)=>a+x.qty,0);
+      return `<div class="item">${skuLine(s)}<div class="row small"><span>Stok sistem: <b>${fmt(s.qty)}</b></span><span>Dalam bin: <b>${fmt(inBins)}</b></span>${inBins!==s.qty?'<span class="pill warn">Tak sama</span>':''}</div><div>${L.map(l=>`<span class="code">${esc(l.code)}</span> (${l.qty})`).join(' ')||'<span class="empty">Belum ada lokasi</span>'}</div>${L.length?`<div><button class="btn" data-map="${esc(L.map(l=>l.code).join(','))}">Tunjuk di peta</button></div>`:''}</div>`}).join('')}</div>`:'<p class="empty">Tiada padanan.</p>'};
+  $('#cr').onclick=e=>{const b=e.target.closest('[data-map]');if(b){showOnMap(b.dataset.map.split(','));return}const c=e.target.closest('.code');if(c&&BINS.has(c.textContent.trim())){mapHL=[c.textContent.trim()];openOnMap(c.textContent.trim())}};
+  $('#cgo').onclick=go;$('#cq').onkeydown=e=>{if(e.key==='Enter')go()};
+  if(cariQ){$('#cq').value=cariQ;go()}}
+
+let pending=null;
+// ---------- location report upload (Inventory Balance Detailed Report: SKU, Bin, Total Qty ...) ----------
+let pendingLoc=null;
+function parseLocReport(rows){const col=(r,names)=>{const k=Object.keys(r).find(x=>names.includes(x.trim().toLowerCase()));return k?r[k]:''};
+  const loc={},master={},queue={},ignored={};let inRack=0,rec=0;
+  rows.forEach(r=>{const k=String(col(r,['sku'])).trim();if(!k)return;const q=+String(col(r,['total qty','qty'])).replace(/,/g,'')||0;if(q<=0)return;
+    let bin=String(col(r,['bin'])).trim().replace(/-LI-/i,'-L1-');const m=bin.match(/^(.+)-L(\d+)-(\d+)$/i);
+    const desc=String(col(r,['sku description'])).trim(),grp=String(col(r,['item group'])).trim(),brand=String(col(r,['item brand'])).trim();
+    const add=()=>{if(!master[k]){const p=parseDesc(desc);master[k]=[desc,brand,grp,catOf(grp,desc),p.ser,p.col,p.size,0]}master[k][7]+=q};
+    if(m){const code=`${m[1].toUpperCase()}-L${+m[2]}-${+m[3]}`;(loc[code]=loc[code]||{})[k]=(loc[code][k]||0)+q;inRack+=q;add()}
+    else if(/receiving/i.test(bin)){queue[k]=(queue[k]||0)+q;rec+=q;add()}
+    else ignored[bin||'(tiada bin)']=(ignored[bin||'(tiada bin)']||0)+q});
+  return {loc,master,queue,ignored,inRack,rec}}
+function locRowOf(code){const b=BINS.get(code);if(b)return b.row;const rk=code.replace(/-L\d+-\d+$/,'');const r=RACKS.find(x=>x.c===rk);if(r)return r.r;return guessRow(rk)||(rk.match(/^(\d-[A-Z]+)/)||[])[1]||'Lain'}
+function showLocPreview(ur,P){const curQ=c=>binQty(c);const rackOf=c=>c.replace(/-L\d+-\d+$/,'');
+  const codes=new Set([...Object.keys(P.loc),...Object.keys(LOCAT)]);const diff={};let changed=0;
+  codes.forEach(c=>{const a=curQ(c),b=Object.values(P.loc[c]||{}).reduce((x,y)=>x+y,0);if(a!==b){changed++;const r=rackOf(c);const o=diff[r]=diff[r]||{a:0,b:0};o.a+=a;o.b+=b}});
+  const racks=Object.entries(diff).sort((x,y)=>Math.abs(y[1].b-y[1].a)-Math.abs(x[1].b-x[1].a));
+  const ign=Object.entries(P.ignored).sort((a,b)=>b[1]-a[1]);
+  ur.innerHTML=`<div class="stats"><div class="stat"><b>${fmt(P.inRack)}</b><span>Helai dalam bin rak</span></div><div class="stat"><b>${fmt(Object.keys(P.loc).length)}</b><span>Bin berisi</span></div><div class="stat"><b>${fmt(Object.keys(P.master).length)}</b><span>SKU</span></div><div class="stat"><b>${fmt(P.rec)}</b><span>Di Receiving</span></div></div>
+    <p class="small muted">Fail ni ada lajur <b>Bin</b>, jadi sistem akan <b>ganti semua lokasi</b> ikut fail. ${fmt(changed)} bin berubah berbanding data sekarang.</p>
+    ${racks.length?`<div class="tbl"><table><thead><tr><th>Rak</th><th class="n">Sekarang</th><th class="n">Fail</th></tr></thead><tbody>${racks.slice(0,40).map(([r,o])=>`<tr><td><span class="code">${esc(r)}</span></td><td class="n">${fmt(o.a)}</td><td class="n" style="color:var(${o.b>o.a?'--ok':'--bad'})">${fmt(o.b)}</td></tr>`).join('')}</tbody></table></div>${racks.length>40?`<p class="small muted">+ ${racks.length-40} rak lagi</p>`:''}`:'<p class="small">Tiada perubahan lokasi.</p>'}
+    ${ign.length?`<details><summary class="small">Tidak dimasukkan (${fmt(ign.reduce((a,x)=>a+x[1],0))} helai, bukan bin rak)</summary><div class="small muted" style="margin-top:6px">${ign.slice(0,12).map(([b,n])=>`${esc(b)}: ${fmt(n)}`).join('<br>')}</div></details>`:''}
+    <div class="row"><button class="btn pri" id="uok">Sahkan dan ganti lokasi</button></div><div id="umsg" class="small"></div>`;
+  $('#uok').onclick=()=>askInline($('#umsg'),'Ganti semua lokasi bin dengan fail ini? Data lokasi sekarang akan diganti.',applyLocReport)}
+async function applyLocReport(){const P=pendingLoc;if(!P)return;
+  const rows={};Object.entries(P.loc).forEach(([c,m])=>{const r=locRowOf(c);(rows[r]=rows[r]||{})[c]=Object.entries(m)});
+  const keys=Object.keys(P.master).sort();const parts=[0,1,2,3].map(i=>{const o={};keys.filter((_,j)=>j%4===i).forEach(k=>o[k]=P.master[k]);return o});
+  QUIET++;let ok=false;
+  try{ok=await guarded(async()=>{for(let i=0;i<4;i++)await db.doc('master/p'+i).set({skus:parts[i]});
+    for(const r in rows)await db.doc('loc/'+docId(r)).set({row:r,bins:rows[r]});
+    for(const r in st.loc)if(!rows[r])await db.doc('loc/'+docId(r)).delete();
+    await db.doc('queue/pending').set({items:P.queue})},'Lokasi dikemas kini ikut fail')}finally{QUIET--}
+  if(ok){pendingLoc=null;tab='peta';render()}}
+function renderUpload(){main.className='';const totSku=Object.keys(st.master).length,tot=Object.values(st.master).reduce((a,m)=>a+m[7],0);
+  main.innerHTML=`<section class="card"><h2>Upload stok terkini</h2>
+    <p class="small muted">Upload <b>Inventory Balance Detailed Report</b> (CSV atau Excel). Kalau fail ada lajur <b>Bin</b>, lokasi setiap bin dikemas kini ikut fail. Fail tanpa lajur Bin cuma kemas kini jumlah stok. Sistem tunjuk perubahan dulu sebelum anda sahkan.</p>
+    <div class="stats"><div class="stat"><b>${fmt(totSku)}</b><span>SKU dalam data</span></div><div class="stat"><b>${fmt(tot)}</b><span>Jumlah helai</span></div></div>
+    <input id="uf" type="file" accept=".xlsx,.xls,.csv"><div id="ur"></div></section>`;
+  $('#uf').onchange=async e=>{const f=e.target.files[0];if(!f)return;const ur=$('#ur');ur.innerHTML='<p class="empty">Membaca fail…</p>';
+    try{const wb=XLSX.read(await f.arrayBuffer(),{type:'array',raw:true});const rows=XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]],{defval:'',raw:false});
+      if(rows.length&&Object.keys(rows[0]).some(x=>x.trim().toLowerCase()==='bin')){pendingLoc=parseLocReport(rows);if(!Object.keys(pendingLoc.loc).length){ur.innerHTML='<p class="pill bad">Tiada bin rak dijumpai dalam fail.</p>';return}showLocPreview(ur,pendingLoc);return}
+      const col=(r,names)=>{const k=Object.keys(r).find(x=>names.includes(x.trim().toLowerCase()));return k?r[k]:''};
+      const next={};rows.forEach(r=>{const k=String(col(r,['sku'])).trim();if(!k)return;const desc=String(col(r,['sku description','description','penerangan'])).trim();
+        const grp=String(col(r,['item group','group'])).trim(),brand=String(col(r,['item brand','brand'])).trim(),qty=Math.round(+col(r,['total qty','qty','quantity'])||0);
+        const p=parseDesc(desc);next[k]=[desc,brand,grp,catOf(grp,desc),p.ser,p.col,p.size,(next[k]?next[k][7]:0)+qty]});
+      if(!Object.keys(next).length){ur.innerHTML='<p class="pill bad">Tiada lajur SKU dijumpai dalam fail.</p>';return}
+      const ch=[];const all=new Set([...Object.keys(st.master),...Object.keys(next)]);
+      all.forEach(k=>{const inB=skuLocs(k).reduce((a,x)=>a+x.qty,0),nq=next[k]?next[k][7]:0;if(nq!==inB)ch.push({k,inB,nq,d:nq-inB})});
+      pending={next,ch};const add=ch.filter(x=>x.d>0),sub=ch.filter(x=>x.d<0);
+      ur.innerHTML=`<div class="stats"><div class="stat"><b>${fmt(Object.keys(next).length)}</b><span>SKU dalam fail</span></div><div class="stat"><b>${add.length}</b><span>Perlu disimpan (+${fmt(add.reduce((a,x)=>a+x.d,0))} helai)</span></div><div class="stat"><b>${sub.length}</b><span>Berkurang (−${fmt(-sub.reduce((a,x)=>a+x.d,0))} helai)</span></div></div>
+        <p class="small muted">Bila disahkan: data stok diganti dengan fail ini; SKU bertambah masuk senarai <b>Menunggu disimpan</b>; SKU berkurang ditolak dari bin (bin paling sikit dulu).</p>
+        <div class="tbl"><table><thead><tr><th>SKU</th><th class="n">Dalam bin</th><th class="n">Fail</th><th class="n">Beza</th></tr></thead><tbody>${ch.slice(0,100).map(x=>`<tr><td>${esc(x.k)}</td><td class="n">${x.inB}</td><td class="n">${x.nq}</td><td class="n" style="color:var(${x.d>0?'--ok':'--bad'})">${x.d>0?'+':''}${x.d}</td></tr>`).join('')}</tbody></table></div>
+        ${ch.length>100?`<p class="small muted">+ ${ch.length-100} lagi</p>`:''}<div class="row"><button class="btn pri" id="uok">Sahkan dan kemas kini</button></div>`;
+      $('#uok').onclick=applyUpload}
+    catch(err){ur.innerHTML='<p class="pill bad">Fail tak dapat dibaca. Pastikan ia fail Excel atau CSV.</p>'}}}
+async function applyUpload(){if(!pending)return;const {next,ch}=pending;const changes={},queue={...st.queue};
+  ch.forEach(x=>{if(x.d>0){queue[x.k]=x.d}else{delete queue[x.k];let rm=-x.d;skuLocs(x.k).sort((a,b)=>a.qty-b.qty).forEach(l=>{if(rm<=0)return;const t=Math.min(rm,l.qty);addTo(changes,l.code,x.k,-t);rm-=t})}});
+  Object.keys(queue).forEach(k=>{if(!next[k])delete queue[k]});
+  const ok=await guarded(async()=>{const keys=Object.keys(next).sort();for(let i=0;i<4;i++){const part={};keys.filter((_,j)=>j%4===i).forEach(k=>part[k]=next[k]);await db.doc('master/p'+i).set({skus:part})}
+    await saveBins(changes);await db.doc('queue/pending').set({items:queue});st.master=next;st.queue=queue},'Stok dikemas kini');
+  if(ok){pending=null;tab='peta';render()}}
+
+// ---------- one map for every tab: panels render on the right, the map stays ----------
+['renderCheck','renderCari','renderUpload','renderCap','renderXfer'].forEach(n=>{const f=window[n];window[n]=function(){ensureMap(false);f.apply(this,arguments);
+  if((mapRack||mapPicked)&&!(locQuiet&&(tab==='check'||tab==='xfer'))){const box=document.createElement('div');box.style.display='contents';box.innerHTML=locCardsHTML();
+    const first=main.firstElementChild;if(tab==='cari'&&first)first.after(box);else main.prepend(box);bindLocCards(box)}}});
+// ---------- boot ----------
+async function connectDb(){
+  // the runtime may attach window.claude a moment after the page starts, so wait for it, then try twice
+  for(let i=0;i<50&&!window.claude;i++)await new Promise(r=>setTimeout(r,200));
+  for(let t=0;t<2;t++){try{const d=window.claude?await window.claude.use('db'):null;if(d)return d}catch(e){}await new Promise(r=>setTimeout(r,1500))}
+  return null}
+async function boot(){render();setStatus('Menyambung ke storan…');
+  db=await connectDb();
+  if(!db){const s=$('#status');s.innerHTML='Storan tidak disambung. <button class="linkbtn" id="retrydb" style="color:var(--accent)">Cuba lagi</button>';s.classList.add('bad');
+    $('#retrydb').onclick=()=>location.reload();return}
+  setStatus('✓ Disambung');checkImport(db);
+  const parts={};for(let i=0;i<4;i++)db.doc('master/p'+i).onSnapshot(s=>{parts[i]=(s.exists&&s.data().skus)||{};if(Object.keys(parts).length===4){st.master=Object.assign({},...Object.values(parts));st.ready.m=1;render()}},()=>{});
+  db.collection('loc').onSnapshot(snap=>{const m={};snap.docs.forEach(d=>{const v=d.data();m[v.row||d.id]=v.bins||{}});st.loc=m;indexLoc();{const sy=$('#synct');if(sy)sy.textContent=new Date().toLocaleString('ms-MY',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'})}st.ready.l=1;if(orphanPass()){buildBinsRaw();if(MAP){MAP.dispose();MAP=null}}if(MAP)MAP.paint();if(!busy())render()},()=>setStatus('Sambungan terputus. Muat semula halaman.',true));
+  db.doc('queue/pending').onSnapshot(s=>{st.queue=(s.exists&&s.data().items)||{};if(!busy())render()},()=>{});
+  db.doc('settings/racks').onSnapshot(s=>{const cfg=s.exists?s.data():{};const key=JSON.stringify([cfg.edit||{},cfg.add||{}]);if(key===JSON.stringify([RACK_CFG.edit,RACK_CFG.add]))return;
+    applyRackCfg(cfg);if(MAP){MAP.dispose();MAP=null}if(!busy())render()},()=>{});
+  db.doc('settings/caps').onSnapshot(s=>{const wasClean=!capDraft||JSON.stringify({def:capDraft.def,groups:capDraft.groups})===JSON.stringify({def:CAPS.def,groups:CAPS.groups||{}});if(s.exists){const v=s.data();CAPS={def:+v.def||60,rules:Array.isArray(v.rules)?v.rules:[],groups:v.groups||null}}else CAPS=JSON.parse(JSON.stringify(DEFAULT_CAPS));if(MAP)MAP.paint();if(PLAN&&tab==='peta')PLAN.draw();if(wasClean)capDraft=null;if(!busy()&&wasClean)render()},()=>{});
+  db.doc('settings/main').onSnapshot(s=>{if(s.exists)st.settings=s.data()},()=>{});
+  db.collection('xfers').onSnapshot(snap=>{const m={};snap.docs.forEach(d=>{const v=d.data();if(v&&(Array.isArray(v.plan)||v.parts))m[d.id]=v});st.xfers=m;if(xPlan&&xPlan.saved&&m[xPlan.saved.id])xPlan.saved={id:xPlan.saved.id,...m[xPlan.saved.id]};if(!busy()&&tab==='xfer')render()},()=>{});
+  db.collection('checks').onSnapshot(snap=>{const m={};snap.docs.forEach(d=>{const v=d.data();if(v&&Array.isArray(v.bins))m[d.id]=v});st.checks=m;if(!busy()&&tab==='check')render()},()=>{});
+}
+let QUIET=0;
+const busy=()=>{if(QUIET>0)return true;const a=document.activeElement;return a&&(a.tagName==='INPUT'||a.tagName==='TEXTAREA')&&a.value!==''};
+window.__startApp=()=>boot();
+</script>
+
+</body>
+</html>
