@@ -300,6 +300,7 @@ h2.ih svg{width:20px;height:20px;color:var(--accent);flex:none}
 .kpi3 .hd{min-height:0}
 .kpi3 .ic{width:36px;height:36px}.kpi3 .ic svg{width:18px;height:18px}
 .kpi3 .num{font-size:28px}
+.kpi3 .kpisub{font-size:12.5px;white-space:normal;padding-top:6px}
 @media (min-width:1600px),(min-width:640px) and (max-width:1179px){.kpis4{grid-template-columns:repeat(4,1fr);gap:8px}
   .kpi3 .hd{flex-direction:column;align-items:flex-start;gap:8px}.kpi3 .lab{font-size:13px}.kpi3 .ft{flex-direction:column;align-items:flex-start;gap:2px}.kpi3 .num{font-size:26px}}
 .stpill{display:inline-block;padding:3px 10px;border-radius:99px;font-size:12px;font-weight:700;white-space:nowrap;background:var(--chip);color:var(--muted)}
@@ -607,7 +608,10 @@ const me=()=>who.value.trim()||'Anonymous';
 const setStatus=(t,bad)=>{const s=$('#status');s.textContent=t;s.classList.toggle('bad',!!bad)};
 const kolOf=k=>{const m=String(k).match(/^[A-Za-z]+?[Xx](\d+)/);return m?'X'+m[1]:''};
 const kolSort=(a,b)=>(parseInt(b.slice(1))||0)-(parseInt(a.slice(1))||0);
-function sku(s){const m=st.master[s];if(!m)return null;return {sku:s,desc:m[0],brand:m[1],grp:m[2],cat:m[3],ser:m[4],col:m[5],size:(m[6]==='TIADA'+' SAIZ'?'NO SIZE':String(m[6]).replace(/ thn$/,' yrs').replace(/ bln$/,' mths')),qty:m[7],kol:kolOf(s)}}
+// brand "DEFAULT" in a report: use the first word of the description when it is a known brand (e.g. "KHTM Camp Collar Shirt" -> KHTM)
+let _kbM=null,_kbS=null;const knownBrands=()=>{if(_kbM!==st.master){_kbM=st.master;_kbS=new Set(Object.values(st.master).map(m=>String(m[1]||'').toUpperCase()).filter(b=>b&&b!=='DEFAULT'))}return _kbS};
+function brandOf(m){const b=String(m[1]||'').trim();if(b&&!/^default$/i.test(b))return b;const w=String(m[0]||'').trim().split(/\s+/)[0].replace(/[^A-Za-z]/g,'').toUpperCase();return w&&knownBrands().has(w)?w:(b||'DEFAULT')}
+function sku(s){const m=st.master[s];if(!m)return null;return {sku:s,desc:m[0],brand:brandOf(m),grp:m[2],cat:m[3],ser:m[4],col:m[5],size:(m[6]==='TIADA'+' SAIZ'?'NO SIZE':String(m[6]).replace(/ thn$/,' yrs').replace(/ bln$/,' mths')),qty:m[7],kol:kolOf(s)}}
 // occupancy helpers
 let LOCAT={};function indexLoc(){LOCAT={};for(const row in st.loc)for(const c in st.loc[row])LOCAT[c]=row}
 const binItems=code=>{const r=LOCAT[code];return (r&&st.loc[r]&&st.loc[r][code])||[]};
@@ -1426,12 +1430,17 @@ function renderCheck(){main.className='';
     const cap=binCap(cur),used=binQty(cur);
     const st2=!r?['pend','Not counted']:r.diff?['bad','Discrepancy']:['ok','Counted · OK'];
     const last=Object.values(R).sort((x,y)=>(y.at||0)-(x.at||0))[0];
-    const kp=(ic,col,lab,n,sub)=>`<div class="kpi kpi2 kpi3" style="--c:${col}"><div class="hd"><span class="ic">${ICON[ic]}</span><span class="lab">${lab}</span></div><div class="ft"><span class="num">${fmt(n)}<small class="unit">bins</small></span>${sub?`<span class="pct" style="color:${col}">${sub}</span>`:''}</div></div>`;
+    const kp=(ic,col,lab,n,sub,pl)=>`<div class="kpi kpi2 kpi3" style="--c:${col}"><div class="hd"><span class="ic">${ICON[ic]}</span><span class="lab">${lab}</span></div><div class="ft"><span class="num">${fmt(n)}<small class="unit">bins</small></span>${sub?`<span class="pct" style="color:${col}">${sub}</span>`:''}</div>${pl!=null?`<div class="kpisub">${pl}</div>`:''}</div>`;
+    // pcs: system qty of the selected SKUs (snapshot at count time when available) and counted qty
+    const sysOf=b=>{const rr=R[b];if(rr&&rr.s)return Object.values(rr.s).reduce((a,x)=>a+(+x||0),0);return chkRows(c,b).reduce((a,x)=>a+x[1],0)};
+    const cntOf=b=>{const rr=R[b];return rr&&rr.c?Object.values(rr.c).reduce((a,x)=>a+(+x||0),0):0};
+    let pTot=0,pCnt=0,pCntSys=0,pLeft=0,pOver=0,pShort=0;AB.forEach(b=>{const s=sysOf(b);pTot+=s;if(R[b]){const n=cntOf(b);pCnt+=n;pCntSys+=s;
+      if(R[b].diff){const ss=R[b].s||Object.fromEntries(chkRows(c,b));const keys=new Set([...Object.keys(ss),...Object.keys(R[b].c||{})]);keys.forEach(k=>{const d=(+(R[b].c||{})[k]||0)-(+ss[k]||0);if(d>0)pOver+=d;else pShort-=d})}}else pLeft+=s});
     const prow=([k,q])=>{const got=r&&r.c&&k in r.c?r.c[k]:'';const s=sku(k);return `<tr data-row="${esc(k)}"><td><span class="code">${esc(k)}</span><div class="small muted">${esc(s?[s.col,s.size].filter(Boolean).join(' · '):'Not in system for this bin')}</div></td><td class="n">${fmt(q)}</td><td class="n"><input class="cnt" type="number" inputmode="numeric" min="0" data-k="${esc(k)}" data-sys="${q}" value="${got}" aria-label="Counted ${esc(k)}"></td><td class="n dif"></td><td class="stc"></td></tr>`};
     const listBtns=AB.map(x=>{const rr=R[x];const s=!rr?(chkSkip.has(x)?'skip':'pend'):rr.diff?'bad':'ok';return `<button type="button" class="binbtn ${s}${x===cur?' cur':''}${LV.has(x)?'':' gone'}" data-go="${esc(x)}" data-st="${s}" title="${esc(x)}"><i></i>${esc(x)}</button>`}).join('');
     h+=`<section class="card"><div class="sechd"><h2 class="ih">${ICON.chart}Stock Check Progress</h2><button class="linkbtn" id="cxdel" style="color:var(--muted)">Delete list</button></div>
       <div class="small muted" style="margin-top:-6px">${esc(c.name||('Random week '+(c.week||'')))} · created by ${esc(nm(c.by))}, ${new Date(c.created||0).toLocaleDateString('en-GB')}${c.only&&c.filter&&skuFilterOn(c.filter)?' · selected SKUs only':''}</div>${hid?`<div class="small hidnote"><span>${chkShowHid?`Showing ${fmt(hid)} bin${hid>1?'s':''} where the system no longer has the selected SKUs (dashed in the list).`:`${fmt(hid)} bin${hid>1?'s':''} hidden: the selected SKUs are no longer in ${hid>1?'them':'it'} (stock moved since the list was created).`}</span><button class="btn sm" id="cxhid">${chkShowHid?'Hide empty bins':'Show hidden bins'}</button></div>`:''}
-      <div class="kpis kpis4">${kp('box','var(--accent)','Total Bins',total,'')}${kp('ok','#34c38f','Counted',done,pct.toFixed(1)+'%')}${kp('used','#3b82f6','Remaining',left,total?(left/total*100).toFixed(1)+'%':'')}${kp('alert','#ef4444','Discrepancies',diffBins,done?(diffBins/done*100).toFixed(1)+'%':'')}</div>
+      <div class="kpis kpis4">${kp('box','var(--accent)','Total Bins',total,'',`<b>${fmt(pTot)}</b> pcs`)}${kp('ok','#34c38f','Counted',done,pct.toFixed(1)+'%',`<b>${fmt(pCnt)}</b> pcs${done?` <span class="muted">(system ${fmt(pCntSys)})</span>`:''}`)}${kp('used','#3b82f6','Remaining',left,total?(left/total*100).toFixed(1)+'%':'',`<b>${fmt(pLeft)}</b> pcs`)}${kp('alert','#ef4444','Discrepancies',diffBins,done?(diffBins/done*100).toFixed(1)+'%':'',pOver||pShort?`<b style="color:#7ee2b8">+${fmt(pOver)}</b> / <b style="color:#ff8a8a">−${fmt(pShort)}</b> pcs`:'<b>0</b> pcs')}</div>
       <div class="captr" role="img" aria-label="${pct.toFixed(1)}% counted"><span style="width:${pct.toFixed(2)}%"></span></div>
       <div class="row small" style="justify-content:space-between"><span class="muted">${last?`Last saved ${new Date(last.at).toLocaleString('en-GB',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'})} by ${esc(nm(last.by))}`:'No counts saved yet'}</span><b>${fmt(done)} / ${fmt(total)}</b></div>
       <div class="row"><button class="btn" id="cxrep"${done?'':' disabled'}>⤓ Discrepancy report (Excel)</button><span class="small muted">${diffBins?fmt(diffBins)+' bin'+(diffBins>1?'s':'')+' with differences':done?'No differences so far':'Available after counts are saved'}</span></div>
