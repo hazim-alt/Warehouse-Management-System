@@ -1876,14 +1876,20 @@ let pending=null;
 let pendingLoc=null;
 function parseLocReport(rows){const col=(r,names)=>{const k=Object.keys(r).find(x=>names.includes(x.trim().toLowerCase()));return k?r[k]:''};
   const loc={},master={},queue={},ignored={};let inRack=0,rec=0;
-  rows.forEach(r=>{const k=String(col(r,['sku'])).trim();if(!k)return;const q=+String(col(r,['total qty','qty'])).replace(/,/g,'')||0;if(q<=0)return;
+  // files exported per piece (Serial / EPC code, no quantity column): each row is 1 pc
+  const hdr=rows.length?Object.keys(rows[0]).map(x=>x.trim().toLowerCase()):[];const serial=!hdr.some(x=>['total qty','qty','quantity'].includes(x));
+  const seen=new Set();let dup=0;const fixB=new Set(),fixG=new Set();const isDef=v=>!v||/^default$/i.test(v);
+  rows.forEach(r=>{const k=String(col(r,['sku'])).trim();if(!k)return;
+    let q;if(serial){const sn=String(col(r,['epc code'])||col(r,['epc'])||col(r,['serial'])).trim();if(sn){if(seen.has(sn)){dup++;return}seen.add(sn)}q=1}else{q=+String(col(r,['total qty','qty'])).replace(/,/g,'')||0;if(q<=0)return}
     let bin=String(col(r,['bin'])).trim().replace(/-LI-/i,'-L1-');const m=bin.match(/^(.+)-L(\d+)-(\d+)$/i);
-    const desc=String(col(r,['sku description'])).trim(),grp=String(col(r,['item group'])).trim(),brand=String(col(r,['item brand'])).trim();
+    const desc=String(col(r,['sku description'])).trim();let grp=String(col(r,['item group'])).trim(),brand=String(col(r,['item brand'])).trim();const old=st.master[k];
+    if(isDef(brand)){const ob=old&&old[1];const w=(desc.split(/\s+/)[0]||'').replace(/[^A-Za-z]/g,'');brand=ob&&!isDef(ob)?ob:w.length>=2?w.toUpperCase():(brand||'DEFAULT');fixB.add(k)}
+    if(isDef(grp)){const og=old&&old[2];if(og&&!isDef(og)){grp=og;fixG.add(k)}else grp=grp||'DEFAULT'}
     const add=()=>{if(!master[k]){const p=parseDesc(desc);master[k]=[desc,brand,grp,catOf(grp,desc),p.ser,p.col,p.size,0]}master[k][7]+=q};
     if(m){const code=`${m[1].toUpperCase()}-L${+m[2]}-${+m[3]}`;(loc[code]=loc[code]||{})[k]=(loc[code][k]||0)+q;inRack+=q;add()}
     else if(/receiving/i.test(bin)){queue[k]=(queue[k]||0)+q;rec+=q;add()}
     else ignored[bin||'(no bin)']=(ignored[bin||'(no bin)']||0)+q});
-  return {loc,master,queue,ignored,inRack,rec}}
+  return {loc,master,queue,ignored,inRack,rec,serial,dup,fixB:fixB.size,fixG:fixG.size}}
 function locRowOf(code){const b=BINS.get(code);if(b)return b.row;const rk=code.replace(/-L\d+-\d+$/,'');const r=RACKS.find(x=>x.c===rk);if(r)return r.r;return guessRow(rk)||(rk.match(/^(\d-[A-Z]+)/)||[])[1]||'Other'}
 function showLocPreview(ur,P){const curQ=c=>binQty(c);const rackOf=c=>c.replace(/-L\d+-\d+$/,'');
   const codes=new Set([...Object.keys(P.loc),...Object.keys(LOCAT)]);const diff={};let changed=0;
@@ -1892,6 +1898,8 @@ function showLocPreview(ur,P){const curQ=c=>binQty(c);const rackOf=c=>c.replace(
   const ign=Object.entries(P.ignored).sort((a,b)=>b[1]-a[1]);
   ur.innerHTML=`<div class="stats"><div class="stat"><b>${fmt(P.inRack)}</b><span>Pcs in rack bins</span></div><div class="stat"><b>${fmt(Object.keys(P.loc).length)}</b><span>Bins with stock</span></div><div class="stat"><b>${fmt(Object.keys(P.master).length)}</b><span>SKU</span></div><div class="stat"><b>${fmt(P.rec)}</b><span>At Receiving</span></div></div>
     <p class="small muted">This file has a <b>Bins</b> column, so the system will <b>replace all locations</b> from the file. ${fmt(changed)} bins differ from the current data.</p>
+    ${P.serial?`<p class="small" style="margin:0">ℹ️ This file has one row per piece (Serial / EPC) and no quantity column, so each row is counted as <b>1 pc</b>.${P.dup?` ${fmt(P.dup)} repeated serial numbers were skipped.`:''}</p>`:''}
+    ${P.fixB||P.fixG?`<p class="small" style="margin:0">ℹ️ Item Brand / Item Group was "DEFAULT" for some SKUs. The system kept the brand${P.fixG?' and item group':''} already saved for those SKUs${P.fixB?', or took the brand from the first word of the description (e.g. KHTM)':''}. Brand fixed: ${fmt(P.fixB)} SKU${P.fixG?` · item group kept: ${fmt(P.fixG)} SKU`:''}.</p>`:''}
     ${racks.length?`<div class="tbl"><table><thead><tr><th>Rack</th><th class="n">Now</th><th class="n">File</th></tr></thead><tbody>${racks.slice(0,40).map(([r,o])=>`<tr><td><span class="code">${esc(r)}</span></td><td class="n">${fmt(o.a)}</td><td class="n" style="color:var(${o.b>o.a?'--ok':'--bad'})">${fmt(o.b)}</td></tr>`).join('')}</tbody></table></div>${racks.length>40?`<p class="small muted">+ ${racks.length-40} more racks</p>`:''}`:'<p class="small">No location changes.</p>'}
     ${ign.length?`<details><summary class="small">Not included (${fmt(ign.reduce((a,x)=>a+x[1],0))} pcs, not rack bins)</summary><div class="small muted" style="margin-top:6px">${ign.slice(0,12).map(([b,n])=>`${esc(b)}: ${fmt(n)}`).join('<br>')}</div></details>`:''}
     <div class="row"><button class="btn pri" id="uok">Confirm and replace locations</button></div><div id="umsg" class="small"></div>`;
