@@ -1258,19 +1258,21 @@ function avgPerBin(){const s=+((st.settings||{}).avgBin);return s>=10&&s<=200?s:
 // ---- collections in bins ----
 let kolSel=[];const kolF={brand:[]};
 const KOL_PAL=['#f472b6','#fb923c','#a3e635','#60a5fa','#facc15','#c084fc','#2dd4bf','#f87171'],KOL_MIX='#f8fafc';
-function kolAll(){const s=new Set();for(const c of BIN_ORDER)for(const [k] of binItems(c)){const x=sku(k);if(x&&x.kol)s.add(x.kol)}return [...s].sort(kolSort)}
-function kolColor(k){const a=kolAll();const i=a.indexOf(k);return KOL_PAL[(i<0?0:i)%KOL_PAL.length]}
+// cached: recomputed only when stock or SKU data change
+let _kaC=null;
+function kolAll(){if(_kaC&&_kaC.loc===st.loc&&_kaC.m===st.master)return _kaC.list;const s=new Set();for(const c of BIN_ORDER)for(const [k] of binItems(c)){const x=kolOf(k);if(x)s.add(x)}const list=[...s].sort(kolSort);_kaC={loc:st.loc,m:st.master,list,idx:new Map(list.map((k,i)=>[k,i]))};return list}
+function kolColor(k){kolAll();const i=_kaC.idx.get(k);return KOL_PAL[(i==null?0:i)%KOL_PAL.length]}
 let _ksC=null,_ksK='';
 function kolScan(){const key=kolSel.join(',')+'|'+fArr(kolF.brand).join(',');if(_ksC&&_ksK===key&&_ksC.loc===st.loc&&_ksC.m===st.master)return _ksC;
-  const per={},tint=new Map(),bins=[],rows={};let mixed=0;kolSel.forEach(k=>per[k]={bins:0,skus:new Set(),pcs:0,rows:new Set(),floors:new Set()});
+  const per={},tint=new Map(),bins=[],rows={},colOf={};let mixed=0;kolSel.forEach(k=>colOf[k]=kolColor(k));kolSel.forEach(k=>per[k]={bins:0,skus:new Set(),pcs:0,rows:new Set(),floors:new Set()});
   for(const c of BIN_ORDER){const it=binItems(c);if(!it.length)continue;const here=new Set();
-    for(const [k,q] of it){const x=sku(k);if(!x||!x.kol||!per[x.kol]||!fHas(kolF.brand,x.brand))continue;here.add(x.kol);per[x.kol].skus.add(k);per[x.kol].pcs+=q}
+    const bf=fArr(kolF.brand).length;for(const [k,q] of it){const kk=kolOf(k);if(!kk||!per[kk])continue;if(bf){const x=sku(k);if(!x||!fHas(kolF.brand,x.brand))continue}here.add(kk);per[kk].skus.add(k);per[kk].pcs+=q}
     if(!here.size)continue;const b=BINS.get(c)||{};bins.push(c);if(here.size>1)mixed++;
     here.forEach(k=>{per[k].bins++;per[k].rows.add(b.row||'?');per[k].floors.add(b.floor===2?'Level M':'Ground')});
     const r=rows[b.row||'?']=rows[b.row||'?']||{n:0,by:{},first:c};r.n++;here.forEach(k=>r.by[k]=(r.by[k]||0)+1);
-    tint.set(c,here.size>1?KOL_MIX:kolColor([...here][0]))}
+    tint.set(c,here.size>1?KOL_MIX:colOf[[...here][0]])}
   _ksC={per,tint,bins,rows,mixed,loc:st.loc,m:st.master};_ksK=key;return _ksC}
-function kolCardHTML(){const all=kolAll().filter(k=>!fArr(kolF.brand).length||Object.keys(st.master).some(s=>{const x=sku(s);return x&&x.kol===k&&fHas(kolF.brand,x.brand)}));
+function kolCardHTML(){let all=kolAll();if(fArr(kolF.brand).length){const ok=new Set();for(const s in st.master){const kk=kolOf(s);if(kk&&!ok.has(kk)){const x=sku(s);if(x&&fHas(kolF.brand,x.brand))ok.add(kk)}}all=all.filter(k=>ok.has(k))}
   const brands=[...new Set(Object.keys(st.master).map(sku).filter(x=>x&&x.kol).map(x=>x.brand).filter(Boolean))].sort();
   let h=`<section class="card" id="kolcard"><div class="sechd"><h2 class="ih">${ICON.used}Collections in Bins</h2>${kolSel.length?'<button class="linkbtn" id="kolclr">Clear</button>':''}</div>
     <div class="small muted" style="margin-top:-6px">Pick one or more collections to see which bins they use. The map colours those bins.</div>
