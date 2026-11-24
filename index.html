@@ -429,6 +429,21 @@ button.btn.sm{min-height:32px;padding:0 12px;font-size:13px}
 .xnm b{font-size:15px;overflow-wrap:anywhere}
 .xnm input{min-width:0}
 @media (max-width:520px){.xrn{grid-template-columns:1fr}}
+/* ---- collections in bins ---- */
+.kolchip{display:inline-flex;align-items:center;gap:6px}
+.kolchip i{width:10px;height:10px;border-radius:50%;background:var(--kc)}
+.kolchip[aria-pressed="true"]{border-color:var(--kc)!important;background:color-mix(in srgb,var(--kc) 22%,transparent)!important;color:var(--fg)!important}
+.kdot{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:6px;vertical-align:middle}
+.koltbl tr.tot td{border-top:1px solid var(--line)}
+.kolrows{display:grid;gap:6px;max-height:260px;overflow:auto}
+.kolrow{display:grid;grid-template-columns:48px 1fr;gap:4px 10px;align-items:center;text-align:left;padding:8px 10px;border-radius:10px;border:1px solid var(--line);background:var(--panel2);color:var(--fg);font:inherit;cursor:pointer}
+.kolrow:hover{border-color:var(--accent)}
+.kolrow b{font-family:var(--mono);grid-row:span 2}
+.kbar{display:flex;height:8px;border-radius:99px;overflow:hidden;background:var(--line)}
+.kbar i{display:block}
+#legfill.kolmode>span:not(#legkol){display:none}
+#legkol{display:contents}#legkol[hidden]{display:none}
+#legkol>span{display:inline-flex;align-items:center;gap:6px}
 </style>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
@@ -540,7 +555,7 @@ document.addEventListener('click',e=>{if(e.target.id==='installapp'&&__ip){__ip.
         <div class="grp"><button id="zin" class="tbtn" aria-label="Zoom in">＋</button><button id="zout" class="tbtn" aria-label="Zoom out">－</button></div></div>
     </div>
   <div class="legend3" id="legedit" hidden><span>Click a rack on the map to select it. Selected racks turn <b style="color:#ffd43b">yellow</b>. Other colours follow the row.</span></div>
-    <div class="legend3" id="legfill"><span id="legnote"></span><span><i style="background:var(--s-empty)"></i>Empty</span><span><i style="background:var(--s-low)"></i>Under 50%</span><span><i style="background:var(--s-mid)"></i>50–89%</span><span><i style="background:var(--s-full)"></i>Full</span><span id="legmk"><i style="background:var(--s-mark)"></i><span id="legmark">Marked</span></span><span id="legsel"><i class="selring"></i>Selected</span><span id="legsrc" hidden><i class="selring"></i>Source bins</span><span id="legdst" hidden><i class="goldring"></i>Destination bins</span></div>
+    <div class="legend3" id="legfill"><span id="legnote"></span><span><i style="background:var(--s-empty)"></i>Empty</span><span><i style="background:var(--s-low)"></i>Under 50%</span><span><i style="background:var(--s-mid)"></i>50–89%</span><span><i style="background:var(--s-full)"></i>Full</span><span id="legmk"><i style="background:var(--s-mark)"></i><span id="legmark">Marked</span></span><span id="legsel"><i class="selring"></i>Selected</span><span id="legsrc" hidden><i class="selring"></i>Source bins</span><span id="legdst" hidden><i class="goldring"></i>Destination bins</span><span id="legkol" hidden></span></div>
     </div>
     <div id="mhint" class="mhint"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 8 12 3 3 8v8l9 5 9-5z"/><path d="m3 8 9 5 9-5M12 13v8"/></svg><span>Click on a bin<br>to view details</span></div>
     <div id="gmsg" class="mmsg" role="status"></div>
@@ -849,7 +864,8 @@ function setPins(){pins.forEach(p=>scene.remove(p));pins.length=0;return;cellsT.
   const sp=new THREE.Sprite(new THREE.SpriteMaterial({map:pinTex,depthTest:false,transparent:true}));sp.renderOrder=999;sp.scale.set(0.35,0.52,1);sp.center.set(0.5,0);
   sp.position.set(c.p[0],c.p[1]+c.s[1]/2,c.p[2]);sp.userData.tier=t;scene.add(sp);pins.push(sp)}}));visAll()}
 const COL={empty:new THREE.Color(STATUS.empty),low:new THREE.Color(STATUS.low),mid:new THREE.Color(STATUS.mid),full:new THREE.Color(STATUS.full),hl:new THREE.Color(STATUS.mark),pick:new THREE.Color('#22d3e0'),src:new THREE.Color('#22d3e0'),dst:new THREE.Color('#ffc83d')};
-let xS=null,xD=null;const xObjs=[];
+let xS=null,xD=null,tint=null;const xObjs=[];
+function setTint(m){tint=m&&m.size?new Map([...m].map(([k,v])=>[k,new THREE.Color(v)])):null;paint()}
 function cellPos(code){for(const arr of cellsT)for(const c of arr)if(c.code===code)return new THREE.Vector3(c.p[0],c.p[1]+c.s[1]/2,c.p[2]);return null}
 function setXfer(src,dst,pair){xS=src&&src.length?new Set(src):null;xD=dst&&dst.length?new Set(dst):null;
   xObjs.forEach(o=>{scene.remove(o);if(o.geometry)o.geometry.dispose();if(o.material){if(o.material.map)o.material.map.dispose();o.material.dispose()}});xObjs.length=0;
@@ -863,10 +879,10 @@ function setXfer(src,dst,pair){xS=src&&src.length?new Set(src):null;xD=dst&&dst.
   paint()}
 function paint(){cellsT.forEach((arr,t)=>{arr.forEach((c,i)=>{let col;
   if(mode==='edit'){const r=RBYID.get(c.rid);cellMs[t].setColorAt(i,sel.has(c.rid)?SELC:r?rc(r.r):COL.empty);return}
-  const inX=xD&&xD.has(c.code)?'d':xS&&xS.has(c.code)?'s':'';
-  if(c.code&&c.code===picked)col=COL.pick;else if(inX==='d')col=COL.dst;else if(inX==='s')col=COL.src;else if(c.code&&hl.has(c.code))col=COL.hl;
+  const inX=xD&&xD.has(c.code)?'d':xS&&xS.has(c.code)?'s':'';const tc=tint&&c.code?tint.get(c.code):null;
+  if(c.code&&c.code===picked)col=COL.pick;else if(tc)col=tc;else if(inX==='d')col=COL.dst;else if(inX==='s')col=COL.src;else if(c.code&&hl.has(c.code))col=COL.hl;
   else{const f=c.code?fillLevel(c.code):'empty';col=COL[f]}
-  if((hl.size||xS||xD)&&!hl.has(c.code)&&!inX&&c.code!==picked)col=col.clone().lerp(new THREE.Color('#1a2946'),0.65);
+  if((hl.size||xS||xD||tint)&&!hl.has(c.code)&&!inX&&!tc&&c.code!==picked)col=col.clone().lerp(new THREE.Color('#1a2946'),0.65);
   cellMs[t].setColorAt(i,col)});cellMs[t].instanceColor.needsUpdate=true})}
 const ray=new THREE.Raycaster(),mouse=new THREE.Vector2();let down=null;
 renderer.domElement.addEventListener('pointerdown',e=>down=[e.clientX,e.clientY]);
@@ -945,7 +961,7 @@ function walkAtWorld(x,z,fl){if(!W.on)walkStart();W.floor=fl;const [nx,nz]=neare
 function walkAtScreen(cx,cy,fl){const b=renderer.domElement.getBoundingClientRect();if(cx<b.left||cx>b.right||cy<b.top||cy>b.bottom)return false;
   mouse.set((cx-b.left)/b.width*2-1,-(cy-b.top)/b.height*2+1);ray.setFromCamera(mouse,camera);
   const v=new THREE.Vector3();if(!ray.ray.intersectPlane(new THREE.Plane(new THREE.Vector3(0,1,0),-(fl===1?DECK:0)),v))return false;walkAtWorld(v.x,v.z,fl);return true}
-return {setXfer,zoom(f){if(W.on)return;const tg=controls.target;camera.position.sub(tg).multiplyScalar(f).add(tg);controls.update()},walk:{atScreen:walkAtScreen,atWorld:walkAtWorld,start:walkStart,stop:walkStop,to:walkTo,floor:walkFloor,on:()=>W.on,getFloor:()=>W.floor,pad:W.pad},dbg:()=>({p:camera.position.toArray(),r:camera.rotation.toArray(),fov:camera.fov,W:{floor:W.floor,yaw:W.yaw,pitch:W.pitch}}),getView,dispose(){if(W.on)walkStop();window.LASTVIEW=getView();dead=true;ro.disconnect();controls.dispose();renderer.dispose();renderer.domElement.remove()},paint,setTier,view,setMode(m){if(mode===m)return;mode=m;visAll();paint()},setSel(keys){sel=new Set(keys);paint()},setCodes(on){codesOn=on;visAll()},highlight(codes){hl=new Set(codes||[]);paint();setPins()},pick(code){picked=code;paint()},
+return {setXfer,setTint,zoom(f){if(W.on)return;const tg=controls.target;camera.position.sub(tg).multiplyScalar(f).add(tg);controls.update()},walk:{atScreen:walkAtScreen,atWorld:walkAtWorld,start:walkStart,stop:walkStop,to:walkTo,floor:walkFloor,on:()=>W.on,getFloor:()=>W.floor,pad:W.pad},dbg:()=>({p:camera.position.toArray(),r:camera.rotation.toArray(),fov:camera.fov,W:{floor:W.floor,yaw:W.yaw,pitch:W.pitch}}),getView,dispose(){if(W.on)walkStop();window.LASTVIEW=getView();dead=true;ro.disconnect();controls.dispose();renderer.dispose();renderer.domElement.remove()},paint,setTier,view,setMode(m){if(mode===m)return;mode=m;visAll();paint()},setSel(keys){sel=new Set(keys);paint()},setCodes(on){codesOn=on;visAll()},highlight(codes){hl=new Set(codes||[]);paint();setPins()},pick(code){picked=code;paint()},
   focus(code){if(W.on){const b=BINS.get(code);const r=b&&RACKS.find(x=>x.c===b.rack);if(r&&r.id)walkTo(r.id);return}let t=-1,i=-1;cellsT.forEach((a,tt)=>{const k=a.findIndex(x=>x.code===code);if(k>=0){t=tt;i=k}});if(t<0)return;const c=cellsT[t][i];
     const b=BINS.get(code);if(b){const m=b.floor===2?'up':'lo';setTier(m);document.querySelectorAll('.mtools [data-t]').forEach(x=>x.setAttribute('aria-pressed',x.dataset.t===m))}
     const T=new THREE.Vector3(...c.p);controls.target.copy(T);
@@ -1157,8 +1173,8 @@ const skuOptions=()=>`<datalist id="skus">${Object.keys(st.master).slice(0,4000)
 function sugHTML(s,qty,sg){return `<div class="list">${sg.out.map(o=>`<div class="sug"><span class="code">${esc(o.code)}</span> · <b>${fmt(o.qty)}</b> pcs<div class="small muted">${esc(o.why)} · ${binItems(o.code).length?`has ${fmt(binQty(o.code))}/${binCap(o.code)}`:'empty'}</div></div>`).join('')}${sg.left>0?`<div class="pill bad">Tiada bin untuk ${fmt(sg.left)} pcs lagi</div>`:''}</div>`}
 function skuLine(s){return `<div class="t">${esc(s.sku)}</div><div class="small muted">${esc(s.desc)}</div><div class="row small"><span class="pill">${esc(s.cat)}</span><span class="pill">${esc(s.size)}</span><span class="pill">${esc(s.brand)}</span>${s.kol?`<span class="pill">Koleksi ${esc(s.kol)}</span>`:''}${isCekak(s)?'<span class="pill">Cekak Musang · maks 30</span>':''}</div>`}
 
-let _hlKey='',_xKey='',locQuiet=false;
-function tabHL(){if(tab==='check'&&chkOpen&&chkSel&&st.checks[chkSel]&&!chkNew){const c=st.checks[chkSel],R=c.results||{};return chkActive(c).filter(b=>!R[b])}if(tab==='xfer'&&xPlan)return xPlan.used;return mapHL}
+let _hlKey='',_xKey='',_kKey='',locQuiet=false;
+function tabHL(){if(tab==='peta'&&kolSel.length)return kolScan().bins;if(tab==='check'&&chkOpen&&chkSel&&st.checks[chkSel]&&!chkNew){const c=st.checks[chkSel],R=c.results||{};return chkActive(c).filter(b=>!R[b])}if(tab==='xfer'&&xPlan)return xPlan.used;return mapHL}
 function curTier(){return (document.querySelector('.mtools [aria-pressed="true"][data-t]')||{}).dataset?.t||'lo'}
 function setTierBtn(t){document.querySelectorAll('.mtools [data-t]').forEach(x=>x.setAttribute('aria-pressed',x.dataset.t===t))}
 function mapClickRack(rid){locQuiet=false;if(tab==='rak'){rakToggle(rid);return}const r=RACKS.find(x=>x.id===rid);if(!r)return;mapRack=r.c;mapPicked=null;render()}
@@ -1182,7 +1198,7 @@ function ensureMap(edit){
   document.querySelectorAll('.mtools [data-v]').forEach(b=>b.setAttribute('aria-pressed',b.dataset.v===v));
   document.querySelectorAll('.mtools button,.mtools .grp').forEach(b=>{const d=b.dataset;b.hidden=(d['3d']!==undefined&&v!=='3d')||(d['2d']!==undefined&&v!=='2d')||(d.edit!==undefined&&!edit)||(d.fill!==undefined&&edit)||(d.hl!==undefined&&(!mapHL.length||tab==='check'||tab==='xfer'))});
   if(v==='2d'&&curTier()==='all')setTierBtn('lo');
-  $('#legedit').hidden=!edit;$('#legfill').hidden=edit;{const lm=$('#legmark');if(lm)lm.textContent=tab==='check'&&chkOpen?'Not counted (list)':'Marked';const xo=tab==='xfer'&&!!(xPlan||(xPrev&&(xPrev.src.length||xPrev.dst.length)))&&v==='3d';['legsrc','legdst'].forEach(i=>$('#'+i).hidden=!xo);$('#legmk').hidden=xo;$('#legsel').hidden=xo}$('#msearch').hidden=edit;
+  $('#legedit').hidden=!edit;$('#legfill').hidden=edit;{const lk=$('#legkol'),ko=tab==='peta'&&kolSel.length>0;$('#legfill').classList.toggle('kolmode',ko);if(lk){lk.hidden=!ko;lk.innerHTML=ko?kolSel.map(k=>`<span><i style="background:${kolColor(k)}"></i>${esc(k)}</span>`).join('')+(kolSel.length>1?`<span><i style="background:${KOL_MIX}"></i>Mixed</span>`:''):''}}{const lm=$('#legmark');if(lm)lm.textContent=tab==='check'&&chkOpen?'Not counted (list)':'Marked';const xo=tab==='xfer'&&!!(xPlan||(xPrev&&(xPrev.src.length||xPrev.dst.length)))&&v==='3d';['legsrc','legdst'].forEach(i=>$('#'+i).hidden=!xo);$('#legmk').hidden=xo;$('#legsel').hidden=xo}$('#msearch').hidden=edit;
   {const gl=$('#gl');if(gl&&+gl.dataset.n!==RACKS.length){gl.dataset.n=RACKS.length;gl.innerHTML=[...new Set(RACKS.map(r=>r.r))].map(r=>`<option value="${esc(r)}">`).join('')+RACKS.map(r=>`<option value="${esc(r.c)}">`).join('')}}
   if(v==='2d'){const ne=$('#mneedle');if(ne)ne.style.transform=''}
   $('#legnote').textContent=v==='2d'?'Rack colour by bins used:':'';
@@ -1227,8 +1243,8 @@ function ensureMap(edit){
   if(!MAP&&window.THREE){MAP=init3D($('#map'),(code,rid)=>{if(tab==='rak'){if(rid)rakToggle(rid)}else{locQuiet=false;mapPicked=code;const r=rackOfCode(code);mapRack=r?r.c:null;render()}});
     const cur=curTier();if(cur!=='all')MAP.setTier(cur);
     MAP.setCodes($('#mcodes').getAttribute('aria-pressed')==='true');
-    _hlKey='';_xKey='-';if(HL.length&&tab!=='check'){MAP.focus(HL[0])}}
-  if(MAP){const H3=tab==='xfer'?[]:HL;const k=H3.join(',');if(k!==_hlKey){_hlKey=k;MAP.highlight(H3)}{const X=tab==='xfer'?xferMapSets():null;const k2=X?X.src.length+'|'+X.dst.length+'|'+X.pair+'|'+X.src[0]+'|'+X.dst[0]:'';if(k2!==_xKey){_xKey=k2;MAP.setXfer(X&&X.src,X&&X.dst,X&&X.pair)}}MAP.setMode(edit?'edit':'fill');if(edit)MAP.setSel(selIds);else MAP.paint()}
+    _hlKey='';_xKey='-';_kKey='-';if(HL.length&&tab!=='check'){MAP.focus(HL[0])}}
+  if(MAP){const KT=tab==='peta'&&kolSel.length?kolScan().tint:null;{const kk=KT?kolSel.join(',')+'|'+fArr(kolF.brand).join(',')+'|'+KT.size:'';if(kk!==_kKey){_kKey=kk;MAP.setTint(KT)}}const H3=tab==='xfer'||KT?[]:HL;const k=H3.join(',');if(k!==_hlKey){_hlKey=k;MAP.highlight(H3)}{const X=tab==='xfer'?xferMapSets():null;const k2=X?X.src.length+'|'+X.dst.length+'|'+X.pair+'|'+X.src[0]+'|'+X.dst[0]:'';if(k2!==_xKey){_xKey=k2;MAP.setXfer(X&&X.src,X&&X.dst,X&&X.pair)}}MAP.setMode(edit?'edit':'fill');if(edit)MAP.setSel(selIds);else MAP.paint()}
   walkUI()}
 const nm=x=>!x?'-':/^tanpa nama$/i.test(x)?'Unnamed':x;
 function findLocation(){const v=$('#gq').value.trim().toUpperCase();const msg=$('#gmsg');msg.textContent='';if(!v)return;
@@ -1239,6 +1255,48 @@ function findLocation(){const v=$('#gq').value.trim().toUpperCase();const msg=$(
     const rows=RACKS.filter(x=>x.r.toUpperCase()===v&&x.id);if(rows.length){const fl=rows.some(x=>x.f===1)?1:2;const ids=rows.filter(x=>x.f===fl).map(x=>x.id);setTierBtn(fl===2?'up':'lo');if(PLAN)PLAN.focus(ids);renderPeta();return}
     msg.textContent='Location not found: '+v;clearTimeout(findLocation.t);findLocation.t=setTimeout(()=>{msg.textContent=''},4000)}
 function avgPerBin(){const s=+((st.settings||{}).avgBin);return s>=10&&s<=200?s:48}
+// ---- collections in bins ----
+let kolSel=[];const kolF={brand:[]};
+const KOL_PAL=['#f472b6','#fb923c','#a3e635','#60a5fa','#facc15','#c084fc','#2dd4bf','#f87171'],KOL_MIX='#f8fafc';
+function kolAll(){const s=new Set();for(const c of BIN_ORDER)for(const [k] of binItems(c)){const x=sku(k);if(x&&x.kol)s.add(x.kol)}return [...s].sort(kolSort)}
+function kolColor(k){const a=kolAll();const i=a.indexOf(k);return KOL_PAL[(i<0?0:i)%KOL_PAL.length]}
+let _ksC=null,_ksK='';
+function kolScan(){const key=kolSel.join(',')+'|'+fArr(kolF.brand).join(',');if(_ksC&&_ksK===key&&_ksC.loc===st.loc&&_ksC.m===st.master)return _ksC;
+  const per={},tint=new Map(),bins=[],rows={};let mixed=0;kolSel.forEach(k=>per[k]={bins:0,skus:new Set(),pcs:0,rows:new Set(),floors:new Set()});
+  for(const c of BIN_ORDER){const it=binItems(c);if(!it.length)continue;const here=new Set();
+    for(const [k,q] of it){const x=sku(k);if(!x||!x.kol||!per[x.kol]||!fHas(kolF.brand,x.brand))continue;here.add(x.kol);per[x.kol].skus.add(k);per[x.kol].pcs+=q}
+    if(!here.size)continue;const b=BINS.get(c)||{};bins.push(c);if(here.size>1)mixed++;
+    here.forEach(k=>{per[k].bins++;per[k].rows.add(b.row||'?');per[k].floors.add(b.floor===2?'Level M':'Ground')});
+    const r=rows[b.row||'?']=rows[b.row||'?']||{n:0,by:{},first:c};r.n++;here.forEach(k=>r.by[k]=(r.by[k]||0)+1);
+    tint.set(c,here.size>1?KOL_MIX:kolColor([...here][0]))}
+  _ksC={per,tint,bins,rows,mixed,loc:st.loc,m:st.master};_ksK=key;return _ksC}
+function kolCardHTML(){const all=kolAll().filter(k=>!fArr(kolF.brand).length||Object.keys(st.master).some(s=>{const x=sku(s);return x&&x.kol===k&&fHas(kolF.brand,x.brand)}));
+  const brands=[...new Set(Object.keys(st.master).map(sku).filter(x=>x&&x.kol).map(x=>x.brand).filter(Boolean))].sort();
+  let h=`<section class="card" id="kolcard"><div class="sechd"><h2 class="ih">${ICON.used}Collections in Bins</h2>${kolSel.length?'<button class="linkbtn" id="kolclr">Clear</button>':''}</div>
+    <div class="small muted" style="margin-top:-6px">Pick one or more collections to see which bins they use. The map colours those bins.</div>
+    <div class="chips2">${all.map(k=>`<button type="button" class="chip2 kolchip" data-kol="${esc(k)}" aria-pressed="${kolSel.includes(k)}" style="--kc:${kolColor(k)}"><i></i>${esc(k)}</button>`).join('')||'<span class="small muted">No collection codes (X2, X3…) found in the SKUs.</span>'}</div>
+    <div class="row small"><span class="muted" style="min-width:42px">Brand</span><div class="grow">${multiPick('brand',brands,kolF.brand,'All brands')}</div></div>`;
+  if(kolSel.length){const S=kolScan();const tot={bins:S.bins.length,skus:new Set(),pcs:0};kolSel.forEach(k=>{S.per[k].skus.forEach(s=>tot.skus.add(s));tot.pcs+=S.per[k].pcs});
+    const rowsShort=set=>{const r=[...set].sort(natSort);return r.length>4?r.slice(0,4).join(', ')+' +'+(r.length-4):r.join(', ')};
+    h+=`<div class="tbl"><table class="koltbl"><thead><tr><th>Collection</th><th class="n">Bins</th><th class="n">SKU</th><th class="n">Pcs</th><th>Rows</th></tr></thead><tbody>
+      ${kolSel.map(k=>{const p=S.per[k];return `<tr><td><span class="kdot" style="background:${kolColor(k)}"></span><b>${esc(k)}</b></td><td class="n">${fmt(p.bins)}</td><td class="n">${fmt(p.skus.size)}</td><td class="n">${fmt(p.pcs)}</td><td class="small">${p.bins?esc(rowsShort(p.rows))+(p.floors.size>1?' <span class="muted">(both floors)</span>':p.floors.has('Level M')?' <span class="muted">(Level M)</span>':''):'<span class="muted">not in any bin</span>'}</td></tr>`}).join('')}
+      ${kolSel.length>1?`<tr class="tot"><td><b>Total</b></td><td class="n">${fmt(tot.bins)}</td><td class="n">${fmt(tot.skus.size)}</td><td class="n">${fmt(tot.pcs)}</td><td class="small muted">${S.mixed?fmt(S.mixed)+' bins hold more than one':''}</td></tr>`:''}</tbody></table></div>
+      ${tot.bins?`<div class="small muted">By row · click to show on the map</div><div class="kolrows">${Object.entries(S.rows).sort((a,b)=>natSort(a[0],b[0])).map(([r,o])=>`<button type="button" class="kolrow" data-krow="${esc(o.first)}"><b>${esc(r)}</b><span class="kbar">${kolSel.filter(k=>o.by[k]).map(k=>`<i style="background:${kolColor(k)};flex:${o.by[k]}"></i>`).join('')}</span><span class="small">${fmt(o.n)} bin${o.n>1?'s':''}${kolSel.length>1?' · '+kolSel.filter(k=>o.by[k]).map(k=>k+' '+o.by[k]).join(' · '):''}</span></button>`).join('')}</div>
+      <div class="row"><button class="btn" id="kolxls">⤓ Bin list (Excel)</button><span id="kolmsg" class="small"></span></div>`:'<p class="empty">No bins hold the selected collection(s).</p>'}`}
+  return h+'</section>'}
+function bindKolCard(){const card=$('#kolcard');if(!card)return;
+  card.querySelectorAll('[data-kol]').forEach(b=>b.onclick=()=>{const k=b.dataset.kol;kolSel=kolSel.includes(k)?kolSel.filter(x=>x!==k):[...kolSel,k].sort(kolSort);mapPicked=null;render()});
+  const cl=$('#kolclr');if(cl)cl.onclick=()=>{kolSel=[];render()};
+  bindMulti(card,kolF,()=>{kolSel=kolSel.filter(k=>kolAll().includes(k));render()});
+  card.querySelectorAll('[data-krow]').forEach(b=>b.onclick=()=>{locQuiet=true;openOnMap(b.dataset.krow,true);render()});
+  const xl=$('#kolxls');if(xl)xl.onclick=async()=>{const msg=$('#kolmsg');const dl=window.claude?await window.claude.use('downloads'):null;
+    if(!dl||!window.XLSX){msg.textContent='Download not available.';return}
+    const S=kolScan();const rows=[];S.bins.forEach(c=>{const b=BINS.get(c)||{};binItems(c).forEach(([k,q])=>{const x=sku(k);if(!x||!kolSel.includes(x.kol)||!fHas(kolF.brand,x.brand))return;rows.push([c,b.floor===2?'Level M':'Ground Floor',b.row||'',x.kol,k,x.desc||'',x.brand||'',x.col||'',x.size||'',q])})});
+    const sum=[['Collections in bins'],['Collections',kolSel.join(', ')],['Brand',fArr(kolF.brand).join(', ')||'All brands'],['Printed',new Date().toLocaleString('en-GB')],[],['Collection','Bins','SKU','Pcs','Rows'],...kolSel.map(k=>{const p=S.per[k];return [k,p.bins,p.skus.size,p.pcs,[...p.rows].sort(natSort).join(', ')]})];
+    const wb=XLSX.utils.book_new();const mk=(a,w)=>{const ws=XLSX.utils.aoa_to_sheet(a);ws['!cols']=w.map(x=>({wch:x}));return ws};
+    XLSX.utils.book_append_sheet(wb,mk(sum,[14,10,10,10,60]),'Summary');XLSX.utils.book_append_sheet(wb,mk([['Bin','Floor','Row','Collection','SKU','Description','Brand','Colour','Size','Qty'],...rows],[14,12,8,10,18,40,14,14,8,8]),'Bins');
+    const p=n=>String(n).padStart(2,'0'),d=new Date(),fn=`Collections_${kolSel.join('_')}_${d.getFullYear()}${p(d.getMonth()+1)}${p(d.getDate())}.xlsx`;
+    try{await dl.save({filename:fn,data:XLSX.write(wb,{type:'array',bookType:'xlsx'})});msg.textContent='✓ '+fn+' downloaded.'}catch(e){msg.textContent=e&&e.code==='declined'?'Download cancelled.':'Download is not possible in this view.'}}}
 function renderPeta(){main.className='';ensureMap(false);
   const t=curTier();const tierLabel=t==='all'?'All levels':t==='up'?'Level M':'Ground floor';
   const codes=BIN_ORDER.filter(c=>t==='all'||(t==='lo'?BINS.get(c).floor===1:BINS.get(c).floor===2));
@@ -1269,7 +1327,8 @@ function renderPeta(){main.className='';ensureMap(false);
         <div class="captr" role="img" aria-label="${usePct.toFixed(1)}% of estimated space used"><span style="width:${usePct.toFixed(2)}%"></span></div>
       </div>
       <p class="small muted" style="margin:0">${fmt(near)} bins nearly full (90–100%) · ${fmt(over)} bins over capacity. Pcs space is an estimate: bins × average per bin (shared by all devices).</p></section>
-    <section class="card"><h2 class="ih">${ICON.chart}Bin Status</h2><div class="bars">
+    ${kolCardHTML()}
+      <section class="card"><h2 class="ih">${ICON.chart}Bin Status</h2><div class="bars">
       ${[['empty',cnt.empty],['low',cnt.low],['mid',cnt.mid],['full',cnt.full]].map(([k,n])=>`<div class="bar"><span class="lb"><i style="background:${SC[k]}"></i>${SL[k]}</span><span class="tr"><span style="width:${(n/tot*100).toFixed(2)}%;background:${SC[k]}"></span></span><span class="vl">${fmt(n)}<small>${pc(n)}</small></span></div>`).join('')}
       <div class="bar"><span class="lb"><i style="background:var(--s-mark)"></i>Marked</span><span class="tr"><span style="width:${(markN/tot*100).toFixed(2)}%;background:var(--s-mark);min-width:${markN?'4px':'0'}"></span></span><span class="vl">${fmt(markN)}<small>${pc(markN)}</small></span></div>
     </div></section>
@@ -1280,6 +1339,7 @@ function renderPeta(){main.className='';ensureMap(false);
     <section class="card"><details><summary>By row</summary><div class="tbl" style="margin-top:8px"><table><thead><tr><th>Row</th><th class="n">Bins</th><th class="n">Empty</th><th class="n">Used</th></tr></thead><tbody>${Object.entries(byRow).sort((a,b)=>a[0].localeCompare(b[0],undefined,{numeric:true})).map(([r,o])=>`<tr><td><a href="#" data-prow="${esc(r)}" style="color:var(--accent)">${esc(r)}</a></td><td class="n">${fmt(o.n)}</td><td class="n">${fmt(o.e)}</td><td class="n">${fmt(o.n-o.e)}</td></tr>`).join('')}</tbody></table></div></details></section>`;
   const openBin=code=>openOnMap(code);
   bindLocCards(main);
+  bindKolCard();
   const ab=$('#avgbin');if(ab)ab.onchange=()=>{const v=Math.round(+ab.value);if(!(v>=10&&v<=200)||v===avgPerBin()){renderPeta();return}const prev=st.settings;st.settings={...(prev||{}),avgBin:v};renderPeta();db.doc('settings/main').set({...st.settings,avgBy:who.value.trim()||'Anonymous',avgAt:Date.now()}).catch(()=>{st.settings=prev;renderPeta()})};
   const la=$('#locall');if(la)la.onclick=()=>{renderPeta.all=!renderPeta.all;renderPeta()};
   main.querySelectorAll('[data-loc]').forEach(tr=>tr.onclick=()=>openBin(tr.dataset.loc));
